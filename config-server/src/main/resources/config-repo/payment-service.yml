@@ -1,5 +1,5 @@
 server:
-  port: 19093
+  port: 8130
 
 service:
   jwt:
