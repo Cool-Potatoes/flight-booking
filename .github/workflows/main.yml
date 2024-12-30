@@ -21,22 +21,28 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'  # Java 17 사용
+          java-version: '17'
           distribution: 'zulu'  # Zulu 배포판 설정
 
-      # 3. Gradle 빌드 및 테스트 실행
+      # 3. Docker Compose 설치
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      # 4. Gradle 빌드 및 테스트 실행
       - name: Build and Test
         run: ./gradlew build
 
-      # 4. Docker Compose 빌드
+      # 5. Docker Compose 빌드
       - name: Build Docker Images
         run: docker-compose build
 
-      # 5. Docker Compose 배포
+      # 6. Docker Compose 배포
       - name: Deploy Docker Compose
         run: docker-compose up -d
 
-      # 6. Docker Compose 정리 (선택적)
+      # 7. Docker Compose 정리 (선택적)
       - name: Tear down Docker Compose
         if: always()  # 성공/실패 여부와 관계없이 실행
         run: docker-compose down
