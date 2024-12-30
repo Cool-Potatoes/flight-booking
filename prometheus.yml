@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'gateway'
+    static_configs:
+      - targets: ['gateway-server:8080']
+
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:8100']
+
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:8110']
+
+  - job_name: 'booking-service'
+    static_configs:
+      - targets: ['booking-service:8120']
+
+  - job_name: 'payment-service'
+    static_configs:
+      - targets: ['payment-service:8130']
+
+  - job_name: 'ticket-service'
+    static_configs:
+      - targets: ['ticket-service:8140']
+
+  - job_name: 'flight-service'
+    static_configs:
+      - targets: ['flight-service:8150']
+
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:8160']
