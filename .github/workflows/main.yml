@@ -32,19 +32,34 @@ jobs:
       - name: Build and Test (Config Server)
         working-directory: config-server
         run: ./gradlew build
+        env:
+          SPRING_CLOUD_CONFIG_ENABLED: "false"
+          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
       - name: Build and Test (Eureka Server)
         working-directory: eureka-server
         run: ./gradlew build
+        env:
+          SPRING_CLOUD_CONFIG_ENABLED: "false"
+          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
       - name: Build and Test (Gateway Service)
         working-directory: gateway-service
         run: ./gradlew build
+        env:
+          SPRING_CLOUD_CONFIG_ENABLED: "false"
+          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
       - name: Build and Test (Payment Service)
         working-directory: payment-service
         run: ./gradlew build
+        env:
+          SPRING_CLOUD_CONFIG_ENABLED: "false"
+          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
       - name: Build and Test (User Service)
         working-directory: user-service
         run: ./gradlew build
+        env:
+          SPRING_CLOUD_CONFIG_ENABLED: "false"
+          SPRING_CONFIG_IMPORT: "optional:configserver:"
