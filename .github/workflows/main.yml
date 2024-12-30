@@ -28,38 +28,39 @@ jobs:
       - name: Grant execute permission for Gradle Wrapper
         run: chmod +x */gradlew
 
-      # 4. Gradle 빌드 및 테스트 실행 (각 서비스별)
+      # 4. Config Server 빌드 및 실행
       - name: Build and Test (Config Server)
         working-directory: config-server
         run: ./gradlew build
-        env:
-          SPRING_CLOUD_CONFIG_ENABLED: "false"
-          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
+      - name: Start Config Server
+        working-directory: config-server
+        run: nohup java -jar build/libs/config-server-*.jar &
+
+      # 5. Config Server Health Check
+      - name: Wait for Config Server
+        run: |
+          until curl -s http://localhost:8888/actuator/health | grep '"status":"UP"'; do
+            echo "Waiting for Config Server..."
+            sleep 5
+          done
+
+      # 6. Eureka Server 빌드 및 테스트
       - name: Build and Test (Eureka Server)
         working-directory: eureka-server
         run: ./gradlew build
-        env:
-          SPRING_CLOUD_CONFIG_ENABLED: "false"
-          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
+      # 7. Gateway Service 빌드 및 테스트
       - name: Build and Test (Gateway Service)
         working-directory: gateway-service
         run: ./gradlew build
-        env:
-          SPRING_CLOUD_CONFIG_ENABLED: "false"
-          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
+      # 8. Payment Service 빌드 및 테스트
       - name: Build and Test (Payment Service)
         working-directory: payment-service
         run: ./gradlew build
-        env:
-          SPRING_CLOUD_CONFIG_ENABLED: "false"
-          SPRING_CONFIG_IMPORT: "optional:configserver:"
 
+      # 9. User Service 빌드 및 테스트
       - name: Build and Test (User Service)
         working-directory: user-service
         run: ./gradlew build
-        env:
-          SPRING_CLOUD_CONFIG_ENABLED: "false"
-          SPRING_CONFIG_IMPORT: "optional:configserver:"
