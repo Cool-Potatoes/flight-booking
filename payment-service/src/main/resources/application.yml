@@ -1,9 +1,16 @@
 server:
-  port: 8130
+  port: 0  # 임시 포트, Config Server에서 덮어씌워짐
 
 spring:
   application:
     name: payment-service
+  config:
+    import: "configserver:"  # Config Server에서 설정 가져오기
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
 
 eureka:
   client:
