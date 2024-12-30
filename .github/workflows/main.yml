@@ -24,7 +24,11 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      # 3. Gradle 빌드 및 테스트 실행 (각 서비스별)
+      # 3. Gradle Wrapper 실행 권한 부여
+      - name: Grant execute permission for Gradle Wrapper
+        run: chmod +x */gradlew
+
+      # 4. Gradle 빌드 및 테스트 실행 (각 서비스별)
       - name: Build and Test (Config Server)
         working-directory: config-server
         run: ./gradlew build
