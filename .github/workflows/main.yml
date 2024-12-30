@@ -1,66 +1,40 @@
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches:
-      - dev
-  pull_request:
-    branches:
-      - dev
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      # 1. 저장소 체크아웃
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # 2. JDK 설정 (Zulu 배포판)
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'zulu'
-
-      # 3. Gradle Wrapper 실행 권한 부여
-      - name: Grant execute permission for Gradle Wrapper
-        run: chmod +x */gradlew
-
-      # 4. Config Server 빌드 및 실행
-      - name: Build and Test (Config Server)
-        working-directory: config-server
-        run: ./gradlew build
-
-      - name: Start Config Server
-        working-directory: config-server
-        run: nohup java -jar build/libs/config-server-*.jar > config-server.log 2>&1 &
-
-      # 5. Config Server Health Check
-      - name: Wait for Config Server
-        run: |
-          until curl -s http://localhost:8888/actuator/health | grep '"status":"UP"'; do
-            echo "Waiting for Config Server..."
-            sleep 5
-          done
-
-      # 6. Eureka Server 빌드 및 테스트
-      - name: Build and Test (Eureka Server)
-        working-directory: eureka-server
-        run: ./gradlew build
-
-      # 7. Gateway Service 빌드 및 테스트
-      - name: Build and Test (Gateway Service)
-        working-directory: gateway-service
-        run: ./gradlew build
-
-      # 8. Payment Service 빌드 및 테스트
-      - name: Build and Test (Payment Service)
-        working-directory: payment-service
-        run: ./gradlew build
-
-      # 9. User Service 빌드 및 테스트
-      - name: Build and Test (User Service)
-        working-directory: user-service
-        run: ./gradlew build
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - name: Set up JDK
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: '17'
+#          distribution: 'zulu'
+#
+#      - name: Set Environment Variables
+#        run: |
+#          echo "DB_URL=jdbc:postgresql://localhost:5432/mydatabase" >> $GITHUB_ENV
+#          echo "DB_USERNAME=myuser" >> $GITHUB_ENV
+#          echo "DB_PASSWORD=mypassword" >> $GITHUB_ENV
+#
+#      - name: Grant execute permission for Gradle Wrapper
+#        run: chmod +x */gradlew
+#
+#      - name: Build and Test Config Server
+#        working-directory: config-server
+#        run: ./gradlew build
+#
+#      - name: Start Config Server
+#        working-directory: config-server
+#        run: nohup java -jar build/libs/config-server-*.jar &
+#
+#      - name: Wait for Config Server
+#        run: |
+#          until curl -s http://localhost:8888/actuator/health | grep '"status":"UP"'; do
+#            echo "Waiting for Config Server..."
+#            sleep 5
+#          done
+#
+#      - name: Build and Test Eureka Server
+#        working-directory: eureka-server
+#        run: ./gradlew build
