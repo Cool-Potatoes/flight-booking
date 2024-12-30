@@ -19,7 +19,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
 
       - name: Build and Test
         run: ./gradlew build
@@ -29,3 +29,4 @@ jobs:
 
       - name: Deploy Docker Compose
         run: docker-compose up -d
+
