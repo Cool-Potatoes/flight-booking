@@ -35,7 +35,7 @@ jobs:
 
       - name: Start Config Server
         working-directory: config-server
-        run: nohup java -jar build/libs/config-server-*.jar &
+        run: nohup java -jar build/libs/config-server-*.jar > config-server.log 2>&1 &
 
       # 5. Config Server Health Check
       - name: Wait for Config Server
