@@ -36,6 +36,9 @@ dependencies {
 	// PostgreSQL
 	runtimeOnly 'org.postgresql:postgresql'
 
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 	// Redis Session Clustering
 	implementation 'org.springframework.session:spring-session-data-redis'
 
