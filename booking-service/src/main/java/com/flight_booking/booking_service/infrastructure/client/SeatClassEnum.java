@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum SeatClassEnum {
 
   ECONOMY("SEAT_ECONOMY"),
-  BUSINESS("SEAT_BUSINESS"),;
+  BUSINESS("SEAT_BUSINESS");
 
   private final String seatClass;
 }

@@ -2,7 +2,6 @@ package com.flight_booking.booking_service.presentation.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.flight_booking.booking_service.domain.model.Booking;
-import com.flight_booking.booking_service.infrastructure.client.Passenger;
 import com.flight_booking.booking_service.infrastructure.client.PassengerTypeEnum;
 import com.flight_booking.booking_service.infrastructure.client.SeatClassEnum;
 import java.util.List;

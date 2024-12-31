@@ -17,8 +17,8 @@ public class BookingController {
   private final BookingService bookingService;
 
   @PostMapping()
-  public ApiResponse<?> createBooking(@RequestBody BookingRequest bookingRequest){
+  public ApiResponse<?> createBooking(@RequestBody BookingRequest bookingRequest) {
 
-    return ApiResponse.ok(bookingService.createBooking(bookingRequest));
+    return ApiResponse.ok(bookingService.createBooking(bookingRequest), "예약에 성공하였습니다.");
   }
 }

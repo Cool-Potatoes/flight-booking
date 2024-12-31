@@ -1,7 +1,6 @@
 package com.flight_booking.booking_service.presentation.request;
 
 import com.flight_booking.booking_service.infrastructure.client.Passenger;
-import com.flight_booking.booking_service.infrastructure.client.PassengerTypeEnum;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;

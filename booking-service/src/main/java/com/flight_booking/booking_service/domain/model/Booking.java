@@ -2,8 +2,6 @@ package com.flight_booking.booking_service.domain.model;
 
 import com.flight_booking.booking_service.common.model.BaseEntity;
 import com.flight_booking.booking_service.infrastructure.client.Passenger;
-import com.flight_booking.booking_service.infrastructure.client.PassengerTypeEnum;
-import com.flight_booking.booking_service.infrastructure.client.SeatClassEnum;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

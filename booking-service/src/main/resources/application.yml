@@ -1,11 +1,11 @@
 server:
-  port: 0  # ?? ??, Config Server?? ?????
+  port: 0  # Config Server
 
 spring:
   application:
     name: booking-service
   config:
-    import: "configserver:"  # Config Server?? ?? ????
+    import: "configserver:"  # Config Server
   cloud:
     config:
       discovery:
