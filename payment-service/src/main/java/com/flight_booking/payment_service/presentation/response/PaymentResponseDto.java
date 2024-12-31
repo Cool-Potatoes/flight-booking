@@ -1,6 +1,7 @@
 package com.flight_booking.payment_service.presentation.response;
 
 import com.flight_booking.payment_service.domain.model.Payment;
+import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ public class PaymentResponseDto {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
+  @QueryProjection
   public PaymentResponseDto(Payment payment) {
     this.paymentId = payment.getPaymentId();
     this.bookingId = payment.getBookingId();

@@ -5,10 +5,16 @@ import com.flight_booking.payment_service.domain.model.PaymentStatusEnum;
 import com.flight_booking.payment_service.domain.repository.PaymentRepository;
 import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
+import com.querydsl.core.types.Predicate;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.errors.ApiException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +43,7 @@ public class PaymentService {
     return new PaymentResponseDto(payment);
   }
 
+  @Transactional(readOnly = true)
   public PaymentResponseDto getPayment(UUID paymentId) {
 
     Payment payment = paymentRepository.findByPaymentIdAndIsDeletedFalse(paymentId)
@@ -45,5 +52,15 @@ public class PaymentService {
     // TODO 사용자 권한검증
 
     return new PaymentResponseDto(payment);
+  }
+
+  @Transactional(readOnly = true)
+  public PagedModel<PaymentResponseDto> getProductsPage(
+      List<UUID> uuidList, Predicate predicate, Pageable pageable) {
+
+    Page<PaymentResponseDto> paymentResponseDtoPage
+        = paymentRepository.findAll(uuidList, predicate, pageable);
+
+    return new PagedModel<>(paymentResponseDtoPage);
   }
 }
