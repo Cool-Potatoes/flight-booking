@@ -5,6 +5,7 @@ import com.flight_booking.booking_service.domain.repository.BookingRepository;
 import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
 import com.flight_booking.booking_service.presentation.request.BookingRequest;
 import com.flight_booking.booking_service.presentation.response.BookingResponse;
+import com.flight_booking.booking_service.presentation.response.BookingResponseCustom;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class BookingService {
     return BookingResponse.from(booking);
   }
 
-  public Page<BookingResponse> getBookings(Pageable pageable, Integer size) {
+  public Page<BookingResponseCustom> getBookings(Pageable pageable, Integer size) {
 
     return bookingRepositoryImpl.findAll(pageable, size);
   }

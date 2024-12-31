@@ -4,6 +4,7 @@ import static com.flight_booking.booking_service.domain.model.QBooking.booking;
 
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.presentation.response.BookingResponse;
+import com.flight_booking.booking_service.presentation.response.BookingResponseCustom;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -28,14 +29,14 @@ public class BookingRepositoryImpl extends QuerydslRepositorySupport implements
   }
 
   @Override
-  public Page<BookingResponse> findAll(Pageable pageable, Integer size) {
+  public Page<BookingResponseCustom> findAll(Pageable pageable, Integer size) {
 
     pageable = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
 
-    JPAQuery<BookingResponse> query = queryFactory
+    JPAQuery<BookingResponseCustom> query = queryFactory
         .select(
             Projections.fields(
-                BookingResponse.class,
+                BookingResponseCustom.class,
                 booking.bookingId,
                 booking.userId,
                 booking.flightId
@@ -45,7 +46,7 @@ public class BookingRepositoryImpl extends QuerydslRepositorySupport implements
         .from(booking);
         //.where(booking.deletedAt.isNull());
 
-    List<BookingResponse> bookings = getQuerydsl().applyPagination(pageable, query).fetch();
+    List<BookingResponseCustom> bookings = getQuerydsl().applyPagination(pageable, query).fetch();
 
     long totalCount = bookings.size();
 

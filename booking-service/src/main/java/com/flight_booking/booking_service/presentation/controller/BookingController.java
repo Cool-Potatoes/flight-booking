@@ -4,6 +4,7 @@ import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.booking_service.common.response.ApiResponse;
 import com.flight_booking.booking_service.presentation.request.BookingRequest;
 import com.flight_booking.booking_service.presentation.response.BookingResponse;
+import com.flight_booking.booking_service.presentation.response.BookingResponseCustom;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,7 +35,7 @@ public class BookingController {
   public ApiResponse<?> getBookings(@PageableDefault(page = 0, size = 10, sort = "createdAt",
       direction = Sort.Direction.DESC) Pageable pageable, @RequestParam Integer size) {
 
-    Page<BookingResponse> bookings = bookingService.getBookings(pageable, size);
+    Page<BookingResponseCustom> bookings = bookingService.getBookings(pageable, size);
 
     if (bookings.isEmpty()) {
       return ApiResponse.noContent();
