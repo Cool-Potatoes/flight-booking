@@ -12,9 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedModel;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,4 +60,26 @@ public class PaymentController {
     return ApiResponse.ok(paymentResponseDtoPagedModel);
   }
 
+  @PutMapping("/{paymentId}")
+  public ApiResponse<?> updateFare(
+      @RequestBody PaymentRequestDto paymentRequestDto,
+      @PathVariable UUID paymentId
+  ) {
+
+    PaymentResponseDto paymentResponseDto
+        = paymentService.updateFare(paymentRequestDto, paymentId);
+
+    return ApiResponse.ok(paymentResponseDto);
+  }
+
+  @DeleteMapping("/{paymentId}")
+  public ApiResponse<?> deletePayment(
+      @PathVariable UUID paymentId
+  ) {
+
+    paymentService.deletePayment(paymentId);
+
+    return ApiResponse.ok("결제 삭제 성공");
+
+  }
 }

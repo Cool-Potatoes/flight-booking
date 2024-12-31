@@ -46,8 +46,7 @@ public class PaymentService {
   @Transactional(readOnly = true)
   public PaymentResponseDto getPayment(UUID paymentId) {
 
-    Payment payment = paymentRepository.findByPaymentIdAndIsDeletedFalse(paymentId)
-        .orElseThrow(() -> new ApiException("존재하지 않는 paymentId"));
+    Payment payment = getPaymentById(paymentId);
 
     // TODO 사용자 권한검증
 
@@ -63,4 +62,44 @@ public class PaymentService {
 
     return new PagedModel<>(paymentResponseDtoPage);
   }
+
+  @Transactional
+  public PaymentResponseDto updateFare(PaymentRequestDto paymentRequestDto, UUID paymentId) {
+
+    Payment payment = getPaymentById(paymentId);
+
+    if (!payment.getBookingId().equals(paymentRequestDto.bookingId())) {
+      throw new ApiException("예약 아이디를 다시 확인해주세요.");
+    }
+
+    // TODO 사용자 권한검증
+    // TODO 마일리지 확인 및 증감
+
+    payment.updateFare(paymentRequestDto.fare()); // TODO updatedBy
+
+    return new PaymentResponseDto(payment);
+  }
+
+  @Transactional
+  public void deletePayment(UUID paymentId) {
+
+    Payment payment = getPaymentById(paymentId);
+
+    payment.delete(); // TODO deletedBy
+  }
+
+
+  /**
+   * paymentId에 해당하는 payment 조회 메서드
+   *
+   * @param paymentId
+   * @return Payment 객체
+   * @throws ApiException 결제 정보가 존재하지 않거나 삭제된 경우 예외처리
+   */
+  private Payment getPaymentById(UUID paymentId) {
+    Payment payment = paymentRepository.findByPaymentIdAndIsDeletedFalse(paymentId)
+        .orElseThrow(() -> new ApiException("존재하지 않는 paymentId"));
+    return payment;
+  }
+
 }
