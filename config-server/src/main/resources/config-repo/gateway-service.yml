@@ -23,6 +23,14 @@ spring:
           uri: lb://payment-service
           predicates:
             - Path=/api/payments/**
+        - id: flight-service  # 라우트 식별자
+          uri: lb://flight-service
+          predicates:
+            - Path=/api/flights/**
+        - id: ticket-service  # 라우트 식별자
+          uri: lb://ticket-service
+          predicates:
+            - Path=/api/tickets/**
 
       discovery:
         locator:
