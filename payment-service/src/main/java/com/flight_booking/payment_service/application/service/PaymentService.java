@@ -25,14 +25,14 @@ public class PaymentService {
   public PaymentResponseDto createPayment(PaymentRequestDto paymentRequestDto) {
 
     // bookindId로 이미 결제시도한게 있는지 검증
-    if (paymentRepository.existsByBookingId(paymentRequestDto.getBookingId())) {
+    if (paymentRepository.existsByBookingId(paymentRequestDto.bookingId())) {
       throw new ApiException("중복된 결제 시도");
     }
 
     // TODO createdBy 넣어주기 or Auditing
     Payment payment = Payment.builder()
-        .bookingId(paymentRequestDto.getBookingId())
-        .fare(paymentRequestDto.getFare())
+        .bookingId(paymentRequestDto.bookingId())
+        .fare(paymentRequestDto.fare())
         .status(PaymentStatusEnum.PENDING)
         .build();
 
