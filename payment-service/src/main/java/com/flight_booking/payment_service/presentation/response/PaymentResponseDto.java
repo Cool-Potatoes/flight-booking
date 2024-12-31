@@ -17,6 +17,7 @@ public class PaymentResponseDto {
   private UUID paymentId;
   private UUID bookingId;
   private Integer fare;
+  private String status;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
@@ -24,6 +25,7 @@ public class PaymentResponseDto {
     this.paymentId = payment.getPaymentId();
     this.bookingId = payment.getBookingId();
     this.fare = payment.getFare();
+    this.status = payment.getStatus().toString();
     this.createdAt = payment.getCreatedAt();
     this.updatedAt = payment.getUpdatedAt();
   }

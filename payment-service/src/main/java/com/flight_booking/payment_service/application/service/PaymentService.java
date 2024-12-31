@@ -5,6 +5,7 @@ import com.flight_booking.payment_service.domain.model.PaymentStatusEnum;
 import com.flight_booking.payment_service.domain.repository.PaymentRepository;
 import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.errors.ApiException;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,16 @@ public class PaymentService {
     paymentRepository.save(payment);
 
     // TODO 마일리지 확인 및 차감 -> 성공적으로 이루어지면 status 변경 -> 탑승객 생성
+
+    return new PaymentResponseDto(payment);
+  }
+
+  public PaymentResponseDto getPayment(UUID paymentId) {
+
+    Payment payment = paymentRepository.findByPaymentIdAndIsDeletedFalse(paymentId)
+        .orElseThrow(() -> new ApiException("존재하지 않는 paymentId"));
+
+    // TODO 사용자 권한검증
 
     return new PaymentResponseDto(payment);
   }
