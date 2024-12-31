@@ -6,6 +6,7 @@ import com.flight_booking.payment_service.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
 import com.querydsl.core.types.Predicate;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class PaymentController {
 
   @PostMapping
   public ApiResponse<?> createPayment(
-      @RequestBody PaymentRequestDto paymentRequestDto) {
+      @RequestBody @Valid PaymentRequestDto paymentRequestDto) {
 
     PaymentResponseDto paymentResponseDto = paymentService.createPayment(paymentRequestDto);
 
@@ -62,7 +63,7 @@ public class PaymentController {
 
   @PutMapping("/{paymentId}")
   public ApiResponse<?> updateFare(
-      @RequestBody PaymentRequestDto paymentRequestDto,
+      @RequestBody @Valid PaymentRequestDto paymentRequestDto,
       @PathVariable UUID paymentId
   ) {
 
