@@ -36,8 +36,9 @@ public class Payment extends BaseEntity {
   @Enumerated(value = EnumType.STRING)
   private PaymentStatusEnum status;
 
-  public void updateFare(Integer fare) {
+  public Payment updateFare(Integer fare) {
     this.fare = fare;
+    return this;
   }
 
   public void delete() {

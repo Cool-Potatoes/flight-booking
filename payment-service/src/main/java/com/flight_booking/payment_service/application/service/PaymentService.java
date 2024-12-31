@@ -75,9 +75,9 @@ public class PaymentService {
     // TODO 사용자 권한검증
     // TODO 마일리지 확인 및 증감
 
-    payment.updateFare(paymentRequestDto.fare()); // TODO updatedBy
+    Payment updatedPayment = payment.updateFare(paymentRequestDto.fare()); // TODO updatedBy
 
-    return new PaymentResponseDto(payment);
+    return new PaymentResponseDto(updatedPayment);
   }
 
   @Transactional
