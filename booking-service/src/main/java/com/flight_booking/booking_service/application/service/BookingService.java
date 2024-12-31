@@ -2,10 +2,14 @@ package com.flight_booking.booking_service.application.service;
 
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
+import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
 import com.flight_booking.booking_service.presentation.request.BookingRequest;
 import com.flight_booking.booking_service.presentation.response.BookingResponse;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookingService {
 
   private final BookingRepository bookingRepository;
+  private final BookingRepositoryImpl bookingRepositoryImpl;
 
   @Transactional
   public List<BookingResponse> createBooking(BookingRequest bookingRequest) {
@@ -30,5 +35,15 @@ public class BookingService {
     bookingRepository.save(booking);
 
     return BookingResponse.from(booking);
+  }
+
+  public Page<BookingResponse> getBookings(Pageable pageable, Integer size) {
+
+    return bookingRepositoryImpl.findAll(pageable, size);
+  }
+
+  public BookingResponse getBooking(UUID bookingId) {
+
+    return bookingRepositoryImpl.findByBookingId(bookingId);
   }
 }

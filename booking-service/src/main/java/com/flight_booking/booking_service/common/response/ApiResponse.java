@@ -39,4 +39,12 @@ public class ApiResponse<T> {
         .data(null)
         .build();
   }
+
+  public static ApiResponse<?> noContent() {
+    return ApiResponse.builder()
+        .httpStatus(HttpStatus.NO_CONTENT.value())
+        .errorMessage("NO CONTENT")
+        .data(null)
+        .build();
+  }
 }
