@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: notification-service
+
+  cloud:
+    config:
+      enabled: false
+      import: "optional:configserver:"
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:flight_booking}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:systempass}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  main:
+    allow-bean-definition-overriding: true
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: Carry9691@gmail.com
+    password: xrxt hjjz bwlg atlm
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.ssl.trust: smtp.gmail.com
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: false
+    fetch-registry: false
+  instance:
+    hostname: notification-service
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+server:
+  port: 8160
+
+logging:
+  level:
+    root: INFO
+    com.flight_booking.notification_service: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
