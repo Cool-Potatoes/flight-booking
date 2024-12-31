@@ -1,5 +1,6 @@
 package com.flight_booking.booking_service.presentation.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.infrastructure.client.Passenger;
 import com.flight_booking.booking_service.infrastructure.client.PassengerTypeEnum;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookingResponse {
 
   private UUID passengerId;

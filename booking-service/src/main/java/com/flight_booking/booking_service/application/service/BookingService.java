@@ -16,6 +16,7 @@ public class BookingService {
 
   private final BookingRepository bookingRepository;
 
+  @Transactional
   public List<BookingResponse> createBooking(BookingRequest bookingRequest) {
 
     Booking booking = Booking.builder()
