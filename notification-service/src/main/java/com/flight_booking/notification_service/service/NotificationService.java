@@ -8,11 +8,14 @@ import com.flight_booking.notification_service.repository.NotificationRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * 알림 서비스
+ * 알림 생성, 조회, 삭제, 읽음 처리 등 알림과 관련된 비즈니스 로직을 담당
+ */
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -20,7 +23,10 @@ public class NotificationService {
   private final NotificationRepository repository;
   private final EmailService emailService;
 
-  // 알림 생성 + 이메일 전송
+  /**
+   * 알림 생성 메서드
+   * 이메일 전송 결과에 따라 상태 업데이트
+   */
   public NotificationResponse createNotification(NotificationRequest request) {
     Notification notification = Notification.builder()
         .ticketId(request.ticketId())
@@ -36,20 +42,12 @@ public class NotificationService {
 
     Notification saved = repository.save(notification);
 
-    emailService.sendEmail(
-        request.receiverEmail(),
-        request.title(),
-        request.content()
-    );
-    saved.setSent(true);
-    saved.setSentAt(LocalDateTime.now());
-    saved.setStatus("SUCCESS");
+    // 이메일 전송 요청 (결과는 EmailService에서 처리)
+    emailService.sendNotification(notification);
 
-    repository.save(saved);
     return toResponse(saved);
   }
 
-  // 단건 조회
   public NotificationResponse getNotificationById(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
@@ -57,14 +55,12 @@ public class NotificationService {
     return toResponse(notification);
   }
 
-  // 사용자 알림 목록
   public List<NotificationResponse> getNotificationsByUserId(Long userId) {
     return repository.findByUserIdAndIsDeletedFalse(userId).stream()
         .map(this::toResponse)
         .collect(Collectors.toList());
   }
 
-  // 알림 읽음 처리
   public NotificationResponse markAsRead(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
@@ -74,12 +70,10 @@ public class NotificationService {
     return toResponse(notification);
   }
 
-  // 알림 소프트 삭제
   public void deleteNotification(UUID id) {
     repository.softDelete(id);
   }
 
-  // Notification → NotificationResponse 변환
   private NotificationResponse toResponse(Notification n) {
     return new NotificationResponse(
         n.getNotificationId(),
