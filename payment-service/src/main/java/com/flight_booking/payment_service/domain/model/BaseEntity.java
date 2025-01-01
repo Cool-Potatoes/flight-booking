@@ -25,7 +25,7 @@ public abstract class BaseEntity {
 
   @CreatedBy
   @Column(updatable = false, nullable = false, length = 100)
-  private String createdBy = "temporal"; // TODO
+  private String createdBy;
 
   @LastModifiedDate
   @Column
