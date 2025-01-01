@@ -11,9 +11,8 @@ import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
 
-  // 사용자 ID로 알림 조회 (삭제되지 않은 데이터만)
-  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.isDeleted = false")
-  List<Notification> findAllByUserId(Long userId);
+  // 사용자 ID로 알림 조회 (삭제되지 않은 알림만)
+  List<Notification> findByUserIdAndIsDeletedFalse(Long userId);
 
   // 소프트 삭제
   @Transactional
@@ -21,3 +20,4 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
   @Query("UPDATE Notification n SET n.isDeleted = true, n.deletedAt = CURRENT_TIMESTAMP WHERE n.notificationId = :notificationId")
   void softDelete(UUID notificationId);
 }
+
