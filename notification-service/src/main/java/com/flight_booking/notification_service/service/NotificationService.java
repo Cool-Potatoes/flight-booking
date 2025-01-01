@@ -7,7 +7,6 @@ import com.flight_booking.notification_service.repository.NotificationRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,12 +22,12 @@ public class NotificationService {
   // 알림 생성 + 이메일 전송
   public NotificationResponse createNotification(NotificationRequest request) {
     Notification notification = Notification.builder()
-        .ticketId(request.getTicketId())
-        .userId(request.getUserId())
-        .notificationType(request.getNotificationType())
-        .receiverEmail(request.getReceiverEmail())
-        .title(request.getTitle())
-        .content(request.getContent())
+        .ticketId(request.ticketId())
+        .userId(request.userId())
+        .notificationType(request.notificationType())
+        .receiverEmail(request.receiverEmail())
+        .title(request.title())
+        .content(request.content())
         .isRead(false)
         .isSent(false)
         .status("PENDING")
@@ -37,9 +36,9 @@ public class NotificationService {
     Notification saved = repository.save(notification);
 
     emailService.sendEmail(
-        request.getReceiverEmail(),
-        request.getTitle(),
-        request.getContent()
+        request.receiverEmail(),
+        request.title(),
+        request.content()
     );
     saved.setSent(true);
     saved.setSentAt(LocalDateTime.now());
@@ -81,18 +80,18 @@ public class NotificationService {
 
   // Notification → NotificationResponse 변환
   private NotificationResponse toResponse(Notification n) {
-    return NotificationResponse.builder()
-        .notificationId(n.getNotificationId())
-        .userId(n.getUserId())
-        .notificationType(n.getNotificationType())
-        .title(n.getTitle())
-        .content(n.getContent())
-        .isRead(n.isRead())
-        .isSent(n.isSent())
-        .createdAt(n.getCreatedAt())
-        .sentAt(n.getSentAt())
-        .status(n.getStatus())
-        .errorMessage(n.getErrorMessage())
-        .build();
+    return new NotificationResponse(
+        n.getNotificationId(),
+        n.getUserId(),
+        n.getNotificationType(),
+        n.getTitle(),
+        n.getContent(),
+        n.isRead(),
+        n.isSent(),
+        n.getCreatedAt(),
+        n.getSentAt(),
+        n.getStatus(),
+        n.getErrorMessage()
+    );
   }
 }
