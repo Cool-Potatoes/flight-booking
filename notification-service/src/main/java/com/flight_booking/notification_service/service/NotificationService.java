@@ -21,12 +21,8 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
   private final NotificationRepository repository;
-  private final EmailService emailService;
 
-  /**
-   * 알림 생성 메서드
-   * 이메일 전송 결과에 따라 상태 업데이트
-   */
+  // [1] 알림 생성
   public NotificationResponse createNotification(NotificationRequest request) {
     Notification notification = Notification.builder()
         .ticketId(request.ticketId())
@@ -41,52 +37,53 @@ public class NotificationService {
         .build();
 
     Notification saved = repository.save(notification);
-
-    // 이메일 전송 요청 (결과는 EmailService에서 처리)
-    emailService.sendNotification(notification);
-
     return toResponse(saved);
   }
 
+  // [2] 특정 알림 조회
   public NotificationResponse getNotificationById(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
-        .orElseThrow(() -> new NotificationNotFoundException("알림을 찾을 수 없습니다. ID: " + id));
+        .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
     return toResponse(notification);
   }
 
+  // [3] 사용자 알림 목록 조회
   public List<NotificationResponse> getNotificationsByUserId(Long userId) {
     return repository.findByUserIdAndIsDeletedFalse(userId).stream()
         .map(this::toResponse)
         .collect(Collectors.toList());
   }
 
+  // [4] 알림 읽음 처리
   public NotificationResponse markAsRead(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
-        .orElseThrow(() -> new NotificationNotFoundException("알림을 찾을 수 없습니다. ID: " + id));
+        .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
     notification.setRead(true);
     repository.save(notification);
     return toResponse(notification);
   }
 
+  // [5] 알림 삭제
   public void deleteNotification(UUID id) {
     repository.softDelete(id);
   }
 
-  private NotificationResponse toResponse(Notification n) {
+  // Notification 엔티티 → NotificationResponse 변환
+  private NotificationResponse toResponse(Notification notification) {
     return new NotificationResponse(
-        n.getNotificationId(),
-        n.getUserId(),
-        n.getNotificationType(),
-        n.getTitle(),
-        n.getContent(),
-        n.isRead(),
-        n.isSent(),
-        n.getCreatedAt(),
-        n.getSentAt(),
-        n.getStatus(),
-        n.getErrorMessage()
+        notification.getNotificationId(),
+        notification.getUserId(),
+        notification.getNotificationType(),
+        notification.getTitle(),
+        notification.getContent(),
+        notification.isRead(),
+        notification.isSent(),
+        notification.getCreatedAt(),
+        notification.getSentAt(),
+        notification.getStatus(),
+        notification.getErrorMessage()
     );
   }
 }
