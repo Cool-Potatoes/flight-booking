@@ -24,16 +24,16 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-  @Value("${email.smtp.host}")
+  @Value("${spring.mail.host}")
   private String smtpHost;
 
-  @Value("${email.smtp.port}")
+  @Value("${spring.mail.port}")
   private int smtpPort;
 
-  @Value("${email.smtp.username}")
+  @Value("${spring.mail.username}")
   private String smtpUsername;
 
-  @Value("${email.smtp.password}")
+  @Value("${spring.mail.password}")
   private String smtpPassword;
 
   private final NotificationRepository repository;
@@ -58,7 +58,7 @@ public class EmailServiceImpl implements EmailService {
     repository.save(notification);
   }
 
-  private boolean sendEmail(String to, String subject, String content) {
+  public boolean sendEmail(String to, String subject, String content) {
     Properties props = new Properties();
     props.put("mail.smtp.host", smtpHost);
     props.put("mail.smtp.port", smtpPort);
