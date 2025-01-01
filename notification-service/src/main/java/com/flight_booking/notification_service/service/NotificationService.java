@@ -2,6 +2,7 @@ package com.flight_booking.notification_service.service;
 
 import com.flight_booking.notification_service.dto.NotificationRequest;
 import com.flight_booking.notification_service.dto.NotificationResponse;
+import com.flight_booking.notification_service.exception.NotificationNotFoundException;
 import com.flight_booking.notification_service.model.Notification;
 import com.flight_booking.notification_service.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -52,13 +53,13 @@ public class NotificationService {
   public NotificationResponse getNotificationById(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
-        .orElseThrow(() -> new RuntimeException("알림을 찾을 수 없습니다."));
+        .orElseThrow(() -> new NotificationNotFoundException("알림을 찾을 수 없습니다. ID: " + id));
     return toResponse(notification);
   }
 
   // 사용자 알림 목록
   public List<NotificationResponse> getNotificationsByUserId(Long userId) {
-    return repository.findAllByUserId(userId).stream()
+    return repository.findByUserIdAndIsDeletedFalse(userId).stream()
         .map(this::toResponse)
         .collect(Collectors.toList());
   }
@@ -67,7 +68,7 @@ public class NotificationService {
   public NotificationResponse markAsRead(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
-        .orElseThrow(() -> new RuntimeException("알림을 찾을 수 없습니다."));
+        .orElseThrow(() -> new NotificationNotFoundException("알림을 찾을 수 없습니다. ID: " + id));
     notification.setRead(true);
     repository.save(notification);
     return toResponse(notification);
