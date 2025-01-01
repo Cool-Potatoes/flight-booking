@@ -1,5 +1,7 @@
 package com.flight_booking.flight_service.domain.model;
 
+import com.flight_booking.flight_service.presentation.request.FlightCreateRequestDto;
+import com.flight_booking.flight_service.presentation.request.FlightUpdateRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,4 +55,27 @@ public class Flight extends BaseEntity {
 
   @Column(nullable = false, length = 10)
   private String airline;
+
+  public static Flight create(FlightCreateRequestDto requestDto, Airport departureAirport,
+      Airport arrivalAirport) {
+    return Flight.builder()
+        .departureTime(requestDto.departureTime())
+        .departureAirport(departureAirport)
+        .arrivalTime(requestDto.arrivalTime())
+        .arrivalAirport(arrivalAirport)
+        .status(requestDto.status())
+        .remainingSeat(requestDto.remainingSeat())
+        .airline(requestDto.airline()).build();
+  }
+
+  public void update(FlightUpdateRequestDto requestDto) {
+    this.remainingSeat = requestDto.remainingSeat();
+    this.departureTime = requestDto.departureTime();
+    this.arrivalTime = requestDto.arrivalTime();
+    this.status = requestDto.status();
+  }
+
+  public void delete(String deletedBy) {
+    super.delete(deletedBy);
+  }
 }
