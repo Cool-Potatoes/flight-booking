@@ -1,4 +1,4 @@
-package com.flight_booking.flight_service.common.response;
+package com.flight_booking.flight_service.presentation.global;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,6 +14,8 @@ public class ApiResponse<T> {
 
   private boolean success;
   private int httpStatus;
+  private List<String> errorMessages;
+  private String errorMessage;
   private T data;
 
   public static <T> ApiResponse<?> ok(T data) {

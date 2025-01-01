@@ -1,4 +1,4 @@
-package com.flight_booking.flight_service.common.model;
+package com.flight_booking.flight_service.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
