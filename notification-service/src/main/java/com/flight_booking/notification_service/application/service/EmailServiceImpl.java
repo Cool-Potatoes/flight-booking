@@ -21,13 +21,17 @@ public class EmailServiceImpl implements EmailService {
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void sendNotification(Notification notification) {
+    // 1. 이메일 전송 시도
     boolean emailSent = mailSender.send(
         notification.getReceiverEmail(),
         notification.getTitle(),
         notification.getContent()
     );
 
-    notification.updateStatus(emailSent); // 상태 업데이트 메서드 사용 (수정됨)
-    repository.save(notification); // 데이터 저장
+    // 2. 이메일 전송 상태 업데이트
+    notification.updateStatus(emailSent);
+
+    // 3. 알림 객체 저장 (DB 업데이트)
+    repository.save(notification);
   }
 }
