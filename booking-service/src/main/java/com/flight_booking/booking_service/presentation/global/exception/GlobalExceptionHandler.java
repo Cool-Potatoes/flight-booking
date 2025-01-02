@@ -46,6 +46,17 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(apiResponse);
   }
 
+  @ExceptionHandler(BusinessException.class)
+  protected ResponseEntity<ApiResponse<?>> handleConflict(BusinessException e) {
+
+    log.error("BusinessException", e);
+
+    HttpStatus httpStatus = HttpStatus.valueOf(e.getStatus());
+    ApiResponse<?> apiResponse = ApiResponse.of(httpStatus, List.of(e.getMessage()));
+
+    return ResponseEntity.status(httpStatus).body(apiResponse);
+  }
+
   @ExceptionHandler(HttpMessageConversionException.class)
   protected ResponseEntity<ApiResponse<?>> handleHttpMessageConversionException(
       HttpMessageConversionException e) {
