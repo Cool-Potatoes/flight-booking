@@ -36,7 +36,7 @@ public class PaymentController {
 
     PaymentResponseDto paymentResponseDto = paymentService.createPayment(paymentRequestDto);
 
-    return ApiResponse.ok(paymentResponseDto);
+    return ApiResponse.ok(paymentResponseDto, "결제 데이터 생성 성공");
   }
 
   @GetMapping("/{paymentId}")
@@ -45,7 +45,7 @@ public class PaymentController {
 
     PaymentResponseDto paymentResponseDto = paymentService.getPayment(paymentId);
 
-    return ApiResponse.ok(paymentResponseDto);
+    return ApiResponse.ok(paymentResponseDto, "결제 데이터 조회 성공");
   }
 
   @GetMapping
@@ -58,7 +58,7 @@ public class PaymentController {
     PagedModel<PaymentResponseDto> paymentResponseDtoPagedModel
         = paymentService.getProductsPage(uuidList, predicate, pageable);
 
-    return ApiResponse.ok(paymentResponseDtoPagedModel);
+    return ApiResponse.ok(paymentResponseDtoPagedModel, "결제 데이터 목록 조회 성공");
   }
 
   @PutMapping("/{paymentId}")
@@ -70,7 +70,7 @@ public class PaymentController {
     PaymentResponseDto paymentResponseDto
         = paymentService.updateFare(paymentRequestDto, paymentId);
 
-    return ApiResponse.ok(paymentResponseDto);
+    return ApiResponse.ok(paymentResponseDto, "결제 금액 데이터 수정 성공");
   }
 
   @DeleteMapping("/{paymentId}")

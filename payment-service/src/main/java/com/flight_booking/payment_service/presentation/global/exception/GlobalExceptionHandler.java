@@ -1,20 +1,19 @@
 package com.flight_booking.payment_service.presentation.global.exception;
 
 import com.flight_booking.payment_service.presentation.global.ApiResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -48,34 +47,11 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(apiResponse);
   }
 
-//  @ExceptionHandler(BusinessException.class)
-//  protected ResponseEntity<ApiResponse<?>> handleConflict(BusinessException e) {
-//
-//    log.error("BusinessException", e);
-//
-//    HttpStatus httpStatus = HttpStatus.valueOf(e.getStatus());
-//    ApiResponse<?> apiResponse = ApiResponse.of(httpStatus, List.of(e.getMessage()));
-//
-//    return ResponseEntity.status(httpStatus).body(apiResponse);
-//  }
-
   @ExceptionHandler(HttpMessageConversionException.class)
   protected ResponseEntity<ApiResponse<?>> handleHttpMessageConversionException(
       HttpMessageConversionException e) {
 
     log.error("HttpMessageConversionException", e);
-
-    ApiResponse<?> apiResponse = ApiResponse.of(HttpStatus.BAD_REQUEST,
-        List.of(e.getMessage()));
-
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
-  }
-
-  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-  protected ResponseEntity<ApiResponse<?>> handleHttpMediaTypeNotSupportedException(
-      HttpMediaTypeNotSupportedException e) {
-
-    log.error("HttpMediaTypeNotSupportedException", e);
 
     ApiResponse<?> apiResponse = ApiResponse.of(HttpStatus.BAD_REQUEST,
         List.of(e.getMessage()));
@@ -92,6 +68,16 @@ public class GlobalExceptionHandler {
         List.of(e.getMessage()));
 
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+  }
+
+  @ExceptionHandler(ApiException.class)
+  protected ResponseEntity<ApiResponse<?>> handleApiException(ApiException e) {
+
+    log.error("ApiException", e);
+
+    ApiResponse<?> apiResponse = ApiResponse.of(HttpStatus.BAD_REQUEST, List.of(e.getMessage()));
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
   }
 
 }
