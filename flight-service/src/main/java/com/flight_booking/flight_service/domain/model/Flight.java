@@ -68,11 +68,14 @@ public class Flight extends BaseEntity {
         .airline(requestDto.airline()).build();
   }
 
-  public void update(FlightUpdateRequestDto requestDto) {
-    this.remainingSeat = requestDto.remainingSeat();
-    this.departureTime = requestDto.departureTime();
-    this.arrivalTime = requestDto.arrivalTime();
-    this.status = requestDto.status();
+  public void update(int remainingSeat,
+      LocalDateTime departureTime,
+      LocalDateTime arrivalTime,
+      FlightStatusEnum status) {
+    this.remainingSeat = remainingSeat;
+    this.departureTime = departureTime;
+    this.arrivalTime = arrivalTime;
+    this.status = status;
   }
 
   public void delete(String deletedBy) {

@@ -58,11 +58,13 @@ public class FlightService {
         () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
     );
 
-    flight.update(requestDto);
+    flight.update(requestDto.remainingSeat(), requestDto.departureTime(), requestDto.arrivalTime(),
+        requestDto.status());
 
     return flight.getFlightId();
   }
 
+  @Transactional
   public UUID deleteFlight(UUID flightId) {
 
     Flight flight = flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(

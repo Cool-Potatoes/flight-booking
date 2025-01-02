@@ -20,7 +20,6 @@ public abstract class BaseEntity {
 
   @CreatedDate
   @Column(updatable = false, nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   private LocalDateTime createdAt;
 
   @CreatedBy
@@ -29,7 +28,6 @@ public abstract class BaseEntity {
 
   @LastModifiedDate
   @Column
-  @Temporal(TemporalType.TIMESTAMP)
   private LocalDateTime updatedAt;
 
   @LastModifiedBy
@@ -37,7 +35,6 @@ public abstract class BaseEntity {
   protected String updatedBy;
 
   @Column
-  @Temporal(TemporalType.TIMESTAMP)
   protected LocalDateTime deletedAt;
 
   @Column(length = 100)
