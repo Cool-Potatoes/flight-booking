@@ -10,12 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false) // Security 필터를 비활성화하여 테스트 단순화
+@AutoConfigureMockMvc(addFilters = false)
 class NotificationControllerIntegrationTest {
 
   @Autowired
@@ -28,31 +29,45 @@ class NotificationControllerIntegrationTest {
 
   @BeforeEach
   public void setUp() {
-    // [1] 테스트 전 데이터 초기화
+    // 테스트용 데이터 초기화 및 생성
     notificationRepository.deleteAll();
-
-    // [2] 테스트용 알림 데이터 추가
     notification1 = notificationRepository.save(
         Notification.builder()
-            .userId(1L) // 테스트 사용자 ID
-            .ticketId(12345L) // 필수 필드인 ticketId 설정 (Long 타입)
-            .notificationType("TICKET_PURCHASE") // 알림 타입
-            .receiverEmail("test@example.com") // 수신자 이메일
-            .isRead(false) // 초기 읽음 상태: false
-            .status("PENDING") // 초기 상태
+            .userId(1L)
+            .ticketId(12345L)
+            .notificationType("TICKET_PURCHASE")
+            .receiverEmail("test@example.com")
+            .isRead(false)
+            .status("PENDING")
             .build()
     );
   }
 
   @Test
   public void testMarkAsRead_Success() throws Exception {
-    // [3] 읽음 처리 API 호출 테스트
+    // 알림 읽음 처리 API 테스트
     mockMvc.perform(
-            patch("/v1/notifications/{id}/read", notification1.getNotificationId()) // 경로 매핑
-                .contentType(MediaType.APPLICATION_JSON) // Content-Type 설정
+            patch("/v1/notifications/{id}/read", notification1.getNotificationId())
+                .contentType(MediaType.APPLICATION_JSON)
         )
-        .andExpect(status().isOk()) // HTTP 상태 코드 200 기대
-        .andExpect(jsonPath("$.notificationId").value(notification1.getNotificationId().toString())) // 반환된 알림 ID 검증
-        .andExpect(jsonPath("$.isRead").value(true)); // 읽음 상태가 true로 업데이트되었는지 검증
+        .andExpect(status().isOk()) // HTTP 200 상태 코드 확인
+        .andExpect(jsonPath("$.notificationId").value(notification1.getNotificationId().toString())) // 알림 ID 확인
+        .andExpect(jsonPath("$.isRead").value(true)); // 읽음 상태 확인
+  }
+
+  @Test
+  public void testGetUserNotificationsWithPaging() throws Exception {
+    // 페이징된 알림 목록 조회 테스트
+    mockMvc.perform(
+            get("/v1/notifications")
+                .param("userId", "1") // 사용자 ID 전달
+                .param("page", "0")   // 첫 번째 페이지 요청
+                .param("size", "10")  // 페이지 크기 요청
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk()) // HTTP 200 상태 코드 확인
+        .andExpect(jsonPath("$.content").isArray()) // 페이징된 데이터가 배열인지 확인
+        .andExpect(jsonPath("$.content[0].userId").value(1L)); // 첫 번째 알림의 사용자 ID 확인
   }
 }
+
