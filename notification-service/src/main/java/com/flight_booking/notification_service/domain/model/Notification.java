@@ -7,9 +7,6 @@ import org.hibernate.annotations.UuidGenerator;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Notification 엔티티 (p_notification 테이블에 매핑됨)
- */
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Getter
@@ -23,66 +20,70 @@ public class Notification extends BaseEntity {
   @GeneratedValue
   @UuidGenerator
   @Column(name = "notification_id", nullable = false, unique = true)
-  private UUID notificationId; // 알림 ID (PK)
+  private UUID notificationId;
 
   @Column(name = "ticket_id", nullable = false)
-  private Long ticketId; // 티켓 ID
+  private Long ticketId;
 
   @Column(name = "user_id", nullable = false)
-  private Long userId; // 사용자 ID
+  private Long userId;
 
   @Column(name = "notification_type", nullable = false, length = 50)
-  private String notificationType; // 알림 유형 (예: TICKET_PURCHASE)
+  private String notificationType;
 
   @Column(name = "receiver_email", nullable = false, length = 100)
-  private String receiverEmail; // 수신자 이메일
+  private String receiverEmail;
 
   @Column(name = "title", length = 200)
-  private String title; // 알림 제목
+  private String title;
 
   @Column(name = "content", columnDefinition = "TEXT")
-  private String content; // 알림 내용
+  private String content;
 
   @Column(name = "is_read", nullable = false)
-  private boolean isRead; // 읽음 여부
+  private boolean isRead;
 
   @Column(name = "is_sent", nullable = false)
-  private boolean isSent; // 발송 여부
+  private boolean isSent;
 
   @Column(name = "sent_at")
-  private LocalDateTime sentAt; // 발송 시간
+  private LocalDateTime sentAt;
 
   @Column(name = "status", length = 20)
-  private String status; // 상태 (SUCCESS, FAIL, PENDING)
+  private String status;
 
   @Column(name = "error_message", length = 255)
-  private String errorMessage; // 에러 메시지
+  private String errorMessage;
 
   @Version
   @Column(name = "version", nullable = false)
-  private Long version; // Optimistic Locking을 위한 버전 필드
+  private Long version;
 
-  /**
-   * 엔티티가 처음 저장되기 전에 기본값 설정
-   */
   @PrePersist
   public void prePersist() {
-    super.prePersist(); // BaseEntity의 prePersist 호출
+    super.prePersist();
     this.isRead = false;
     this.isSent = false;
     this.status = "PENDING";
   }
 
-  // 특정 필드만 변경 가능하도록 Setter 메서드를 명시적으로 추가
-  public void markAsRead() {
-    this.isRead = true;
+  public void setSent(boolean isSent) {
+    this.isSent = isSent;
   }
 
-  public void updateStatus(String status) {
+  public void setSentAt(LocalDateTime sentAt) {
+    this.sentAt = sentAt;
+  }
+
+  public void setStatus(String status) {
     this.status = status;
   }
 
   public void setErrorMessage(String errorMessage) {
     this.errorMessage = errorMessage;
+  }
+
+  public void setRead(boolean isRead) {
+    this.isRead = isRead;
   }
 }
