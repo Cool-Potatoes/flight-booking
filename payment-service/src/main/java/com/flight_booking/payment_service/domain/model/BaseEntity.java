@@ -3,8 +3,6 @@ package com.flight_booking.payment_service.domain.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;
@@ -20,7 +18,6 @@ public abstract class BaseEntity {
 
   @CreatedDate
   @Column(updatable = false, nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   private LocalDateTime createdAt;
 
   @CreatedBy
@@ -29,7 +26,6 @@ public abstract class BaseEntity {
 
   @LastModifiedDate
   @Column
-  @Temporal(TemporalType.TIMESTAMP)
   private LocalDateTime updatedAt;
 
   @LastModifiedBy
@@ -37,7 +33,6 @@ public abstract class BaseEntity {
   public String updatedBy;
 
   @Column
-  @Temporal(TemporalType.TIMESTAMP)
   protected LocalDateTime deletedAt;
 
   @Column(length = 100)
