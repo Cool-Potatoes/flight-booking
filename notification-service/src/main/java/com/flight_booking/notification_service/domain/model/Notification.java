@@ -22,33 +22,44 @@ public class Notification extends BaseEntity {
   @Id
   @GeneratedValue
   @UuidGenerator
+  @Column(name = "notification_id", nullable = false, unique = true)
   private UUID notificationId; // 알림 ID (PK)
 
-  @Column(nullable = false)
+  @Column(name = "ticket_id", nullable = false)
   private Long ticketId; // 티켓 ID
 
-  @Column(nullable = false)
+  @Column(name = "user_id", nullable = false)
   private Long userId; // 사용자 ID
 
-  @Column(nullable = false)
+  @Column(name = "notification_type", nullable = false, length = 50)
   private String notificationType; // 알림 유형 (예: TICKET_PURCHASE)
 
-  @Column(nullable = false)
+  @Column(name = "receiver_email", nullable = false, length = 100)
   private String receiverEmail; // 수신자 이메일
 
+  @Column(name = "title", length = 200)
   private String title; // 알림 제목
+
+  @Column(name = "content", columnDefinition = "TEXT")
   private String content; // 알림 내용
 
-  @Column(nullable = false)
+  @Column(name = "is_read", nullable = false)
   private boolean isRead; // 읽음 여부
 
+  @Column(name = "is_sent", nullable = false)
   private boolean isSent; // 발송 여부
+
+  @Column(name = "sent_at")
   private LocalDateTime sentAt; // 발송 시간
 
+  @Column(name = "status", length = 20)
   private String status; // 상태 (SUCCESS, FAIL, PENDING)
+
+  @Column(name = "error_message", length = 255)
   private String errorMessage; // 에러 메시지
 
   @Version
+  @Column(name = "version", nullable = false)
   private Long version; // Optimistic Locking을 위한 버전 필드
 
   /**
