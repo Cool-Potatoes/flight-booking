@@ -7,6 +7,7 @@ import com.flight_booking.booking_service.presentation.global.exception.booking.
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
+import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -39,14 +40,18 @@ public class BookingService {
     return BookingResponseDto.from(booking);
   }
 
-  public PagedModel<BookingResponseCustomDto> getBookings(Pageable pageable, Integer size) {
+  public PagedModel<BookingResponseCustomDto> getBookings(Predicate predicate, Pageable pageable) {
 
-    return new PagedModel<>(bookingRepositoryImpl.findAll(pageable, size));
+    return new PagedModel<>(bookingRepositoryImpl.findAllBookings(predicate, pageable));
   }
 
-  public BookingResponseCustomDto getBooking(UUID bookingId) {
+  public List<BookingResponseDto> getBooking(UUID bookingId) {
 
-    return bookingRepositoryImpl.findByBookingId(bookingId);
+    Booking booking = bookingRepository.findById(bookingId)
+        .filter(n->!n.getIsDeleted())
+        .orElseThrow(NotFountBookingException::new);
+
+    return BookingResponseDto.from(booking);
   }
 
   @Transactional(readOnly = false)

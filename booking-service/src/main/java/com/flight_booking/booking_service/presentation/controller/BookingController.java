@@ -1,13 +1,16 @@
 package com.flight_booking.booking_service.presentation.controller;
 
 import com.flight_booking.booking_service.application.service.BookingService;
+import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.presentation.global.ApiResponse;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
+import com.querydsl.core.types.Predicate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,10 +37,9 @@ public class BookingController {
   }
 
   @GetMapping
-  public ApiResponse<?> getBookings(@PageableDefault(page = 0, size = 10, sort = "createdAt",
-      direction = Direction.DESC) Pageable pageable, @RequestParam Integer size) {
+  public ApiResponse<?> getBookings(@QuerydslPredicate(root = Booking.class) Predicate predicate, Pageable pageable) {
 
-    PagedModel<BookingResponseCustomDto> bookings = bookingService.getBookings(pageable, size);
+    PagedModel<BookingResponseCustomDto> bookings = bookingService.getBookings(predicate, pageable);
 
     if (bookings.getContent().isEmpty()) {
       return ApiResponse.noContent();
@@ -64,6 +66,6 @@ public class BookingController {
 
     bookingService.deleteBooking(bookingId);
 
-    return ApiResponse.ok( "예매 삭제 성공");
+    return ApiResponse.ok("예매 삭제 성공");
   }
 }

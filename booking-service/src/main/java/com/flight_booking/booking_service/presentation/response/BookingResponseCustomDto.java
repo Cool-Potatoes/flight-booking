@@ -1,20 +1,23 @@
 package com.flight_booking.booking_service.presentation.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.flight_booking.booking_service.domain.model.Booking;
+import com.querydsl.core.annotations.QueryProjection;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BookingResponseCustomDto {
+public record BookingResponseCustomDto(
+    UUID bookingId,
+    Long userId,
+    UUID flightId
+) {
 
-  private UUID bookingId;
-  private Long userId;
-  private UUID flightId;
+  @QueryProjection
+  public BookingResponseCustomDto(Booking booking){
+    this(booking.getBookingId(), booking.getUserId(), booking.getFlightId());
+  }
 }
