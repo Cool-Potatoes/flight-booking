@@ -40,7 +40,7 @@ public class PaymentService {
 
     // TODO 마일리지 확인 및 차감 -> 성공적으로 이루어지면 status 변경 -> 탑승객 생성
 
-    return new PaymentResponseDto(payment);
+    return PaymentResponseDto.from(payment);
   }
 
   @Transactional(readOnly = true)
@@ -50,7 +50,7 @@ public class PaymentService {
 
     // TODO 사용자 권한검증
 
-    return new PaymentResponseDto(payment);
+    return PaymentResponseDto.from(payment);
   }
 
   @Transactional(readOnly = true)
@@ -60,7 +60,7 @@ public class PaymentService {
     Page<PaymentResponseDto> paymentResponseDtoPage
         = paymentRepository.findAll(uuidList, predicate, pageable);
 
-    return new PagedModel<>(paymentResponseDtoPage);
+    return PaymentResponseDto.from(paymentResponseDtoPage);
   }
 
   @Transactional
@@ -77,7 +77,7 @@ public class PaymentService {
 
     Payment updatedPayment = payment.updateFare(paymentRequestDto.fare()); // TODO updatedBy
 
-    return new PaymentResponseDto(updatedPayment);
+    return PaymentResponseDto.from(payment);
   }
 
   @Transactional
