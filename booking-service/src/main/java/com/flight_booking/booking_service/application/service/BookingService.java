@@ -23,14 +23,14 @@ public class BookingService {
   private final BookingRepository bookingRepository;
   private final BookingRepositoryImpl bookingRepositoryImpl;
 
-  @Transactional
+  @Transactional(readOnly = false)
   public List<BookingResponseDto> createBooking(BookingRequestDto bookingRequestDto) {
 
     Booking booking = Booking.builder()
 // TODO : 유저아이디는 로그인한 유저 아이디 가져올것
 //        .userId()
-        .flightId(bookingRequestDto.getFlightId())
-        .passengers(bookingRequestDto.getPassengers())
+        .flightId(bookingRequestDto.flightId())
+        .passengers(bookingRequestDto.passengers())
 //        .passengerId(bookingRequest.getPassengerId())
         .build();
 
@@ -47,5 +47,23 @@ public class BookingService {
   public BookingResponseCustomDto getBooking(UUID bookingId) {
 
     return bookingRepositoryImpl.findByBookingId(bookingId);
+  }
+
+  @Transactional(readOnly = false)
+  public List<BookingResponseDto> updateBooking(UUID bookingId, BookingRequestDto bookingRequestDto) {
+
+    Booking booking = bookingRepository.findById(bookingId).orElseThrow();
+
+    booking.updateBooking(bookingRequestDto);
+    bookingRepository.save(booking);
+
+    return BookingResponseDto.from(booking);
+  }
+
+  @Transactional(readOnly = false)
+  public void deleteBooking(UUID bookingId) {
+
+    Booking booking = bookingRepository.findById(bookingId).orElseThrow();
+    booking.deleteBooking();
   }
 }
