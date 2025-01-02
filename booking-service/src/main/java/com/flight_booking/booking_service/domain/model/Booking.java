@@ -1,7 +1,6 @@
 package com.flight_booking.booking_service.domain.model;
 
 import com.flight_booking.booking_service.infrastructure.client.Passenger;
-import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,8 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,15 +45,25 @@ public class Booking extends BaseEntity {
   @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Passenger> passengers;
 
-  public void updateBooking(BookingRequestDto requestDto){
+  public void updateBooking(UUID flightId, BookingStatusEnum bookingStatus,
+      List<Passenger> passengers) {
 
-    Optional.ofNullable(requestDto.flightId()).ifPresent(flightId -> this.flightId = flightId);
-    Optional.ofNullable(requestDto.passengers()).ifPresent(passengers -> this.passengers = passengers);
-    Optional.ofNullable(requestDto.bookingStatus()).ifPresent(bookingStatus -> this.bookingStatus = bookingStatus);
+    if (flightId != null) {
+      this.flightId = flightId;
+    }
+    if (bookingStatus != null) {
+      this.bookingStatus = bookingStatus;
+    }
+    if (passengers != null) {
+      this.passengers = passengers;
+    }
   }
 
-  public void deleteBooking(){
+  public void deleteBooking() {
     this.isDeleted = true;
+    this.deletedAt = LocalDateTime.now();
+// TODO
+    //    this.deletedBy =
   }
 
 //  @Column

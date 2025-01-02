@@ -61,7 +61,10 @@ public class BookingService {
     Booking booking = bookingRepository.findById(bookingId)
         .orElseThrow(NotFountBookingException::new);
 
-    booking.updateBooking(bookingRequestDto);
+    booking.updateBooking(bookingRequestDto.flightId(),
+        bookingRequestDto.bookingStatus(),
+        bookingRequestDto.passengers());
+
     bookingRepository.save(booking);
 
     return BookingResponseDto.from(booking);
@@ -72,6 +75,7 @@ public class BookingService {
 
     Booking booking = bookingRepository.findById(bookingId)
         .orElseThrow(NotFountBookingException::new);
+
     booking.deleteBooking();
   }
 }
