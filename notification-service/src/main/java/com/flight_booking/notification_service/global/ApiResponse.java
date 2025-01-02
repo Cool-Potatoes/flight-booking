@@ -1,57 +1,65 @@
 package com.flight_booking.notification_service.global;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
+
 import java.util.List;
 
 /**
  * 공통 API 응답 클래스
  * 모든 API 응답 형식을 통일하기 위해 사용
  */
+@Getter
 public class ApiResponse<T> {
 
-  private boolean success; // 요청 성공 여부
-  private HttpStatus httpStatus; // HTTP 상태 코드
-  private List<String> errors; // 에러 메시지 리스트
-  private T data; // 응답 데이터
+  private final boolean success; // 요청 성공 여부
+  private final HttpStatus httpStatus; // HTTP 상태 코드
+  private final List<String> errors; // 에러 메시지 리스트
+  private final T data; // 응답 데이터
 
-  private ApiResponse() {}
+  private ApiResponse(Builder<T> builder) {
+    this.success = builder.success;
+    this.httpStatus = builder.httpStatus;
+    this.errors = builder.errors;
+    this.data = builder.data;
+  }
 
   public static <T> Builder<T> builder() {
     return new Builder<>();
   }
 
   public static class Builder<T> {
-    private final ApiResponse<T> apiResponse;
-
-    public Builder() {
-      apiResponse = new ApiResponse<>();
-    }
+    private boolean success;
+    private HttpStatus httpStatus;
+    private List<String> errors;
+    private T data;
 
     public Builder<T> success(boolean success) {
-      apiResponse.success = success;
+      this.success = success;
       return this;
     }
 
     public Builder<T> httpStatus(HttpStatus httpStatus) {
-      apiResponse.httpStatus = httpStatus;
+      this.httpStatus = httpStatus;
       return this;
     }
 
     public Builder<T> errors(List<String> errors) {
-      apiResponse.errors = errors;
+      this.errors = errors;
       return this;
     }
 
     public Builder<T> data(T data) {
-      apiResponse.data = data;
+      this.data = data;
       return this;
     }
 
     public ApiResponse<T> build() {
-      return apiResponse;
+      return new ApiResponse<>(this);
     }
   }
 
+  // 기존 정적 메서드도 빌더 패턴 기반으로 제공 가능
   public static <T> ApiResponse<T> ok(T data) {
     return ApiResponse.<T>builder()
         .success(true)
