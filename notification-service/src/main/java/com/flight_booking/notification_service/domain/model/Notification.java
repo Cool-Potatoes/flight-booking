@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -71,5 +71,18 @@ public class Notification extends BaseEntity {
     this.isRead = false;
     this.isSent = false;
     this.status = "PENDING";
+  }
+
+  // 특정 필드만 변경 가능하도록 Setter 메서드를 명시적으로 추가
+  public void markAsRead() {
+    this.isRead = true;
+  }
+
+  public void updateStatus(String status) {
+    this.status = status;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
   }
 }
