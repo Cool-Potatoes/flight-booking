@@ -8,6 +8,7 @@ import jakarta.mail.internet.MimeMessage;
 
 import java.util.Properties;
 
+// SMTP를 통해 메일을 전송하는 구현체
 @Service
 public class SmtpMailSender implements MailSender {
 
@@ -23,6 +24,7 @@ public class SmtpMailSender implements MailSender {
   @Value("${spring.mail.password}")
   private String smtpPassword;
 
+  // SMTP를 사용하여 이메일 전송
   @Override
   public boolean send(String to, String subject, String content) {
     Properties props = new Properties();
