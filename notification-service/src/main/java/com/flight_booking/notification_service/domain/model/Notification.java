@@ -66,4 +66,7 @@ public class Notification extends BaseEntity {
     this.status = emailSent ? "SUCCESS" : "FAIL";
     this.errorMessage = emailSent ? null : "Failed to send email";
   }
+  public void setRead(boolean isRead) {
+    this.isRead = isRead;
+  }
 }
