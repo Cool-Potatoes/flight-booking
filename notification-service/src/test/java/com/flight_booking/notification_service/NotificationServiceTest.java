@@ -1,11 +1,11 @@
 package com.flight_booking.notification_service;
 
-import com.flight_booking.notification_service.dto.NotificationRequest;
-import com.flight_booking.notification_service.dto.NotificationResponse;
-import com.flight_booking.notification_service.exception.NotificationNotFoundException;
-import com.flight_booking.notification_service.model.Notification;
-import com.flight_booking.notification_service.repository.NotificationRepository;
-import com.flight_booking.notification_service.service.NotificationService;
+import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
+import com.flight_booking.notification_service.presentation.dto.NotificationResponse;
+import com.flight_booking.notification_service.global.exception.NotificationNotFoundException;
+import com.flight_booking.notification_service.domain.model.Notification;
+import com.flight_booking.notification_service.domain.repository.NotificationRepository;
+import com.flight_booking.notification_service.application.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

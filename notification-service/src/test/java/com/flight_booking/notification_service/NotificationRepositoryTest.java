@@ -1,7 +1,7 @@
 package com.flight_booking.notification_service;
 
-import com.flight_booking.notification_service.model.Notification;
-import com.flight_booking.notification_service.repository.NotificationRepository;
+import com.flight_booking.notification_service.domain.model.Notification;
+import com.flight_booking.notification_service.domain.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

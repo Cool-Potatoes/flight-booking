@@ -1,7 +1,7 @@
-package com.flight_booking.notification_service.service;
+package com.flight_booking.notification_service.application.service;
 
-import com.flight_booking.notification_service.model.Notification;
-import com.flight_booking.notification_service.repository.NotificationRepository;
+import com.flight_booking.notification_service.domain.model.Notification;
+import com.flight_booking.notification_service.domain.repository.NotificationRepository;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

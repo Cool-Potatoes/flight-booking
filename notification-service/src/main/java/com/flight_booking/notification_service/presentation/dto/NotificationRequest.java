@@ -1,4 +1,4 @@
-package com.flight_booking.notification_service.dto;
+package com.flight_booking.notification_service.presentation.dto;
 
 import jakarta.validation.constraints.NotNull;
 

@@ -1,4 +1,4 @@
-package com.flight_booking.notification_service.common;
+package com.flight_booking.notification_service.global;
 
 import org.springframework.http.HttpStatus;
 import java.util.List;

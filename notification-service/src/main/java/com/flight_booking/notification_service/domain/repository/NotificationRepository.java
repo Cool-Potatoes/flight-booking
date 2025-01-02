@@ -1,6 +1,6 @@
-package com.flight_booking.notification_service.repository;
+package com.flight_booking.notification_service.domain.repository;
 
-import com.flight_booking.notification_service.model.Notification;
+import com.flight_booking.notification_service.domain.model.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

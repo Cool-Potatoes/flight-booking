@@ -1,8 +1,8 @@
-package com.flight_booking.notification_service.controller;
+package com.flight_booking.notification_service.presentation.controller;
 
-import com.flight_booking.notification_service.dto.NotificationRequest;
-import com.flight_booking.notification_service.dto.NotificationResponse;
-import com.flight_booking.notification_service.service.NotificationService;
+import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
+import com.flight_booking.notification_service.presentation.dto.NotificationResponse;
+import com.flight_booking.notification_service.application.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package com.flight_booking.notification_service.model;
+package com.flight_booking.notification_service.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;

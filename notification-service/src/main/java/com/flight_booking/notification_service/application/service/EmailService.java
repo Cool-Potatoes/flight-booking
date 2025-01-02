@@ -1,6 +1,6 @@
-package com.flight_booking.notification_service.service;
+package com.flight_booking.notification_service.application.service;
 
-import com.flight_booking.notification_service.model.Notification;
+import com.flight_booking.notification_service.domain.model.Notification;
 
 /**
  * 이메일 전송 서비스 인터페이스

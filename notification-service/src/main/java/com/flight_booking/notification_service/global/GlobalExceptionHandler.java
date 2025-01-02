@@ -1,6 +1,6 @@
-package com.flight_booking.notification_service.common;
+package com.flight_booking.notification_service.global;
 
-import com.flight_booking.notification_service.exception.NotificationNotFoundException;
+import com.flight_booking.notification_service.global.exception.NotificationNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
