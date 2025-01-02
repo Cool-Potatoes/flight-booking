@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BookingResponseCustom {
+public class BookingResponseCustomDto {
 
   private UUID bookingId;
   private Long userId;

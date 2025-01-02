@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BookingResponse {
+public class BookingResponseDto {
 
   private UUID passengerId;
   private String passengerName;
@@ -35,9 +35,9 @@ public class BookingResponse {
 //
 //  }
 
-  public static List<BookingResponse> from(Booking booking) {
+  public static List<BookingResponseDto> from(Booking booking) {
     return booking.getPassengers().stream()
-        .map(passenger -> BookingResponse.builder()
+        .map(passenger -> BookingResponseDto.builder()
             .passengerId(passenger.getPassengerId())
             .passengerName(passenger.getPassengerName())
             .passengerType(passenger.getPassengerType())

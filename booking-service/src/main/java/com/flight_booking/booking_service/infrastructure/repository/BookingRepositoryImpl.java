@@ -3,8 +3,8 @@ package com.flight_booking.booking_service.infrastructure.repository;
 import static com.flight_booking.booking_service.domain.model.QBooking.booking;
 
 import com.flight_booking.booking_service.domain.model.Booking;
-import com.flight_booking.booking_service.presentation.response.BookingResponse;
-import com.flight_booking.booking_service.presentation.response.BookingResponseCustom;
+import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
+import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -29,14 +29,14 @@ public class BookingRepositoryImpl extends QuerydslRepositorySupport implements
   }
 
   @Override
-  public Page<BookingResponseCustom> findAll(Pageable pageable, Integer size) {
+  public Page<BookingResponseCustomDto> findAll(Pageable pageable, Integer size) {
 
     pageable = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
 
-    JPAQuery<BookingResponseCustom> query = queryFactory
+    JPAQuery<BookingResponseCustomDto> query = queryFactory
         .select(
             Projections.fields(
-                BookingResponseCustom.class,
+                BookingResponseCustomDto.class,
                 booking.bookingId,
                 booking.userId,
                 booking.flightId
@@ -46,7 +46,7 @@ public class BookingRepositoryImpl extends QuerydslRepositorySupport implements
         .from(booking);
         //.where(booking.deletedAt.isNull());
 
-    List<BookingResponseCustom> bookings = getQuerydsl().applyPagination(pageable, query).fetch();
+    List<BookingResponseCustomDto> bookings = getQuerydsl().applyPagination(pageable, query).fetch();
 
     long totalCount = bookings.size();
 
@@ -54,11 +54,11 @@ public class BookingRepositoryImpl extends QuerydslRepositorySupport implements
   }
 
   @Override
-  public BookingResponse findByBookingId(UUID bookingId) {
+  public BookingResponseCustomDto findByBookingId(UUID bookingId) {
     return queryFactory
         .select(
             Projections.fields(
-                BookingResponse.class,
+                BookingResponseCustomDto.class,
                 booking.userId,
                 booking.bookingId,
                 booking.flightId,

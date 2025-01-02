@@ -1,4 +1,4 @@
-package com.flight_booking.booking_service.common.response;
+package com.flight_booking.booking_service.presentation.global;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;

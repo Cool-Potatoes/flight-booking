@@ -1,17 +1,19 @@
 package com.flight_booking.booking_service.presentation.controller;
 
 import com.flight_booking.booking_service.application.service.BookingService;
-import com.flight_booking.booking_service.common.response.ApiResponse;
-import com.flight_booking.booking_service.presentation.request.BookingRequest;
-import com.flight_booking.booking_service.presentation.response.BookingResponse;
-import com.flight_booking.booking_service.presentation.response.BookingResponseCustom;
+import com.flight_booking.booking_service.presentation.global.ApiResponse;
+import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
+import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,18 +28,18 @@ public class BookingController {
   private final BookingService bookingService;
 
   @PostMapping
-  public ApiResponse<?> createBooking(@RequestBody BookingRequest bookingRequest) {
+  public ApiResponse<?> createBooking(@RequestBody BookingRequestDto bookingRequestDto) {
 
-    return ApiResponse.ok(bookingService.createBooking(bookingRequest), "예약 성공");
+    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto), "예약 성공");
   }
 
   @GetMapping
   public ApiResponse<?> getBookings(@PageableDefault(page = 0, size = 10, sort = "createdAt",
-      direction = Sort.Direction.DESC) Pageable pageable, @RequestParam Integer size) {
+      direction = Direction.DESC) Pageable pageable, @RequestParam Integer size) {
 
-    Page<BookingResponseCustom> bookings = bookingService.getBookings(pageable, size);
+    PagedModel<BookingResponseCustomDto> bookings = bookingService.getBookings(pageable, size);
 
-    if (bookings.isEmpty()) {
+    if (bookings.getContent().isEmpty()) {
       return ApiResponse.noContent();
     }
 
@@ -45,7 +47,7 @@ public class BookingController {
   }
 
   @GetMapping("/{bookingId}")
-  public ApiResponse<?> getBooking(@RequestParam UUID bookingId) {
+  public ApiResponse<?> getBooking(@PathVariable UUID bookingId) {
 
     return ApiResponse.ok(bookingService.getBooking(bookingId), "예매 상세 조회 성공");
   }

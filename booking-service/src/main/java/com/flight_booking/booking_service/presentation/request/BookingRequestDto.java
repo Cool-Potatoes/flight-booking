@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingRequest {
+public class BookingRequestDto {
 
   private UUID flightId;
   private List<Passenger> passengers;
