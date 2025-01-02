@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.errors.ApiException;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -81,7 +80,7 @@ public class PaymentService {
 
     // 충돌 여부 확인
     if (!currentFare.equals(updateFareRequestDto.previousFare())) {
-      throw new CannotAcquireLockException("결제 금액 충돌 발생: 현재 금액이 변경되었습니다. "
+      throw new ApiException("결제 금액 충돌 발생: 현재 금액이 변경되었습니다. "
           + "현재 금액: " + currentFare + ", 요청 전 금액: " + updateFareRequestDto.previousFare());
     }
 

@@ -23,8 +23,10 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        show_sql: true
         format_sql: true
-        use_sql_comment: true
+        use_sql_comments: true
+
 logging:
   level:
     org:
