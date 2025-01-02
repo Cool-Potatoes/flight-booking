@@ -10,10 +10,14 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.errors.ApiException;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -63,10 +67,13 @@ public class PaymentService {
     return PaymentResponseDto.from(paymentResponseDtoPage);
   }
 
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Retryable(value = CannotAcquireLockException.class, maxAttempts = 5, backoff = @Backoff(delay = 2000))
+  // 2초 대기 후 최대 5번 재시도
   public PaymentResponseDto updateFare(PaymentRequestDto paymentRequestDto, UUID paymentId) {
 
-    Payment payment = getPaymentById(paymentId);
+    Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId)
+        .orElseThrow(() -> new ApiException("존재하지 않는 paymentId"));
 
     if (!payment.getBookingId().equals(paymentRequestDto.bookingId())) {
       throw new ApiException("예약 아이디를 다시 확인해주세요.");
@@ -77,7 +84,7 @@ public class PaymentService {
 
     Payment updatedPayment = payment.updateFare(paymentRequestDto.fare()); // TODO updatedBy
 
-    return PaymentResponseDto.from(payment);
+    return PaymentResponseDto.from(updatedPayment);
   }
 
   @Transactional
