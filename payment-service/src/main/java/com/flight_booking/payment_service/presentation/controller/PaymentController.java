@@ -4,6 +4,7 @@ import com.flight_booking.payment_service.application.service.PaymentService;
 import com.flight_booking.payment_service.domain.model.Payment;
 import com.flight_booking.payment_service.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
+import com.flight_booking.payment_service.presentation.request.UpdateFareRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
 import com.querydsl.core.types.Predicate;
 import jakarta.validation.Valid;
@@ -63,12 +64,12 @@ public class PaymentController {
 
   @PutMapping("/{paymentId}")
   public ApiResponse<?> updateFare(
-      @RequestBody @Valid PaymentRequestDto paymentRequestDto,
+      @RequestBody @Valid UpdateFareRequestDto updateFareRequestDto,
       @PathVariable UUID paymentId
   ) {
 
     PaymentResponseDto paymentResponseDto
-        = paymentService.updateFare(paymentRequestDto, paymentId);
+        = paymentService.updateFare(updateFareRequestDto, paymentId);
 
     return ApiResponse.ok(paymentResponseDto, "결제 금액 데이터 수정 성공");
   }
