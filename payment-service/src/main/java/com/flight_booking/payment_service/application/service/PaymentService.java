@@ -18,10 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PaymentService {
 
   private final PaymentRepository paymentRepository;
 
+  @Transactional
   public PaymentResponseDto createPayment(PaymentRequestDto paymentRequestDto) {
 
     // bookindId로 이미 결제시도한게 있는지 검증
@@ -43,7 +45,6 @@ public class PaymentService {
     return PaymentResponseDto.from(payment);
   }
 
-  @Transactional(readOnly = true)
   public PaymentResponseDto getPayment(UUID paymentId) {
 
     Payment payment = getPaymentById(paymentId);
@@ -53,7 +54,6 @@ public class PaymentService {
     return PaymentResponseDto.from(payment);
   }
 
-  @Transactional(readOnly = true)
   public PagedModel<PaymentResponseDto> getProductsPage(
       List<UUID> uuidList, Predicate predicate, Pageable pageable) {
 
