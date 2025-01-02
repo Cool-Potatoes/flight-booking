@@ -6,24 +6,22 @@ import com.flight_booking.notification_service.global.exception.NotificationNotF
 import com.flight_booking.notification_service.domain.model.Notification;
 import com.flight_booking.notification_service.domain.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-/**
- * 알림 서비스
- * 알림 생성, 조회, 삭제, 읽음 처리 등 알림과 관련된 비즈니스 로직을 담당
- */
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
 
+  // 알림 저장소
   private final NotificationRepository repository;
 
-  // [1] 알림 생성
+  // 알림 생성
   public NotificationResponse createNotification(NotificationRequest request) {
+    // 알림 엔티티 생성
     Notification notification = Notification.builder()
         .ticketId(request.ticketId())
         .userId(request.userId())
@@ -36,27 +34,29 @@ public class NotificationService {
         .status("PENDING")
         .build();
 
+    // 저장 후 응답 반환
     Notification saved = repository.save(notification);
     return toResponse(saved);
   }
 
-  // [2] 특정 알림 조회
+  // 특정 알림 조회
   public NotificationResponse getNotificationById(UUID id) {
+    // ID로 알림 조회, 삭제되지 않은 것만 반환
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
         .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
     return toResponse(notification);
   }
 
-  // [3] 사용자 알림 목록 조회
-  public List<NotificationResponse> getNotificationsByUserId(Long userId) {
-    return repository.findByUserIdAndIsDeletedFalse(userId).stream()
-        .map(this::toResponse)
-        .collect(Collectors.toList());
+  // 사용자 ID에 따른 알림 목록 조회 (페이징)
+  public Page<NotificationResponse> getNotificationsByUserId(Long userId, Pageable pageable) {
+    // 페이징된 결과를 응답 객체로 변환
+    return repository.findByUserIdAndIsDeletedFalse(userId, pageable).map(this::toResponse);
   }
 
-  // [4] 알림 읽음 처리
+  // 알림 읽음 처리
   public NotificationResponse markAsRead(UUID id) {
+    // 알림 조회 후 읽음 상태 업데이트
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
         .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
@@ -65,12 +65,12 @@ public class NotificationService {
     return toResponse(notification);
   }
 
-  // [5] 알림 삭제
+  // 알림 삭제 (소프트 삭제)
   public void deleteNotification(UUID id) {
     repository.softDelete(id);
   }
 
-  // Notification 엔티티 → NotificationResponse 변환
+  // 알림 엔티티를 응답 객체로 변환
   private NotificationResponse toResponse(Notification notification) {
     return new NotificationResponse(
         notification.getNotificationId(),
