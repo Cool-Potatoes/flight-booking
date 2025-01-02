@@ -15,28 +15,19 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-  private final MailSender mailSender; // MailSender 인터페이스를 통한 의존성 주입
-  private final NotificationRepository repository;
+  private final MailSender mailSender; // 이메일 전송 의존성
+  private final NotificationRepository repository; // 알림 데이터 저장소
 
   @Override
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void sendNotification(Notification notification) {
-    // 메일 전송
     boolean emailSent = mailSender.send(
         notification.getReceiverEmail(),
         notification.getTitle(),
         notification.getContent()
     );
 
-    // 알림 상태 업데이트
-    notification.setSent(emailSent);
-    notification.setSentAt(emailSent ? LocalDateTime.now() : null);
-    notification.setStatus(emailSent ? "SUCCESS" : "FAIL");
-    if (!emailSent) {
-      notification.setErrorMessage("Failed to send email");
-    }
-
-    // 데이터 저장
-    repository.save(notification);
+    notification.updateStatus(emailSent); // 상태 업데이트 메서드 사용 (수정됨)
+    repository.save(notification); // 데이터 저장
   }
 }

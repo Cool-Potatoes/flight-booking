@@ -59,31 +59,11 @@ public class Notification extends BaseEntity {
   @Column(name = "version", nullable = false)
   private Long version;
 
-  @PrePersist
-  public void prePersist() {
-    super.prePersist();
-    this.isRead = false;
-    this.isSent = false;
-    this.status = "PENDING";
-  }
-
-  public void setSent(boolean isSent) {
-    this.isSent = isSent;
-  }
-
-  public void setSentAt(LocalDateTime sentAt) {
-    this.sentAt = sentAt;
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public void setErrorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
-  }
-
-  public void setRead(boolean isRead) {
-    this.isRead = isRead;
+  // 알림 상태 업데이트 메서드 (수정됨)
+  public void updateStatus(boolean emailSent) {
+    this.isSent = emailSent;
+    this.sentAt = emailSent ? LocalDateTime.now() : null;
+    this.status = emailSent ? "SUCCESS" : "FAIL";
+    this.errorMessage = emailSent ? null : "Failed to send email";
   }
 }
