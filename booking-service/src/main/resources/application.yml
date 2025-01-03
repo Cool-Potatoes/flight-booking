@@ -1,0 +1,18 @@
+server:
+  port: 0  # Config Server
+
+spring:
+  application:
+    name: booking-service
+  config:
+    import: "configserver:"  # Config Server
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

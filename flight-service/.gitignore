@@ -1,4 +1,4 @@
-notification-service/HELP.md
+HELP.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
@@ -35,23 +35,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-# Windows
-Thumbs.db
-ehthumbs.db
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Linux
-.directory
-
-# 임시 파일, 캐시 파일
-.metadata/
-.tmp/
-.recommenders/
-
-# 환경 파일
-.env
