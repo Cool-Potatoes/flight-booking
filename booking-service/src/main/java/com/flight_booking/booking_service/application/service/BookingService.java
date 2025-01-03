@@ -47,8 +47,7 @@ public class BookingService {
 
   public List<BookingResponseDto> getBooking(UUID bookingId) {
 
-    Booking booking = bookingRepository.findById(bookingId)
-        .filter(n->!n.getIsDeleted())
+    Booking booking = bookingRepository.findByBookingIdAndIsDeletedFalse(bookingId)
         .orElseThrow(NotFountBookingException::new);
 
     return BookingResponseDto.from(booking);
