@@ -1,5 +1,6 @@
 package com.flight_booking.notification_service.global;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * 모든 API 응답 형식을 통일하기 위해 사용
  */
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL) // null 값을 JSON 응답에서 제외
 public class ApiResponse<T> {
 
   private final boolean success; // 요청 성공 여부
