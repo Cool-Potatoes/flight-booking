@@ -2,6 +2,7 @@ package com.flight_booking.user_service.presentation.controller;
 
 import com.flight_booking.user_service.application.service.AuthService;
 import com.flight_booking.user_service.presentation.global.ApiResponse;
+import com.flight_booking.user_service.presentation.request.LoginRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +23,12 @@ public class AuthController {
   public ApiResponse<?> signUp(@Valid @RequestBody SignUpRequest request) {
     authService.createUser(request);
     return ApiResponse.ok("회원가입 성공");
+  }
+
+  // 로그인
+  @PostMapping("/login")
+  public ApiResponse<?> login(@Valid @RequestBody LoginRequest request) {
+    String token = authService.authenticate(request);
+    return ApiResponse.ok("로그인 성공", token);
   }
 }
