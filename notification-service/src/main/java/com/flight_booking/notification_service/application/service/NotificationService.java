@@ -19,6 +19,9 @@ public class NotificationService {
   // 알림 저장소
   private final NotificationRepository repository;
 
+  // 이메일 전송 서비스
+  private final EmailService emailService;
+
   // 알림 생성
   public NotificationResponse createNotification(NotificationRequest request) {
     // 알림 엔티티 생성
@@ -34,14 +37,18 @@ public class NotificationService {
         .status("PENDING")
         .build();
 
-    // 저장 후 응답 반환
+    // 저장
     Notification saved = repository.save(notification);
+
+    // 이메일 전송 (비동기)
+    emailService.sendNotification(saved);
+
+    // 응답 반환
     return toResponse(saved);
   }
 
   // 특정 알림 조회
   public NotificationResponse getNotificationById(UUID id) {
-    // ID로 알림 조회, 삭제되지 않은 것만 반환
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
         .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
@@ -50,13 +57,11 @@ public class NotificationService {
 
   // 사용자 ID에 따른 알림 목록 조회 (페이징)
   public Page<NotificationResponse> getNotificationsByUserId(Long userId, Pageable pageable) {
-    // 페이징된 결과를 응답 객체로 변환
     return repository.findByUserIdAndIsDeletedFalse(userId, pageable).map(this::toResponse);
   }
 
   // 알림 읽음 처리
   public NotificationResponse markAsRead(UUID id) {
-    // 알림 조회 후 읽음 상태 업데이트
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
         .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
