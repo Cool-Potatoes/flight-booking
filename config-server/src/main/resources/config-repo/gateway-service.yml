@@ -31,6 +31,10 @@ spring:
           uri: lb://ticket-service
           predicates:
             - Path=/api/tickets/**
+        - id: booking-service  # 라우트 식별자
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/booking/**
 
       discovery:
         locator:
