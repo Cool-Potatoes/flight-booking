@@ -6,6 +6,7 @@ import com.flight_booking.booking_service.domain.repository.PassengerRepository;
 import com.flight_booking.booking_service.presentation.global.exception.passenger.InvalidPassengerListException;
 import com.flight_booking.booking_service.presentation.global.exception.passenger.MissingRequiredFieldsException;
 import com.flight_booking.booking_service.presentation.request.PassengerRequestDto;
+import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,8 @@ public class PassengerService {
   private final PassengerRepository passengerRepository;
 
   @Transactional(readOnly = false)
-  public List<Passenger> createPassenger(List<PassengerRequestDto> passengerRequestDtos, Booking savedBooking) {
+  public List<PassengerResponseDto> createPassenger(List<PassengerRequestDto> passengerRequestDtos,
+      Booking savedBooking) {
 
     // TODO : 좌석 이미 예약되어있는지 가져와서 체크
     //  승객 중복 예약? 가능? - 같은 승객이 자리 여러개
@@ -45,13 +47,16 @@ public class PassengerService {
         })
         .collect(Collectors.toList());
 
-    return passengerRepository.saveAll(passengers);
+    List<Passenger> savedPassengers = passengerRepository.saveAll(passengers);
+
+    return savedPassengers.stream().map(PassengerResponseDto::of).collect(Collectors.toList());
   }
 
   @Transactional(readOnly = false)
   public void updatePassenger(Booking booking, List<PassengerRequestDto> passengerRequestDtos) {
 
-    List<Passenger> passengers = passengerRepository.findAllByBooking_BookingId(booking.getBookingId());
+    List<Passenger> passengers = passengerRepository.findAllByBooking_BookingId(
+        booking.getBookingId());
 
 //    if (passengers.size() != bookingRequestDto.passengerDtos().size()) {
 //      throw new PassengerListSizeMismatchException();

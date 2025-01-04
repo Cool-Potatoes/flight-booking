@@ -9,6 +9,7 @@ import com.flight_booking.booking_service.presentation.global.exception.booking.
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
+import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
@@ -40,9 +41,9 @@ public class BookingService {
 
     Booking savedBooking = bookingRepository.save(booking);
 
-    List<Passenger> savedPassenger = passengerService.createPassenger(bookingRequestDto.passengerRequestDtos(), savedBooking);
+    List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(bookingRequestDto.passengerRequestDtos(), savedBooking);
 
-    return BookingResponseDto.of(savedBooking, savedPassenger);
+    return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
   }
 
   public PagedModel<BookingResponseCustomDto> getBookings(Predicate predicate, Pageable pageable) {
