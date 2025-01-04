@@ -63,24 +63,6 @@ public class BookingRepositoryImpl implements
         .where(builder)
         .fetchOne();
 
-//    JPAQuery<BookingResponseCustomDto> query = queryFactory
-//        .select(
-//            Projections.fields(
-//                BookingResponseCustomDto.class,
-//                booking.bookingId,
-//                booking.userId,
-//                booking.flightId
-//                //booking.passengers
-//            )
-//        )
-//        .from(booking);
-//    //.where(booking.deletedAt.isNull());
-//
-//    List<BookingResponseCustomDto> bookings = getQuerydsl().applyPagination(pageable, query)
-//        .fetch();
-//
-//    long totalCount = bookings.size();
-//    return new PageImpl<>(bookings, pageable, totalCount);
     if (total == null) {
       total = 0L;
     }
