@@ -1,12 +1,15 @@
 package com.flight_booking.booking_service.application.service;
 
 import com.flight_booking.booking_service.domain.model.Booking;
+import com.flight_booking.booking_service.domain.model.BookingStatusEnum;
+import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
 import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
-import com.flight_booking.booking_service.presentation.global.exception.booking.NotFountBookingException;
+import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
+import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
@@ -23,21 +26,24 @@ public class BookingService {
 
   private final BookingRepository bookingRepository;
   private final BookingRepositoryImpl bookingRepositoryImpl;
+  private final PassengerService passengerService;
+
 
   @Transactional(readOnly = false)
-  public List<BookingResponseDto> createBooking(BookingRequestDto bookingRequestDto) {
+  public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto) {
 
     Booking booking = Booking.builder()
-// TODO : 유저아이디는 로그인한 유저 아이디 가져올것
-//        .userId()
+        // TODO: 유저아이디는 로그인한 유저 아이디 가져올 것
+        // .userId(loggedInUserId)
         .flightId(bookingRequestDto.flightId())
-        .passengers(bookingRequestDto.passengers())
-//        .passengerId(bookingRequest.getPassengerId())
+        .bookingStatus(BookingStatusEnum.BOOKING_WAITING) // 초기 예약 상태 설정
         .build();
 
-    bookingRepository.save(booking);
+    Booking savedBooking = bookingRepository.save(booking);
 
-    return BookingResponseDto.from(booking);
+    List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(bookingRequestDto.passengerRequestDtos(), savedBooking);
+
+    return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
   }
 
   public PagedModel<BookingResponseCustomDto> getBookings(Predicate predicate, Pageable pageable) {
@@ -45,24 +51,25 @@ public class BookingService {
     return new PagedModel<>(bookingRepositoryImpl.findAllBookings(predicate, pageable));
   }
 
-  public List<BookingResponseDto> getBooking(UUID bookingId) {
+  public BookingResponseDto getBooking(UUID bookingId) {
 
     Booking booking = bookingRepository.findByBookingIdAndIsDeletedFalse(bookingId)
-        .orElseThrow(NotFountBookingException::new);
+        .orElseThrow(NotFoundBookingException::new);
 
     return BookingResponseDto.from(booking);
   }
 
   @Transactional(readOnly = false)
-  public List<BookingResponseDto> updateBooking(UUID bookingId,
+  public BookingResponseDto updateBooking(UUID bookingId,
       BookingRequestDto bookingRequestDto) {
 
     Booking booking = bookingRepository.findById(bookingId)
-        .orElseThrow(NotFountBookingException::new);
+        .orElseThrow(NotFoundBookingException::new);
 
     booking.updateBooking(bookingRequestDto.flightId(),
-        bookingRequestDto.bookingStatus(),
-        bookingRequestDto.passengers());
+        bookingRequestDto.bookingStatus());
+
+    passengerService.updatePassenger(booking, bookingRequestDto.passengerRequestDtos());
 
     bookingRepository.save(booking);
 
@@ -73,7 +80,7 @@ public class BookingService {
   public void deleteBooking(UUID bookingId) {
 
     Booking booking = bookingRepository.findById(bookingId)
-        .orElseThrow(NotFountBookingException::new);
+        .orElseThrow(NotFoundBookingException::new);
 
     booking.deleteBooking();
   }

@@ -7,8 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum BookingStatusEnum {
 
-  BOOKING("BOOKING_COMPLETE"),
-  CANCELLED("BOOKING_CANCELLED");
+  BOOKING_WAITING("BOOKING_WAITING"),
+  BOOKING_COMPLETE("BOOKING_COMPLETE"),
+  BOOKING_CANCELLED("BOOKING_CANCELLED");
 
   private final String booking;
 }

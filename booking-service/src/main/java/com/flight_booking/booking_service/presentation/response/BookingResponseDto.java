@@ -2,40 +2,62 @@ package com.flight_booking.booking_service.presentation.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.flight_booking.booking_service.domain.model.Booking;
-import com.flight_booking.booking_service.infrastructure.client.PassengerTypeEnum;
+import com.flight_booking.booking_service.domain.model.Passenger;
+import com.flight_booking.booking_service.domain.model.PassengerTypeEnum;
 import com.flight_booking.booking_service.infrastructure.client.SeatClassEnum;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record BookingResponseDto(
-    UUID passengerId,
-    String passengerName,
-    PassengerTypeEnum passengerType,
-    Boolean baggage,
-    Boolean meal,
-    SeatClassEnum seatClass,
-    String seatNumber,
-    Long price
+    UUID bookingId,
+    String bookingStatus,
+    UUID flightId,
+    List<PassengerResponseDto> passengers
 ) {
-  public static List<BookingResponseDto> from(Booking booking) {
-    return booking.getPassengers().stream()
-        .map(passenger -> new BookingResponseDto(
+
+  public static BookingResponseDto from(Booking booking) {
+    List<PassengerResponseDto> passengerDtos = booking.getPassengers().stream()
+        .map(passenger -> new PassengerResponseDto(
             passenger.getPassengerId(),
-            passenger.getPassengerName(),
+            passenger.getSeatId(),
             passenger.getPassengerType(),
+            passenger.getPassengerName(),
             passenger.getBaggage(),
-            passenger.getMeal(),
+            passenger.getMeal()
             // TODO: 추가 예정
-            null, // seatClass
-            null, // seatNumber
-            null  // price
+            // seatClass, seatNumber, price 등
         ))
         .collect(Collectors.toList());
+
+    return new BookingResponseDto(
+        booking.getBookingId(),
+        booking.getBookingStatus().toString(),
+        booking.getFlightId(),
+        passengerDtos
+    );
+  }
+
+  public static BookingResponseDto of(Booking savedBooking, List<PassengerResponseDto> passengerResponseDtoList) {
+    List<PassengerResponseDto> passengerDtos = passengerResponseDtoList.stream()
+        .map(passenger -> new PassengerResponseDto(
+            passenger.passengerId(),
+            passenger.seatId(),
+            passenger.passengerType(),
+            passenger.passengerName(),
+            passenger.baggage(),
+            passenger.meal()
+            // TODO: 추가 예정
+            // seatClass, seatNumber, price 등
+        ))
+        .collect(Collectors.toList());
+
+    return new BookingResponseDto(
+        savedBooking.getBookingId(),
+        savedBooking.getBookingStatus().toString(),
+        savedBooking.getFlightId(),
+        passengerDtos
+    );
   }
 }
