@@ -11,6 +11,8 @@ spring:
       discovery:
         enabled: true
         service-id: config-server
+  main:
+    allow-bean-definition-overriding: true
 
 eureka:
   client:
