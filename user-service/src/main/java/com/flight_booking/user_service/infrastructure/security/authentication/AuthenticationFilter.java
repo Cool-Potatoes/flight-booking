@@ -1,89 +1,60 @@
 package com.flight_booking.user_service.infrastructure.security.authentication;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flight_booking.user_service.domain.model.Role;
-import com.flight_booking.user_service.infrastructure.security.JwtUtil;
-import com.flight_booking.user_service.presentation.global.ApiResponse;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
-import com.flight_booking.user_service.presentation.request.LoginRequest;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-@Slf4j(topic = "로그인 및 JWT 생성")
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+@Component
+@Slf4j(topic = "사용자 인증 필터")
+@RequiredArgsConstructor
+public class AuthenticationFilter extends OncePerRequestFilter {
 
-  private final JwtUtil jwtUtil;
-
-  public AuthenticationFilter(JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
-    this.jwtUtil = jwtUtil;
-    this.setAuthenticationManager(authenticationManager);
-    setFilterProcessesUrl("/v1/auth/login"); // 로그인 요청 URL 설정
-  }
+  private final CustomUserDetailsService customUserDetailsService;
 
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest request,
-      HttpServletResponse response) throws AuthenticationException {
-    try {
-      log.info("로그인 시도");
-      // 요청 본문에서 로그인 정보 (이메일, 비밀번호) 추출
-      LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(),
-          LoginRequest.class);
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain) throws ServletException, IOException {
 
-      // 이메일 확인 로그 추가
-      log.info("로그인 요청 이메일: {}", loginRequest.email());
+    log.info("--------user-service------------");
+    String email = request.getHeader("X-USER-Email");
+    String role = request.getHeader("X-USER-Role");
+    log.info("header: {}, {}", email, role);
 
-      // 인증 시도
-      return getAuthenticationManager().authenticate(
-          new UsernamePasswordAuthenticationToken(
-              loginRequest.email(), loginRequest.password()
-          )
-      );
-    } catch (IOException e) {
-      throw new RuntimeException("로그인 요청 처리 중 오류 발생", e);
+    if (email != null && role != null) {
+      try {
+        // 이메일로 사용자 정보 로드
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+        // 인증 객체 생성 (권한 포함)
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            userDetails, null, userDetails.getAuthorities());
+
+        log.info("auth {}", authentication.getAuthorities());
+
+        // 인증 정보를 SecurityContext에 설정
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      } catch (Exception e) {
+        // 사용자 정보 로드 실패 시, 에러 처리
+        log.error("사용자 인증 실패: {}", e.getMessage());
+
+        ErrorCode errorCode = ErrorCode.USER_AUTHENTICATION_FAILED;
+        response.setStatus(errorCode.getHttpStatus().value());
+        response.getWriter().write(errorCode.getMessage());
+        return;
+      }
     }
-  }
 
-  @Override
-  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-      FilterChain chain, Authentication authResult) throws IOException, ServletException {
-    log.info("로그인 성공 및 JWT 생성");
-    // 인증 성공 후 JWT 생성
-    String email = ((CustomUserDetails) authResult.getPrincipal()).getUsername();
-    Role role = ((CustomUserDetails) authResult.getPrincipal()).getUser().getRole();
-    String token = jwtUtil.createToken(email, role);
-
-    // JWT 토큰을 응답 헤더에 추가
-    response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-
-    // 로그인 성공 응답
-    ApiResponse<?> apiResponse = ApiResponse.ok("로그인 성공", token);
-    response.setContentType("application/json;charset=UTF-8");
-    new ObjectMapper().writeValue(response.getWriter(), apiResponse);
-  }
-
-  @Override
-  protected void unsuccessfulAuthentication(HttpServletRequest request,
-      HttpServletResponse response, AuthenticationException failed)
-      throws IOException, ServletException {
-    log.error("로그인 실패: {}", failed.getMessage());
-    // 인증 실패 시 응답 처리
-    ApiResponse<?> errorResponse = ApiResponse.builder()
-        .message(ErrorCode.LOGIN_FAIL.getMessage())
-        .httpStatus(HttpStatus.UNAUTHORIZED)
-        .build();
-
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    response.setContentType("application/json;charset=UTF-8");
-    new ObjectMapper().writeValue(response.getWriter(), errorResponse);
+    filterChain.doFilter(request, response);
   }
 }
