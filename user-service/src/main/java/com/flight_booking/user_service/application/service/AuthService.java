@@ -4,20 +4,22 @@ import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
 import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
-import com.flight_booking.user_service.infrastructure.security.JwtUtil;
+import com.flight_booking.user_service.infrastructure.security.jwt.JwtUtil;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
-import com.flight_booking.user_service.presentation.request.LoginRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,8 +27,8 @@ public class AuthService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final JwtUtil jwtUtil;
   private final AuthenticationManager authenticationManager;
+  private final JwtUtil jwtUtil;
 
   // 회원가입
   public void createUser(SignUpRequest request) {
@@ -39,7 +41,6 @@ public class AuthService {
         .password(passwordEncoder.encode(request.password())) // 비밀번호 암호화 처리
         .name(request.name())
         .phone(request.phone())
-        .role(request.role() != null ? request.role() : Role.USER)
         .isBlocked(false)
         .mileage(0L)
         .build();
@@ -47,17 +48,25 @@ public class AuthService {
     userRepository.save(user);
   }
 
-  // 로그인
-  public String authenticate(LoginRequest request) {
-    // 이메일과 비밀번호를 사용한 인증 시도
-    Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+  public String createToken(String email, String password) {
+    try {
+      log.info("service");
+      Authentication authentication = authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(email, password)
+      );
+      CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-    // 인증 성공 후 SecurityContext에 인증 정보 설정
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+      String validatedEmail = userDetails.getUsername();
+      String role = userDetails.getAuthorities().stream()
+          .map(GrantedAuthority::getAuthority)
+          .findFirst()
+          .orElse(Role.USER.getAuthority());
 
-    // 사용자 정보를 통해 JWT 생성
-    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-    return jwtUtil.createToken(userDetails.getUsername(), userDetails.getUser().getRole());
+      return jwtUtil.createToken(validatedEmail, role);
+    } catch (AuthenticationException ex) {
+      // 인증 실패 시 처리
+      log.error("로그인 실패: {}", ex.getMessage());
+      throw new UserException(ErrorCode.LOGIN_FAIL);
+    }
   }
 }

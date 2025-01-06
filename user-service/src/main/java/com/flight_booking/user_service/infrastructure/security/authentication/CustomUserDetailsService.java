@@ -7,7 +7,6 @@ import com.flight_booking.user_service.presentation.global.exception.UserExcepti
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,10 +15,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
   private final UserRepository userRepository;
 
+  // username -> email
   @Override
-  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+    // security 세션에 유저 정보 저장
     return new CustomUserDetails(user);
   }
 }
