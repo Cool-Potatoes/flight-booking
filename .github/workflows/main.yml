@@ -1,10 +1,6 @@
-name: Java CI/CD with Docker
+name: Multi-Service CI/CD with Docker
 
 on:
-  push:
-    branches:
-      - main
-      - 'feature/**'
   pull_request:
     branches:
       - main
@@ -14,18 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 소스 코드 가져오기
-      - name: Checkout source code
+      # Checkout repository code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      # JDK 17 설정
+      # Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'adopt'
 
-      # Gradle 캐시 설정
+      # Cache Gradle dependencies
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
@@ -34,25 +30,71 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # Gradle 빌드
+      # Build all services with Gradle
       - name: Build with Gradle
         run: ./gradlew build
 
-      # Gradle 테스트 실행
+      # Run Tests for all services
       - name: Run Tests
-        run: ./gradlew test
+        run: |
+          SERVICES=("config-server" "eureka-server" "gateway-server" "user-service" "auth-service" "booking-service" "payment-service" "ticket-service" "flight-service" "notification-service")
+          for SERVICE in "${SERVICES[@]}"
+          do
+            echo "Running tests for $SERVICE"
+            ./gradlew :$SERVICE:test
+          done
 
-      # DockerHub 로그인
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Log in to DockerHub
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Docker 이미지 빌드 및 푸시
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: chohanbeom/notification-service:latest
+      # Build and push Docker images for all services using a loop
+      - name: Build and Push Docker Images
+        run: |
+          SERVICES=("config-server" "eureka-server" "gateway-server" "user-service" "auth-service" "booking-service" "payment-service" "ticket-service" "flight-service" "notification-service")
+          for SERVICE in "${SERVICES[@]}"
+          do
+            echo "Building and pushing Docker image for $SERVICE"
+            docker build -t ${{ secrets.DOCKER_USERNAME }}/$SERVICE ./$SERVICE
+            docker push ${{ secrets.DOCKER_USERNAME }}/$SERVICE
+          done
+
+      # Create Docker network for services
+      - name: Create Docker Network
+        run: |
+          echo "Creating Docker network for inter-service communication"
+          docker network create service-network || true
+
+      # Deploy services with environment variables and Docker network
+      - name: Deploy Services
+        run: |
+          SERVICES=("user-service" "auth-service" "booking-service" "payment-service" "ticket-service" "flight-service")
+          for SERVICE in "${SERVICES[@]}"
+          do
+            echo "Deploying $SERVICE with environment variables"
+            docker run -d \
+              --network service-network \
+              -e DB_HOST=${{ secrets.DB_HOST }} \
+              -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e DB_NAME=${SERVICE}_db \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              --name $SERVICE ${{ secrets.DOCKER_USERNAME }}/$SERVICE
+          done
+
+      # Verify running services
+      - name: Verify Services
+        run: |
+          SERVICES=("user-service" "auth-service" "booking-service" "payment-service" "ticket-service" "flight-service")
+          for SERVICE in "${SERVICES[@]}"
+          do
+            echo "Checking status of $SERVICE"
+            docker ps | grep $SERVICE || echo "$SERVICE is not running"
+          done
