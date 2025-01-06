@@ -2,7 +2,6 @@ package com.flight_booking.user_service.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -16,14 +15,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "p_users")
 public class User extends BaseEntity {
 
@@ -44,13 +41,16 @@ public class User extends BaseEntity {
   @Column(name = "phone", nullable = false, length = 20)
   private String phone;
 
+  @Builder.Default
   @Column(name = "mileage", nullable = false)
   private Long mileage = 0L;
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "role", nullable = false)
   private Role role = Role.USER;
 
+  @Builder.Default
   @Column(name = "is_blocked", nullable = false)
   private Boolean isBlocked = false;
 
@@ -58,7 +58,6 @@ public class User extends BaseEntity {
   public void preRemove() {
     this.isDeleted = true;
     this.deletedAt = LocalDateTime.now();
-    this.deletedBy = this.email;
   }
 
   @PrePersist
