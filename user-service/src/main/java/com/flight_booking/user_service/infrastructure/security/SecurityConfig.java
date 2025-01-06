@@ -2,6 +2,8 @@ package com.flight_booking.user_service.infrastructure.security;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+import com.flight_booking.user_service.infrastructure.security.authentication.AuthenticationFilter;
+import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
@@ -19,10 +22,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+  private final CustomUserDetailsService customUserDetailsService;
+
   @Bean
   public AuthenticationManager authenticationManager(
       AuthenticationConfiguration authenticationConfiguration) throws Exception {
     return authenticationConfiguration.getAuthenticationManager();
+  }
+
+  @Bean
+  public AuthenticationFilter authenticationFilter() {
+    return new AuthenticationFilter(customUserDetailsService);
   }
 
   // SecurityFilterChain 설정
@@ -36,7 +46,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> {
           auth.requestMatchers("/v1/auth/signup", "/v1/auth/signin").permitAll(); // 로그인, 회원가입 URL 허용
           auth.anyRequest().authenticated(); // 모든 요청은 인증 필요
-        });
+        })
+        .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 }
