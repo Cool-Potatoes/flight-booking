@@ -1,10 +1,9 @@
 name: Multi-Service CI/CD with Docker
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-      - 'feature/**'
 
 jobs:
   build-and-deploy:
@@ -37,7 +36,13 @@ jobs:
 
       # Run Tests for all services
       - name: Run Tests
-        run: ./gradlew test
+        run: |
+          SERVICES=("config-server" "eureka-server" "gateway-server" "user-service" "auth-service" "booking-service" "payment-service" "ticket-service" "flight-service" "notification-service")
+          for SERVICE in "${SERVICES[@]}"
+          do
+            echo "Running tests for $SERVICE"
+            ./gradlew :$SERVICE:test
+          done
 
       # Set up Docker Buildx
       - name: Set up Docker Buildx
@@ -59,4 +64,37 @@ jobs:
             echo "Building and pushing Docker image for $SERVICE"
             docker build -t ${{ secrets.DOCKER_USERNAME }}/$SERVICE ./$SERVICE
             docker push ${{ secrets.DOCKER_USERNAME }}/$SERVICE
+          done
+
+      # Create Docker network for services
+      - name: Create Docker Network
+        run: |
+          echo "Creating Docker network for inter-service communication"
+          docker network create service-network || true
+
+      # Deploy services with environment variables and Docker network
+      - name: Deploy Services
+        run: |
+          SERVICES=("user-service" "auth-service" "booking-service" "payment-service" "ticket-service" "flight-service")
+          for SERVICE in "${SERVICES[@]}"
+          do
+            echo "Deploying $SERVICE with environment variables"
+            docker run -d \
+              --network service-network \
+              -e DB_HOST=${{ secrets.DB_HOST }} \
+              -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e DB_NAME=${SERVICE}_db \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              --name $SERVICE ${{ secrets.DOCKER_USERNAME }}/$SERVICE
+          done
+
+      # Verify running services
+      - name: Verify Services
+        run: |
+          SERVICES=("user-service" "auth-service" "booking-service" "payment-service" "ticket-service" "flight-service")
+          for SERVICE in "${SERVICES[@]}"
+          do
+            echo "Checking status of $SERVICE"
+            docker ps | grep $SERVICE || echo "$SERVICE is not running"
           done

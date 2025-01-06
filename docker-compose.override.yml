@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  user-service:
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: user_db
+      DB_USER: root
+      DB_PASSWORD: root
+
+  booking-service:
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: booking_db
+      DB_USER: root
+      DB_PASSWORD: root
+
+  payment-service:
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: payment_db
+      DB_USER: root
+      DB_PASSWORD: root
+
+  ticket-service:
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: ticket_db
+      DB_USER: root
+      DB_PASSWORD: root
+
+  flight-service:
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_NAME: flight_db
+      DB_USER: root
+      DB_PASSWORD: root
