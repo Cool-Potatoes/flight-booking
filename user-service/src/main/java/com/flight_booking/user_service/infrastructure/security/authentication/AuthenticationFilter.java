@@ -27,8 +27,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
 
     log.info("--------user-service------------");
-    String email = request.getHeader("X-USER-Email");
-    String role = request.getHeader("X-USER-Role");
+    String email = request.getHeader("X-USER-EMAIL");
+    String role = request.getHeader("X-USER-ROLE");
     log.info("header: {}, {}", email, role);
 
     if (email != null && role != null) {

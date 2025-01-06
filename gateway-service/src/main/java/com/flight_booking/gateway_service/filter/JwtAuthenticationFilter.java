@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -38,15 +39,14 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     // 토큰이 유효한 경우, 이메일과 역할 추출
     String email = jwtUtil.extractEmail(token);
     String role = jwtUtil.extractRole(token);
-    log.info("email: {}, role: {}", email, role);
 
     // 이메일과 역할을 헤더에 추가
-    exchange.getRequest().mutate()
+    ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
         .header("X-USER-EMAIL", email)
         .header("X-USER-ROLE", role)
         .build();
 
-    log.info("X-USER-EMAIL: {}, X-USER-ROLE, {}", email, role);
+    exchange = exchange.mutate().request(modifiedRequest).build();
 
     return chain.filter(exchange);
   }
