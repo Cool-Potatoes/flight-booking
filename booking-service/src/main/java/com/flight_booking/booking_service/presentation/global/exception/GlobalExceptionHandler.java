@@ -1,6 +1,6 @@
 package com.flight_booking.booking_service.presentation.global.exception;
 
-import com.flight_booking.booking_service.presentation.global.ApiResponse;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
