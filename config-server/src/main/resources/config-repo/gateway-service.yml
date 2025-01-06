@@ -21,19 +21,19 @@ spring:
         - id: payment-service  # 라우트 식별자
           uri: lb://payment-service
           predicates:
-            - Path=/api/payments/**
+            - Path=/v1/payments/**
         - id: flight-service  # 라우트 식별자
           uri: lb://flight-service
           predicates:
-            - Path=/api/flights/**
+            - Path=/v1/flights/**
         - id: ticket-service  # 라우트 식별자
           uri: lb://ticket-service
           predicates:
-            - Path=/api/tickets/**
+            - Path=/v1/tickets/**
         - id: booking-service  # 라우트 식별자
           uri: lb://booking-service
           predicates:
-            - Path=/api/booking/**
+            - Path=/v1/booking/**
 
       discovery:
         locator:
