@@ -1,7 +1,7 @@
 package com.flight_booking.payment_service.payment;
 
+import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.payment_service.application.service.PaymentService;
-import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
 import com.flight_booking.payment_service.presentation.request.UpdateFareRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
 import java.util.UUID;
