@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-@Slf4j(topic = "JWT 인증")
+@Slf4j(topic = "JWT 인증 처리")
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter {
@@ -21,7 +21,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     // 로그인 및 회원가입 경로는 인증 없이 처리
     String path = exchange.getRequest().getURI().getPath();
-    if (path.startsWith("/v1/auth/signUp") || path.startsWith("/v1/auth/login")) {
+    if (path.equals("/v1/auth/signup") || path.equals("/v1/auth/signin")) {
       return chain.filter(exchange); // 인증 없이 다음 필터로 넘김
     }
 
@@ -29,12 +29,25 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     String token = jwtUtil.extractToken(exchange);
 
     if (token == null || !jwtUtil.validateToken(token)) {
-      // 토큰이 없거나 유효하지 않으면 UNAUTHORIZED 응답 반환
+      log.info("토큰 검증 실패");
+      // 유효하지 않은 토큰이면 UNAUTHORIZED 응답 반환
       exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
       return exchange.getResponse().setComplete();
     }
 
-    // 유효한 토큰일 경우 다음 필터로 요청을 전달
+    // 토큰이 유효한 경우, 이메일과 역할 추출
+    String email = jwtUtil.extractEmail(token);
+    String role = jwtUtil.extractRole(token);
+    log.info("email: {}, role: {}", email, role);
+
+    // 이메일과 역할을 헤더에 추가
+    exchange.getRequest().mutate()
+        .header("X-USER-EMAIL", email)
+        .header("X-USER-ROLE", role)
+        .build();
+
+    log.info("X-USER-EMAIL: {}, X-USER-ROLE, {}", email, role);
+
     return chain.filter(exchange);
   }
 }
