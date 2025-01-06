@@ -1,9 +1,9 @@
 package com.flight_booking.payment_service.application.service;
 
+import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.payment_service.domain.model.Payment;
 import com.flight_booking.payment_service.domain.model.PaymentStatusEnum;
 import com.flight_booking.payment_service.domain.repository.PaymentRepository;
-import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
 import com.flight_booking.payment_service.presentation.request.UpdateFareRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
 import com.querydsl.core.types.Predicate;

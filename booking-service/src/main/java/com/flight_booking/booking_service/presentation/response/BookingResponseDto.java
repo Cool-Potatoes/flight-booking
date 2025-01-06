@@ -2,9 +2,6 @@ package com.flight_booking.booking_service.presentation.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.flight_booking.booking_service.domain.model.Booking;
-import com.flight_booking.booking_service.domain.model.Passenger;
-import com.flight_booking.booking_service.domain.model.PassengerTypeEnum;
-import com.flight_booking.booking_service.infrastructure.client.SeatClassEnum;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,7 +36,8 @@ public record BookingResponseDto(
     );
   }
 
-  public static BookingResponseDto of(Booking savedBooking, List<PassengerResponseDto> passengerResponseDtoList) {
+  public static BookingResponseDto of(Booking savedBooking,
+      List<PassengerResponseDto> passengerResponseDtoList) {
     List<PassengerResponseDto> passengerDtos = passengerResponseDtoList.stream()
         .map(passenger -> new PassengerResponseDto(
             passenger.passengerId(),
