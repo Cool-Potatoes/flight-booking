@@ -1,8 +1,8 @@
 package com.flight_booking.payment_service.presentation.controller;
 
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.application.service.PaymentService;
 import com.flight_booking.payment_service.domain.model.Payment;
-import com.flight_booking.payment_service.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
 import com.flight_booking.payment_service.presentation.request.UpdateFareRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;

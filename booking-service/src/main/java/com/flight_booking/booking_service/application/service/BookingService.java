@@ -2,7 +2,6 @@ package com.flight_booking.booking_service.application.service;
 
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.domain.model.BookingStatusEnum;
-import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
 import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
@@ -41,7 +40,8 @@ public class BookingService {
 
     Booking savedBooking = bookingRepository.save(booking);
 
-    List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(bookingRequestDto.passengerRequestDtos(), savedBooking);
+    List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(
+        bookingRequestDto.passengerRequestDtos(), savedBooking);
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
   }
