@@ -1,12 +1,16 @@
-package com.flight_booking.booking_service.presentation.global;
+package com.flight_booking.common.presentation.global;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
