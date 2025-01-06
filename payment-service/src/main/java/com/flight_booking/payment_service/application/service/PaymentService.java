@@ -4,6 +4,7 @@ import com.flight_booking.payment_service.domain.model.Payment;
 import com.flight_booking.payment_service.domain.model.PaymentStatusEnum;
 import com.flight_booking.payment_service.domain.repository.PaymentRepository;
 import com.flight_booking.payment_service.presentation.request.PaymentRequestDto;
+import com.flight_booking.payment_service.presentation.request.UpdateFareRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -63,21 +65,31 @@ public class PaymentService {
     return PaymentResponseDto.from(paymentResponseDtoPage);
   }
 
-  @Transactional
-  public PaymentResponseDto updateFare(PaymentRequestDto paymentRequestDto, UUID paymentId) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public PaymentResponseDto updateFare(UpdateFareRequestDto updateFareRequestDto, UUID paymentId) {
 
-    Payment payment = getPaymentById(paymentId);
+    Payment payment = paymentRepository.findByPaymentIdWithLock(paymentId)
+        .orElseThrow(() -> new ApiException("존재하지 않는 paymentId"));
 
-    if (!payment.getBookingId().equals(paymentRequestDto.bookingId())) {
+    if (!payment.getBookingId().equals(updateFareRequestDto.bookingId())) {
       throw new ApiException("예약 아이디를 다시 확인해주세요.");
+    }
+
+    // 기존 결제 금액 확인
+    Integer currentFare = payment.getFare();
+
+    // 충돌 여부 확인
+    if (!currentFare.equals(updateFareRequestDto.previousFare())) {
+      throw new ApiException("결제 금액 충돌 발생: 현재 금액이 변경되었습니다. "
+          + "현재 금액: " + currentFare + ", 요청 전 금액: " + updateFareRequestDto.previousFare());
     }
 
     // TODO 사용자 권한검증
     // TODO 마일리지 확인 및 증감
 
-    Payment updatedPayment = payment.updateFare(paymentRequestDto.fare()); // TODO updatedBy
+    Payment updatedPayment = payment.updateFare(updateFareRequestDto.newFare()); // TODO updatedBy
 
-    return PaymentResponseDto.from(payment);
+    return PaymentResponseDto.from(updatedPayment);
   }
 
   @Transactional

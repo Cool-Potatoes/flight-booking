@@ -1,14 +1,17 @@
-# 베이스 이미지 설정: OpenJDK 17 사용
+# Base image
 FROM openjdk:17-jdk-slim
 
-# 애플리케이션 작업 디렉토리 생성
-WORKDIR /app
+# Set environment variables
+ENV APP_HOME=/app
 
-# Gradle 빌드 후 생성된 JAR 파일을 이미지에 복사
-COPY build/libs/*.jar app.jar
+# Create app directory
+WORKDIR $APP_HOME
 
-# 애플리케이션이 사용할 포트 설정 (Spring Boot 기본 포트 8160)
+# Copy build artifacts
+COPY build/libs/notification-service-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose the server port
 EXPOSE 8160
 
-# JAR 파일 실행
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

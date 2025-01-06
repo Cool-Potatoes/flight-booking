@@ -1,8 +1,10 @@
-package com.flight_booking.booking_service.infrastructure.client;
+package com.flight_booking.booking_service.domain.model;
 
-import com.flight_booking.booking_service.domain.model.Booking;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,21 +23,39 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(name = "p_passenger")
-public class Passenger {
+public class Passenger extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "passenger_id", updatable = false, nullable = false)
   private UUID passengerId;
 
+  @Column(nullable = false)
   private UUID seatId;
-  private PassengerTypeEnum passengerType;
+
+  @Column(nullable = false)
   private String passengerName;
+
+  @Column(nullable = false)
+  @Enumerated(value = EnumType.STRING)
+  private PassengerTypeEnum passengerType;
+
+  @Column(nullable = false)
   private Boolean baggage;
+
+  @Column(nullable = false)
   private Boolean meal;
 
-  // TODO : 임시
   @ManyToOne
   @JoinColumn(name = "booking_id")
   private Booking booking;
+
+  public void updatePassenger(Booking booking, UUID seatId, PassengerTypeEnum passengerType,
+      String passengerName, Boolean baggage, Boolean meal) {
+    this.booking = booking;
+    this.seatId = seatId;
+    this.passengerType = passengerType;
+    this.passengerName = passengerName;
+    this.baggage = baggage;
+    this.meal = meal;
+  }
 }

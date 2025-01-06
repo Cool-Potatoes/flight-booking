@@ -1,4 +1,4 @@
-package com.flight_booking.booking_service.infrastructure.client;
+package com.flight_booking.booking_service.domain.model;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
