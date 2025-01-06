@@ -2,18 +2,26 @@ package com.flight_booking.user_service.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Getter
 @AllArgsConstructor
 public enum Role {
 
-  USER("ROLE_USER"),
-  ADMIN("ROLE_ADMIN");
+  USER(Authority.USER),
+  ADMIN(Authority.ADMIN);
 
-  private final String role;
+  private final String authority;
 
-  public SimpleGrantedAuthority toAuthority() {
-    return new SimpleGrantedAuthority(role);
+  //유저 권한 조회
+  public String getAuthority() {
+    return this.authority;
   }
+
+  //유저 권한
+  public static class Authority {
+
+    public static final String USER = "ROLE_USER";
+    public static final String ADMIN = "ROLE_ADMIN";
+  }
+
 }
