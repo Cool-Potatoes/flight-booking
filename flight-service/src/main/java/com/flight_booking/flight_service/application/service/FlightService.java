@@ -63,7 +63,6 @@ public class FlightService {
         .arrivalTime(requestDto.arrivalTime())
         .arrivalAirport(arrivalAirport)
         .statusEnum(requestDto.status())
-        .remainingSeat(requestDto.remainingSeat())
         .airline(requestDto.airline())
         .totalEconomySeatsCount(requestDto.totalEconomySeatsCount())
         .totalBusinessSeatsCount(requestDto.totalBusinessSeatsCount())
@@ -82,7 +81,7 @@ public class FlightService {
   public FlightResponseDto updateFlight(UUID flightId, FlightRequestDto requestDto) {
     Flight flight = getFlight(flightId);
 
-    flight.update(requestDto.remainingSeat(), requestDto.departureTime(), requestDto.arrivalTime(),
+    flight.update(requestDto.departureTime(), requestDto.arrivalTime(),
         requestDto.status(), requestDto.totalEconomySeatsCount(),
         requestDto.totalBusinessSeatsCount(), requestDto.totalFirstClassSeatsCount());
 

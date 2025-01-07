@@ -49,9 +49,6 @@ public class Flight extends BaseEntity {
   @Column(nullable = false)
   private Integer totalFirstClassSeatsCount;
 
-  @Column(nullable = false)
-  private Integer remainingSeat;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "departure_airport_id", nullable = false)
   private Airport departureAirport;
@@ -63,14 +60,11 @@ public class Flight extends BaseEntity {
   @Column(nullable = false, length = 10)
   private String airline;
 
-  public void update(Integer remainingSeat,
+  public void update(
       LocalDateTime departureTime,
       LocalDateTime arrivalTime,
       FlightStatusEnum status, Integer totalEconomySeatsCount, Integer totalBusinessSeatsCount,
       Integer totalFirstClassSeatsCount) {
-    if (remainingSeat != null) {
-      this.remainingSeat = remainingSeat;
-    }
     if (departureTime != null) {
       this.departureTime = departureTime;
     }
