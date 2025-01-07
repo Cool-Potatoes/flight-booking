@@ -6,6 +6,7 @@ import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,7 +31,7 @@ public class TicketController {
 
 
   @PostMapping
-  public ApiResponse<?> createTicket(@RequestBody TicketRequestDto ticketRequestDto) {
+  public ApiResponse<?> createTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
 
     TicketResponseDto ticketResponseDto = ticketService.createTicket(ticketRequestDto);
 
@@ -48,9 +50,10 @@ public class TicketController {
 
   /**
    * 본인의 항공권 정보 목록 조회
-   * @param uuidList 항공권 id를 list로 입력하여 조회
+   *
+   * @param uuidList  항공권 id를 list로 입력하여 조회
    * @param predicate 검색어로 조회
-   * @param pageable 정렬
+   * @param pageable  정렬
    * @return TicketResponseDto의 PagedModel
    */
   @GetMapping
@@ -66,6 +69,19 @@ public class TicketController {
         = ticketService.getTicketsPage(email, uuidList, predicate, pageable);
 
     return ApiResponse.ok(flightResponseDtoPagedModel, "항공권 목록 조회 성공");
+  }
+
+  @PutMapping("/{ticketId}")
+  public ApiResponse<?> updateTicket(
+      @PathVariable UUID ticketId,
+      @Valid @RequestBody TicketRequestDto ticketRequestDto
+  ) {
+
+    // TODO 본인 것인지 권한 확인
+
+    TicketResponseDto ticketResponseDto = ticketService.updateTicket(ticketId, ticketRequestDto);
+
+    return ApiResponse.ok(ticketResponseDto, "항공권 수정 성공");
   }
 
 }

@@ -36,4 +36,7 @@ public class Ticket extends BaseEntity {
   @Column(nullable = false)
   private UUID flightId;
 
+  public void update(UUID seatId) {
+    this.seatId = seatId;
+  }
 }
