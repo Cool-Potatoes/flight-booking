@@ -1,18 +1,18 @@
 package com.flight_booking.user_service.presentation.controller;
 
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.UserService;
-import com.flight_booking.user_service.domain.model.User;
-import com.flight_booking.user_service.presentation.global.ApiResponse;
-import com.flight_booking.user_service.presentation.response.UserResponse;
-import java.util.List;
+
+import com.flight_booking.user_service.presentation.response.PageResponse;
+import com.flight_booking.user_service.presentation.response.UserListResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/users")
@@ -21,18 +21,18 @@ public class UserController {
   private final UserService userService;
 
   // 전체 회원 목록 조회
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping
   public ApiResponse<?> getAllUsers(
-      @RequestHeader(value = "X-USER-EMAIL") String email,
-      @RequestHeader(value = "X-USER-ROLE") String role) {
-    log.info("X-USER-EMAIL: {}", email);
-    log.info("X-USER-ROLE: {}", role);
-    List<User> users = userService.getAllUsers();
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) String role,
+      @RequestParam(required = false) Boolean isBlocked,
+      Pageable pageable) {
 
-    List<UserResponse> userResponses = users.stream()
-        .map(UserResponse::fromEntity)
-        .toList();
+    PageResponse<UserListResponse> response = userService.getUserList(email, name, role, isBlocked,
+        pageable);
 
-    return ApiResponse.ok(userResponses, "사용자 목록 조회 성공");
+    return ApiResponse.ok(response, "회원 목록 조회 성공");
   }
 }
