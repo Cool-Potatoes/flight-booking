@@ -4,8 +4,13 @@ import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
 import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
+import com.querydsl.core.types.Predicate;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,5 +48,15 @@ public class TicketService {
         .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
 
     return TicketResponseDto.from(ticket);
+  }
+
+  @Transactional(readOnly = true)
+  public PagedModel<TicketResponseDto> getTicketsPage(
+      String email, List<UUID> uuidList, Predicate predicate, Pageable pageable) {
+
+    Page<TicketResponseDto> ticketResponseDtoPage
+        = ticketRepository.findAll(email, uuidList, predicate, pageable);
+
+    return new PagedModel<>(ticketResponseDtoPage);
   }
 }

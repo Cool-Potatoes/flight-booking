@@ -1,16 +1,23 @@
 package com.flight_booking.ticket_service.presentation.controller;
 
 import com.flight_booking.ticket_service.application.service.TicketService;
+import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.global.ApiResponse;
+import com.querydsl.core.types.Predicate;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,9 +39,33 @@ public class TicketController {
   @GetMapping("/{ticketId}")
   public ApiResponse<?> getTicket(@PathVariable UUID ticketId) {
 
+    // TODO 사용자 추가 본인 것만 조회
+
     TicketResponseDto ticketResponseDto = ticketService.getTicket(ticketId);
 
     return ApiResponse.ok(ticketResponseDto, "항공권 조회 성공");
+  }
+
+  /**
+   * 본인의 항공권 정보 목록 조회
+   * @param uuidList 항공권 id를 list로 입력하여 조회
+   * @param predicate 검색어로 조회
+   * @param pageable 정렬
+   * @return TicketResponseDto의 PagedModel
+   */
+  @GetMapping
+  public ApiResponse<?> getTicketsPage(
+      @RequestParam(required = false) List<UUID> uuidList,
+      @QuerydslPredicate(root = Ticket.class) Predicate predicate,
+      Pageable pageable
+  ) {
+
+    String email = "tmpUser"; // TODO 사용자 추가
+
+    PagedModel<TicketResponseDto> flightResponseDtoPagedModel
+        = ticketService.getTicketsPage(email, uuidList, predicate, pageable);
+
+    return ApiResponse.ok(flightResponseDtoPagedModel, "항공권 목록 조회 성공");
   }
 
 }
