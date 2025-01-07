@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -82,6 +83,16 @@ public class TicketController {
     TicketResponseDto ticketResponseDto = ticketService.updateTicket(ticketId, ticketRequestDto);
 
     return ApiResponse.ok(ticketResponseDto, "항공권 수정 성공");
+  }
+
+  @PatchMapping("/{ticketId}")
+  public ApiResponse<?> cancelTicket(@PathVariable UUID ticketId) {
+
+    // TODO 권한 확인
+
+    ticketService.cancelTicket(ticketId);
+
+    return ApiResponse.ok("항공권 취소 요청됨");
   }
 
 }

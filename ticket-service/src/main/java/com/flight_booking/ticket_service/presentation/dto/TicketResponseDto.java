@@ -9,7 +9,8 @@ public record TicketResponseDto(
     UUID bookingId,
     UUID passengerId,
     UUID seatId,
-    UUID flightId
+    UUID flightId,
+    String ticketState
 ) {
 
   @QueryProjection
@@ -19,7 +20,8 @@ public record TicketResponseDto(
         ticket.getBookingId(),
         ticket.getPassengerId(),
         ticket.getSeatId(),
-        ticket.getFlightId()
+        ticket.getFlightId(),
+        ticket.getState().getDescription()
     );
   }
 

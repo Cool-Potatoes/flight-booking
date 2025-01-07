@@ -1,6 +1,7 @@
 package com.flight_booking.ticket_service.application.service;
 
 import com.flight_booking.ticket_service.domain.model.Ticket;
+import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
 import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
@@ -34,6 +35,7 @@ public class TicketService {
         .passengerId(ticketRequestDto.passengerId())
         .seatId(ticketRequestDto.seatId())
         .flightId(ticketRequestDto.flightId())
+        .state(TicketStateEnum.BOOKED)
         .build();
 
     Ticket savedTicket = ticketRepository.save(ticket);
@@ -86,6 +88,16 @@ public class TicketService {
     ticket.update(ticketRequestDto.seatId());
 
     return TicketResponseDto.from(ticket);
+  }
+
+  @Transactional
+  public void cancelTicket(UUID ticketId) {
+
+    Ticket ticket = getTicketById(ticketId);
+
+    // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
+
+    ticket.updateState(TicketStateEnum.CANCEL_PENDING);
   }
 
 
