@@ -9,7 +9,9 @@ import org.springframework.data.web.PagedModel;
 
 public record FlightResponseDto(UUID flightId, UUID departureAirportId, UUID arrivalAriportId,
                                 LocalDateTime departureTime, LocalDateTime arrivalTime,
-                                String state, Integer remainingSeat, String Airline) {
+                                String state, Integer remainingSeat, String Airline,
+                                Integer totalEconomySeatsCount, Integer totalBusinessSeatsCount,
+                                Integer totalFirstSeatsCount) {
 
   @QueryProjection
   public FlightResponseDto(Flight flight) {
@@ -21,7 +23,10 @@ public record FlightResponseDto(UUID flightId, UUID departureAirportId, UUID arr
         flight.getArrivalTime(),
         flight.getStatusEnum().getState(),
         flight.getRemainingSeat(),
-        flight.getAirline()
+        flight.getAirline(),
+        flight.getTotalEconomySeatsCount(),
+        flight.getTotalBusinessSeatsCount(),
+        flight.getTotalFirstClassSeatsCount()
     );
   }
 

@@ -41,6 +41,15 @@ public class Flight extends BaseEntity {
   private FlightStatusEnum statusEnum;
 
   @Column(nullable = false)
+  private Integer totalEconomySeatsCount;
+
+  @Column(nullable = false)
+  private Integer totalBusinessSeatsCount;
+
+  @Column(nullable = false)
+  private Integer totalFirstClassSeatsCount;
+
+  @Column(nullable = false)
   private Integer remainingSeat;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -57,7 +66,8 @@ public class Flight extends BaseEntity {
   public void update(Integer remainingSeat,
       LocalDateTime departureTime,
       LocalDateTime arrivalTime,
-      FlightStatusEnum status) {
+      FlightStatusEnum status, Integer totalEconomySeatsCount, Integer totalBusinessSeatsCount,
+      Integer totalFirstClassSeatsCount) {
     if (remainingSeat != null) {
       this.remainingSeat = remainingSeat;
     }
@@ -69,6 +79,15 @@ public class Flight extends BaseEntity {
     }
     if (status != null) {
       this.statusEnum = status;
+    }
+    if (totalEconomySeatsCount != null) {
+      this.totalEconomySeatsCount = totalEconomySeatsCount;
+    }
+    if (totalBusinessSeatsCount != null) {
+      this.totalBusinessSeatsCount = totalBusinessSeatsCount;
+    }
+    if (totalFirstClassSeatsCount != null) {
+      this.totalFirstClassSeatsCount = totalFirstClassSeatsCount;
     }
   }
 

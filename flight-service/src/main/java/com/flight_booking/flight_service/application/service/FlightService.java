@@ -4,7 +4,6 @@ import com.flight_booking.flight_service.domain.model.Airport;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.repository.AirportRepository;
 import com.flight_booking.flight_service.domain.repository.FlightRepository;
-import com.flight_booking.flight_service.domain.repository.SeatRepository;
 import com.flight_booking.flight_service.presentation.request.FlightRequestDto;
 import com.flight_booking.flight_service.presentation.response.FlightResponseDto;
 import com.querydsl.core.types.Predicate;
@@ -22,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class FlightService {
 
   private final AirportRepository airportRepository;
-  private final SeatRepository seatRepository;
   private final FlightRepository flightRepository;
+  private final SeatService seatService;
 
   @Transactional(readOnly = true)
   public FlightResponseDto getFlightById(UUID flightId) {
@@ -65,11 +64,16 @@ public class FlightService {
         .arrivalAirport(arrivalAirport)
         .statusEnum(requestDto.status())
         .remainingSeat(requestDto.remainingSeat())
-        .airline(requestDto.airline()).build();
+        .airline(requestDto.airline())
+        .totalEconomySeatsCount(requestDto.totalEconomySeatsCount())
+        .totalBusinessSeatsCount(requestDto.totalBusinessSeatsCount())
+        .totalFirstClassSeatsCount(requestDto.totalFirstClassSeatsCount())
+        .build();
 
     Flight savedFlight = flightRepository.save(flight);
 
     //TODO : seat create 추가
+    seatService.createSeat(savedFlight);
 
     return FlightResponseDto.from(savedFlight);
   }
@@ -79,7 +83,8 @@ public class FlightService {
     Flight flight = getFlight(flightId);
 
     flight.update(requestDto.remainingSeat(), requestDto.departureTime(), requestDto.arrivalTime(),
-        requestDto.status());
+        requestDto.status(), requestDto.totalEconomySeatsCount(),
+        requestDto.totalBusinessSeatsCount(), requestDto.totalFirstClassSeatsCount());
 
     return FlightResponseDto.from(flight);
   }

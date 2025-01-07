@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/flights")
 @RequiredArgsConstructor
-public class ExternalFlightController {
+public class FlightController {
 
   private final FlightService flightService;
 

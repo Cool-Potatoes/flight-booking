@@ -12,7 +12,10 @@ public record FlightRequestDto(
     LocalDateTime arrivalTime,
     FlightStatusEnum status,
     Integer remainingSeat,
-    String airline
+    String airline,
+    Integer totalEconomySeatsCount,
+    Integer totalBusinessSeatsCount,
+    Integer totalFirstClassSeatsCount
 ) {
 
 }
