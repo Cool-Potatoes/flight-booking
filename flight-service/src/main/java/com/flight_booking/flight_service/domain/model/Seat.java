@@ -47,4 +47,7 @@ public class Seat extends BaseEntity {
   private Flight flight;
 
 
+  public void updatePrice(Long price) {
+    this.price = price;
+  }
 }
