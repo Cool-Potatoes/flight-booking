@@ -15,10 +15,10 @@ spring:
   cloud:
     gateway:
       routes: # Spring Cloud Gateway의 라우팅 설정
-        - id: order-service  # 라우트 식별자
+        - id: user-service  # 라우트 식별자
           uri: lb://user-service
           predicates:
-            - Path=/api/users/**
+            - Path=/v1/users/**, /v1/auth/**
         - id: payment-service  # 라우트 식별자
           uri: lb://payment-service
           predicates:
@@ -64,3 +64,7 @@ management:
     web:
       exposure:
         include: refresh  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신)
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG

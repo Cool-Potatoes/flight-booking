@@ -29,6 +29,8 @@ ext {
 
 dependencies {
 
+	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
+
 	// PostgreSQL
 	runtimeOnly 'org.postgresql:postgresql'
 
