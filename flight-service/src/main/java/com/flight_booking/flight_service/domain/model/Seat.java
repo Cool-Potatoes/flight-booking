@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,5 +50,11 @@ public class Seat extends BaseEntity {
 
   public void updatePrice(Long price) {
     this.price = price;
+  }
+
+  public void delete(String deletedBy) {
+    this.isDeleted = true;
+    this.deletedAt = LocalDateTime.now();
+    this.deletedBy = deletedBy;
   }
 }

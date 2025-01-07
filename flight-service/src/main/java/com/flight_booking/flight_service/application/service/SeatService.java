@@ -55,6 +55,14 @@ public class SeatService {
 
   }
 
+  @Transactional
+  public void deleteFlightSeats(UUID flightId, String deletedBy) {
+    Set<Seat> seatSet = seatRepository.findByFlight_FlightId(flightId);
+    for(Seat seat:seatSet) {
+      seat.delete(deletedBy);
+    }
+  }
+
 
   // 좌석 클래스에 따른 Seat 생성
   private void createSeatsForClass(Flight flight, Set<Seat> seatSet, SeatClassEnum seatClass,

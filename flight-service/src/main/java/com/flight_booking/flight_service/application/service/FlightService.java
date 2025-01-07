@@ -98,6 +98,7 @@ public class FlightService {
     String deletedBy = "tmpUser";
 
     flight.delete(deletedBy);
+    seatService.deleteFlightSeats(flightId, deletedBy);
 
     return FlightResponseDto.from(flight);
   }

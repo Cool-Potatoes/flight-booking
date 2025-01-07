@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SeatRepository extends JpaRepository<Seat, UUID> {
 
   Set<Seat> findByFlight_FlightIdAndIsAvailableTrueAndIsDeletedFalse(UUID flightId);
+
+  Set<Seat> findByFlight_FlightId(UUID flightId);
 }
