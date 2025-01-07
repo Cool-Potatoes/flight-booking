@@ -58,6 +58,14 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
   }
 
+  @ExceptionHandler(RuntimeException.class)
+  protected ResponseEntity<ApiResponse<?>> handleRunTimeException(RuntimeException e) {
+
+    ApiResponse<?> apiResponse = ApiResponse.of(HttpStatus.BAD_REQUEST, List.of(e.getMessage()));
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+  }
+
   @ExceptionHandler(Exception.class)
   protected ResponseEntity<ApiResponse<?>> handleException(Exception e) {
 
