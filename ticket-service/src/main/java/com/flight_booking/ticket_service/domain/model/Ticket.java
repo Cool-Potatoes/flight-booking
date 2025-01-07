@@ -1,5 +1,6 @@
 package com.flight_booking.ticket_service.domain.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,10 +18,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(name = "p_ticket")
-public class Ticket {
+public class Ticket extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID ticketId;
+
+  @Column(nullable = false)
+  private UUID bookingId;
+
+  @Column(nullable = false)
+  private UUID passengerId;
+
+  @Column(nullable = false)
+  private UUID seatId;
+
+  @Column(nullable = false)
+  private UUID flightId;
 
 }
