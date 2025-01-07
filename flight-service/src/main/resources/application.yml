@@ -1,11 +1,11 @@
 server:
-  port: 0  # ?? ??, Config Server?? ?????
+  port: 0  # Temporary port, will be overwritten by Config server settings later.
 
 spring:
   application:
     name: flight-service
   config:
-    import: "configserver:"  # Config Server?? ?? ????
+    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
   cloud:
     config:
       discovery:

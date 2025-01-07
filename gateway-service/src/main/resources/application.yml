@@ -1,11 +1,11 @@
 server:
-  port: 0  # 임시 포트, Config Server에서 덮어씌워짐
+  port: 0  # Temporary port, will be overwritten by Config Server
 
 spring:
   application:
     name: gateway-service
   config:
-    import: "configserver:"  # Config Server에서 설정 가져오기
+    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
   cloud:
     config:
       discovery:
@@ -15,9 +15,4 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-
-eureka.instance:
-  hostname: gateway-service
+      defaultZone: http://localhost:8761/eureka/
