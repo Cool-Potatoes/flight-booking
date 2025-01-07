@@ -31,8 +31,7 @@ dependencies {
 
 	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
 
-	// PostgreSQL
-	runtimeOnly 'org.postgresql:postgresql'
+	
 
 	// Redis Session Clustering
 	implementation 'org.springframework.session:spring-session-data-redis'
@@ -74,8 +73,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
-	// JPA
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
