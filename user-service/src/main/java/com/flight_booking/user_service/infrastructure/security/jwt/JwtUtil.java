@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtil {
 
-  // HTTP Authorization 헤더 키
-  public static final String AUTHORIZATION_HEADER = "Authorization";
   // JWT 내 권한 키
   public static final String JWT_ROLE_KEY = "role";
   // Token 식별자
@@ -55,7 +53,7 @@ public class JwtUtil {
         .issuer(issuer)
         .issuedAt(now) // 발급 시간
         .expiration(expiration) // 만료 시간
-        .signWith(key, SIG.HS512)
+        .signWith(key, SIG.HS256)
         .compact();
   }
 }

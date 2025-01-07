@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import java.util.Base64;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +29,13 @@ public class JwtUtil {
 
   @Value("${SECRET_KEY}")
   private String secretKey;
+  private SecretKey key;
 
-  private SecretKey getSecretKey() {
+  @PostConstruct
+  public void init() {
     try {
-      // Base64로 인코딩된 비밀키를 디코딩하여 SecretKey 생성
       byte[] decodedKey = Base64.getDecoder().decode(secretKey);
-      return Keys.hmacShaKeyFor(decodedKey); // 디코딩된 키를 사용하여 SecretKey 생성
+      key = Keys.hmacShaKeyFor(decodedKey); // HMAC-SHA 키 생성
     } catch (IllegalArgumentException e) {
       log.error("SECRET_KEY 설정이 잘못되었습니다.", e);
       throw new RuntimeException(JwtErrorCode.INVALID_SECRET_KEY.getMessage(), e);
@@ -44,7 +46,7 @@ public class JwtUtil {
   public boolean validateToken(String token) {
     try {
       Jws<Claims> claimsJws = Jwts.parser()
-          .verifyWith(getSecretKey())
+          .verifyWith(key)
           .build().parseSignedClaims(token);
       log.info("payload: {}", claimsJws.getPayload().toString());
       return true;
@@ -100,8 +102,8 @@ public class JwtUtil {
   // Claims 추출
   private Claims parseClaims(String token) {
     Jws<Claims> jws = Jwts.parser()
-        .verifyWith(getSecretKey())
+        .verifyWith(key)
         .build().parseSignedClaims(token);
-    return jws.getBody();
+    return jws.getPayload();
   }
 }
