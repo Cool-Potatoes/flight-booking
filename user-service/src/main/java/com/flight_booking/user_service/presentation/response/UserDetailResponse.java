@@ -4,28 +4,22 @@ import com.flight_booking.user_service.domain.model.User;
 import lombok.Builder;
 
 @Builder
-public record UserResponse(
+public record UserDetailResponse(
 
-    Long id,
     String email,
     String name,
     String phone,
-    Long mileage,
-    String role,
-    Boolean isBlocked
+    Long mileage
+
 ) {
 
-  public static UserResponse fromEntity(User user) {
-    return new UserResponse(
-        user.getId(),
+  public static UserDetailResponse fromEntity(User user) {
+    return new UserDetailResponse(
         user.getEmail(),
         user.getName(),
         user.getPhone(),
-        user.getMileage(),
-        user.getRole().name(),
-        user.getIsBlocked()
+        user.getMileage()
     );
   }
-
 
 }

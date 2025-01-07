@@ -1,6 +1,5 @@
 package com.flight_booking.user_service.presentation.global.exception;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,8 @@ public enum ErrorCode {
   DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 사용자입니다."),
   LOGIN_FAIL(HttpStatus.BAD_REQUEST, "로그인에 실패했습니다."),
   USER_AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "사용자 인증에 실패했습니다."),
-  INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다.");
+  INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다."),
+  ACCESS_ONLY_SELF(HttpStatus.FORBIDDEN, "본인만 조회 가능합니다.");
 
   private final HttpStatus httpStatus;
   private final String message;
