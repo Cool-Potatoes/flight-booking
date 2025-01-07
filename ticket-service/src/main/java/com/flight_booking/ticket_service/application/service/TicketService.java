@@ -4,6 +4,7 @@ import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
 import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,5 +34,14 @@ public class TicketService {
     Ticket savedTicket = ticketRepository.save(ticket);
 
     return TicketResponseDto.from(savedTicket);
+  }
+
+  @Transactional(readOnly = true)
+  public TicketResponseDto getTicket(UUID ticketId) {
+
+    Ticket ticket = ticketRepository.findByIdIsDeletedFalse(ticketId)
+        .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
+
+    return TicketResponseDto.from(ticket);
   }
 }
