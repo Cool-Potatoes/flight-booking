@@ -5,10 +5,16 @@ import com.flight_booking.flight_service.domain.model.Seat;
 import com.flight_booking.flight_service.domain.model.SeatClassEnum;
 import com.flight_booking.flight_service.domain.repository.SeatRepository;
 import com.flight_booking.flight_service.presentation.request.SeatRequestDto;
+import com.flight_booking.flight_service.presentation.response.SeatResponseDto;
+import com.querydsl.core.types.Predicate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,9 +64,20 @@ public class SeatService {
   @Transactional
   public void deleteFlightSeats(UUID flightId, String deletedBy) {
     Set<Seat> seatSet = seatRepository.findByFlight_FlightId(flightId);
-    for(Seat seat:seatSet) {
+    for (Seat seat : seatSet) {
       seat.delete(deletedBy);
     }
+  }
+
+  @Transactional(readOnly = true)
+  public PagedModel<SeatResponseDto> getSeatsPage(
+      UUID flightId, List<UUID> seatIdList, Predicate predicate, Pageable pageable) {
+
+    Page<SeatResponseDto> seatResponseDtoPage
+        = seatRepository.findAll(flightId, seatIdList, predicate, pageable);
+
+    return SeatResponseDto.fromPage(seatResponseDtoPage);
+
   }
 
 

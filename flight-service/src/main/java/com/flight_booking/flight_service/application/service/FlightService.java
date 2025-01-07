@@ -71,7 +71,6 @@ public class FlightService {
 
     Flight savedFlight = flightRepository.save(flight);
 
-    //TODO : seat create 추가
     seatService.createSeat(savedFlight);
 
     return FlightResponseDto.from(savedFlight);
