@@ -48,7 +48,7 @@ public class AuthService {
     userRepository.save(user);
   }
 
-  public String createToken(String email, String password) {
+  public String signIn(String email, String password) {
     try {
       log.info("service");
       Authentication authentication = authenticationManager.authenticate(
