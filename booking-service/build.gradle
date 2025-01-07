@@ -21,6 +21,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	mavenLocal()
 }
 
 ext {
@@ -28,6 +29,9 @@ ext {
 }
 
 dependencies {
+
+	// 공통 모듈
+	implementation 'com.flight_booking:common:0.0.2-SNAPSHOT'
 
 	// Kafka
 	implementation 'org.springframework.kafka:spring-kafka'

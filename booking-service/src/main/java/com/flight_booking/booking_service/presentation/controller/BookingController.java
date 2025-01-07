@@ -2,16 +2,14 @@ package com.flight_booking.booking_service.presentation.controller;
 
 import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.booking_service.domain.model.Booking;
-import com.flight_booking.booking_service.presentation.global.ApiResponse;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,7 +34,8 @@ public class BookingController {
   }
 
   @GetMapping
-  public ApiResponse<?> getBookings(@QuerydslPredicate(root = Booking.class) Predicate predicate, Pageable pageable) {
+  public ApiResponse<?> getBookings(@QuerydslPredicate(root = Booking.class) Predicate predicate,
+      Pageable pageable) {
 
     PagedModel<BookingResponseCustomDto> bookings = bookingService.getBookings(predicate, pageable);
 

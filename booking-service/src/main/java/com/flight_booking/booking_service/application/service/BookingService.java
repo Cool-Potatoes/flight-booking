@@ -2,7 +2,6 @@ package com.flight_booking.booking_service.application.service;
 
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.domain.model.BookingStatusEnum;
-import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
 import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
@@ -10,12 +9,15 @@ import com.flight_booking.booking_service.presentation.request.BookingRequestDto
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
 import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
+import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class BookingService {
   private final BookingRepository bookingRepository;
   private final BookingRepositoryImpl bookingRepositoryImpl;
   private final PassengerService passengerService;
+  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
 
 
   @Transactional(readOnly = false)
@@ -41,7 +44,12 @@ public class BookingService {
 
     Booking savedBooking = bookingRepository.save(booking);
 
-    List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(bookingRequestDto.passengerRequestDtos(), savedBooking);
+    List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(
+        bookingRequestDto.passengerRequestDtos(), savedBooking);
+
+    kafkaTemplate.send("payment-creation-topic", savedBooking.getBookingId().toString(),
+        ApiResponse.ok(new PaymentRequestDto(savedBooking.getBookingId(), 1000), // TODO fare 입력
+            "message from createBooking"));
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
   }

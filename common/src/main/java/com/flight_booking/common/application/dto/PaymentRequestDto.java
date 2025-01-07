@@ -1,4 +1,4 @@
-package com.flight_booking.payment_service.presentation.request;
+package com.flight_booking.common.application.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

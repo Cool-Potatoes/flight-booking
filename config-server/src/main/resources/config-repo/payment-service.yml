@@ -27,6 +27,11 @@ spring:
         show_sql: true
         format_sql: true
         use_sql_comments: true
+  kafka:
+    bootstrap-servers: localhost:9092  # Kafka가 실행중인 포트번호
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
 
 resilience4j:
