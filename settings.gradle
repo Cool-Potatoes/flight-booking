@@ -1,0 +1,12 @@
+rootProject.name = 'flight-booking'
+
+include ':eureka-server',
+        ':config-server',
+        ':gateway-service',
+        ':flight-service',
+        ':notification-service',
+        ':payment-service',
+        ':ticket-service',
+        ':booking-service',
+        ':user-service',
+        ':common'
