@@ -69,6 +69,14 @@ public class UserService {
     }
   }
 
+  @Transactional
+  public void deleteUser(Long id, CustomUserDetails userDetails) {
+    User user = getUser(id);
+    checkUser(userDetails, user);
+
+    user.setDeletedBy(userDetails.getUsername());
+  }
+
   // -----------------------------------------------------------------------------------------------
 
   // 존재하는 사용자 확인

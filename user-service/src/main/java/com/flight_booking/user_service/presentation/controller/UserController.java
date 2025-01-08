@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,5 +62,15 @@ public class UserController {
 
     userService.updateUser(id, userDetails, updateRequest);
     return ApiResponse.ok("회원 정보 수정 성공");
+  }
+
+  // 회원 탈퇴
+  @PreAuthorize("hasRole('ROLE_USER')")
+  @DeleteMapping("/{id}")
+  public ApiResponse<?> deleteUser(
+      @PathVariable(name = "id") Long id,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    userService.deleteUser(id, userDetails);
+    return ApiResponse.ok("회원 탈퇴 성공");
   }
 }
