@@ -1,10 +1,13 @@
 package com.flight_booking.user_service.infrastructure.persistence;
 
+import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
 import java.util.Optional;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AuditorAwareImpl implements AuditorAware<String> {
 
   @Override
@@ -12,12 +15,14 @@ public class AuditorAwareImpl implements AuditorAware<String> {
     // 인증된 사용자 정보
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    // 인증되지 않은 사용자일 경우 "SYSTEM" 또는 "AnonymousUser"
-    if (authentication == null || authentication.getPrincipal() == "anonymousUser") {
+    // 인증되지 않는 경우
+    if (authentication == null || !authentication.isAuthenticated()) {
       return Optional.of("SYSTEM");
     }
 
-    // 인증된 사용자일 경우 이메일 반환
-    return Optional.ofNullable(authentication.getPrincipal().toString());
+    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+    // CustomUserDetails의 getUsername(email) 사용
+    return Optional.of(userDetails.getUsername());
   }
 }
