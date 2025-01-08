@@ -4,12 +4,15 @@ import com.flight_booking.flight_service.domain.model.Airport;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.repository.AirportRepository;
 import com.flight_booking.flight_service.domain.repository.FlightRepository;
-import com.flight_booking.flight_service.domain.repository.SeatRepository;
-import com.flight_booking.flight_service.presentation.request.FlightCreateRequestDto;
-import com.flight_booking.flight_service.presentation.request.FlightUpdateRequestDto;
-import com.flight_booking.flight_service.presentation.response.FlightDetailResponseDto;
+import com.flight_booking.flight_service.presentation.request.FlightRequestDto;
+import com.flight_booking.flight_service.presentation.response.FlightResponseDto;
+import com.querydsl.core.types.Predicate;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,20 +21,31 @@ import org.springframework.transaction.annotation.Transactional;
 public class FlightService {
 
   private final AirportRepository airportRepository;
-  private final SeatRepository seatRepository;
   private final FlightRepository flightRepository;
+  private final SeatService seatService;
 
-  public FlightDetailResponseDto getFlightById(UUID flightId) {
+  @Transactional(readOnly = true)
+  public FlightResponseDto getFlightById(UUID flightId) {
     Flight flight = flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(
         //TODO: Error 타입 정해지면 수정
         () -> new RuntimeException("해당하는 항공편이 존재하지 않습니다.")
     );
 
-    return FlightDetailResponseDto.from(flight);
+    return FlightResponseDto.from(flight);
+  }
+
+  @Transactional(readOnly = true)
+  public PagedModel<FlightResponseDto> getFlightsPage(List<UUID> uuidList, Predicate predicate,
+      Pageable pageable) {
+
+    Page<FlightResponseDto> flightResponseDtoPage
+        = flightRepository.findAll(uuidList, predicate, pageable);
+
+    return FlightResponseDto.from(flightResponseDtoPage);
   }
 
   @Transactional
-  public UUID createFlight(FlightCreateRequestDto requestDto) {
+  public FlightResponseDto createFlight(FlightRequestDto requestDto) {
 
     Airport departureAirport = airportRepository.findByCityName(requestDto.departureAirport())
         .orElseThrow(
@@ -43,39 +57,61 @@ public class FlightService {
             () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
         );
 
-    Flight flight = flightRepository.save(
-        Flight.create(requestDto, departureAirport, arrivalAirport)
-    );
+    Flight flight = Flight.builder()
+        .departureTime(requestDto.departureTime())
+        .departureAirport(departureAirport)
+        .arrivalTime(requestDto.arrivalTime())
+        .arrivalAirport(arrivalAirport)
+        .statusEnum(requestDto.status())
+        .airline(requestDto.airline())
+        .totalEconomySeatsCount(requestDto.totalEconomySeatsCount())
+        .totalBusinessSeatsCount(requestDto.totalBusinessSeatsCount())
+        .totalFirstClassSeatsCount(requestDto.totalFirstClassSeatsCount())
+        .build();
 
-    //TODO : seat create 추가
+    Flight savedFlight = flightRepository.save(flight);
 
-    return flight.getFlightId();
+    seatService.createSeat(savedFlight);
+
+    return FlightResponseDto.from(savedFlight);
   }
 
   @Transactional
-  public UUID updateFlight(UUID flightId, FlightUpdateRequestDto requestDto) {
-    Flight flight = flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(
-        () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
-    );
+  public FlightResponseDto updateFlight(UUID flightId, FlightRequestDto requestDto) {
+    Flight flight = getFlight(flightId);
 
-    flight.update(requestDto.remainingSeat(), requestDto.departureTime(), requestDto.arrivalTime(),
-        requestDto.status());
+    flight.update(requestDto.departureTime(), requestDto.arrivalTime(),
+        requestDto.status(), requestDto.totalEconomySeatsCount(),
+        requestDto.totalBusinessSeatsCount(), requestDto.totalFirstClassSeatsCount());
 
-    return flight.getFlightId();
+    return FlightResponseDto.from(flight);
   }
 
   @Transactional
-  public UUID deleteFlight(UUID flightId) {
+  public FlightResponseDto deleteFlight(UUID flightId) {
 
-    Flight flight = flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(
-        () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
-    );
+    Flight flight = getFlight(flightId);
 
     //TODO: 유저 구현 후 수정
     String deletedBy = "tmpUser";
 
     flight.delete(deletedBy);
+    seatService.deleteFlightSeats(flightId, deletedBy);
 
-    return flight.getFlightId();
+    return FlightResponseDto.from(flight);
   }
+
+  /**
+   * flightId로 Flight 조회 메서드
+   *
+   * @param flightId UUID
+   * @return Flight
+   */
+  private Flight getFlight(UUID flightId) {
+    return flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(
+        () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
+    );
+  }
+
+
 }

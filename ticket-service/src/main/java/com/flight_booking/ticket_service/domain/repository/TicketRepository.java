@@ -1,8 +1,8 @@
-package com.flight_booking.flight_service.domain.repository;
+package com.flight_booking.ticket_service.domain.repository;
 
-import com.flight_booking.flight_service.domain.model.Flight;
-import com.flight_booking.flight_service.domain.model.QFlight;
-import com.flight_booking.flight_service.infrastructure.repository.FlightRepositoryCustom;
+import com.flight_booking.ticket_service.domain.model.QTicket;
+import com.flight_booking.ticket_service.domain.model.Ticket;
+import com.flight_booking.ticket_service.infrastructure.repository.TicketRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.ArrayList;
@@ -16,14 +16,13 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 
-public interface FlightRepository extends
-    JpaRepository<Flight, UUID>,
-    FlightRepositoryCustom,
-    QuerydslPredicateExecutor<Flight>,
-    QuerydslBinderCustomizer<QFlight> {
+public interface TicketRepository extends JpaRepository<Ticket, UUID>,
+    TicketRepositoryCustom,
+    QuerydslPredicateExecutor<Ticket>,
+    QuerydslBinderCustomizer<QTicket> {
 
   @Override // Predicate 조건
-  default void customize(QuerydslBindings querydslBindings, @NotNull QFlight qFlight) {
+  default void customize(QuerydslBindings querydslBindings, @NotNull QTicket qTicket) {
     querydslBindings.bind(String.class)
         .all((StringPath path, Collection<? extends String> values) -> {
           List<String> valueList = new ArrayList<>(values.stream().map(String::trim).toList());
@@ -38,5 +37,7 @@ public interface FlightRepository extends
         });
   }
 
-  Optional<Flight> findByFlightIdAndIsDeletedFalse(UUID flightId);
+  boolean existsByBookingId(UUID uuid);
+
+  Optional<Ticket> findByIdIsDeletedFalse(UUID ticketId);
 }

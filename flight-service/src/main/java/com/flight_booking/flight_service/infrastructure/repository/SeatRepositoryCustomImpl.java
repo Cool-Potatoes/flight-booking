@@ -1,8 +1,8 @@
 package com.flight_booking.flight_service.infrastructure.repository;
 
-import com.flight_booking.flight_service.domain.model.QFlight;
-import com.flight_booking.flight_service.presentation.response.FlightResponseDto;
-import com.flight_booking.flight_service.presentation.response.QFlightResponseDto;
+import com.flight_booking.flight_service.domain.model.QSeat;
+import com.flight_booking.flight_service.presentation.response.QSeatResponseDto;
+import com.flight_booking.flight_service.presentation.response.SeatResponseDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -20,25 +20,26 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class FlightRepositoryCustomImpl implements FlightRepositoryCustom {
+public class SeatRepositoryCustomImpl implements SeatRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
 
-  public FlightRepositoryCustomImpl(EntityManager em) {
+  public SeatRepositoryCustomImpl(EntityManager em) {
     this.queryFactory = new JPAQueryFactory(em);
   }
 
   @Override
-  public Page<FlightResponseDto> findAll(
-      List<UUID> uuidList, Predicate predicate, Pageable pageable) {
+  public Page<SeatResponseDto> findAll(
+      UUID flightId, List<UUID> seatIdList, Predicate predicate, Pageable pageable) {
 
-    QFlight flight = QFlight.flight;
+    QSeat seat = QSeat.seat;
 
     BooleanBuilder builder = new BooleanBuilder(predicate); // predicate 적용
-    if (uuidList != null && !uuidList.isEmpty()) { // idList 값이 있다면 조회
-      builder.and(flight.flightId.in(uuidList));
+    if (seatIdList != null && !seatIdList.isEmpty()) { // idList 값이 있다면 조회
+      builder.and(seat.seatId.in(seatIdList));
     }
-    builder.and(flight.isDeleted.eq(false)); // isDeleted=false 만 조회
+    builder.and(seat.isDeleted.eq(false)); // isDeleted=false 만 조회
+    builder.and(seat.flight.flightId.eq(flightId)); // flightId로 필터링
 
     // size 10, 30, 50 이 아니라면 10으로 고정
     int size = pageable.getPageSize();
@@ -51,18 +52,18 @@ public class FlightRepositoryCustomImpl implements FlightRepositoryCustom {
         Sort.Order.desc("updatedAt")
     );
 
-    List<FlightResponseDto> results = queryFactory
-        .select(new QFlightResponseDto(flight))
-        .from(flight)
+    List<SeatResponseDto> results = queryFactory
+        .select(new QSeatResponseDto(seat))
+        .from(seat)
         .where(builder)
-        .orderBy(getDynamicSort(sort, flight.getType(), flight.getMetadata()))
+        .orderBy(getDynamicSort(sort, seat.getType(), seat.getMetadata()))
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
         .fetch();
 
     Long total = queryFactory
-        .select(flight.count())
-        .from(flight)
+        .select(seat.count())
+        .from(seat)
         .where(builder)
         .fetchOne();
 
@@ -92,5 +93,4 @@ public class FlightRepositoryCustomImpl implements FlightRepositoryCustom {
 
     return orderSpecifiers.toArray(new OrderSpecifier[0]); // list 크기에 맞춰 배열 생성
   }
-
 }

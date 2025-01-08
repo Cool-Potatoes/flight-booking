@@ -8,5 +8,9 @@ public enum SeatClassEnum {
   BUSINESS("SEAT_BUSINESS"),
   FIRST("SEAT_FIRST");
 
-  private final String seatClass;
+  private final String classType;
+
+  public String getClassType() {
+    return classType;
+  }
 }
