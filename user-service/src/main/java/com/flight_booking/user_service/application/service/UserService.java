@@ -48,6 +48,27 @@ public class UserService {
     return UserDetailResponse.fromEntity(user);
   }
 
+  // 회원 정보 수정
+  @Transactional
+  public void updateUser(Long id, CustomUserDetails userDetails, UpdateRequest updateRequest) {
+    User user = getUser(id);
+    boolean isAdmin = isAdmin(userDetails);
+
+    // 사용자: 본인 정보만 수정, 추가 항목 수정 불가
+    if (!isAdmin) {
+      checkUser(userDetails, user);
+      validateUser(updateRequest);
+    }
+
+    // 공통 수정 사항
+    updateBasic(user, updateRequest);
+
+    // 관리자: 추가 항목 수정
+    if (isAdmin) {
+      updateAdminOnly(user, updateRequest);
+    }
+  }
+
   // -----------------------------------------------------------------------------------------------
 
   // 존재하는 사용자 확인
@@ -66,6 +87,38 @@ public class UserService {
   private void checkUser(CustomUserDetails userDetails, User user) {
     if (!userDetails.getUsername().equals(user.getEmail())) {
       throw new UserException(ErrorCode.ACCESS_ONLY_SELF);
+    }
+  }
+
+  // 기본 수정 항목
+  private void updateBasic(User user, UpdateRequest updateRequest) {
+    String name = updateRequest.name();
+    if (name != null) {
+      user.setName(name);
+    }
+    String phone = updateRequest.phone();
+    if (phone != null) {
+      user.setPhone(phone);
+    }
+  }
+
+  // 관리자용 추가 수정 항목
+  private void updateAdminOnly(User user, UpdateRequest updateRequest) {
+    Role role = updateRequest.role();
+    if (role != null) {
+      user.setRole(role);
+    }
+
+    Boolean blocked = updateRequest.isBlocked();
+    if (blocked != null) {
+      user.setIsBlocked(blocked);
+    }
+  }
+
+  // 사용자 수정 불가 항목 처리
+  private void validateUser(UpdateRequest updateRequest) {
+    if (updateRequest.role() != null || updateRequest.isBlocked() != null) {
+      throw new UserException(ErrorCode.CANNOT_MODIFY_FIELD);
     }
   }
 }

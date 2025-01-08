@@ -13,7 +13,8 @@ public enum ErrorCode {
   LOGIN_FAIL(HttpStatus.BAD_REQUEST, "로그인에 실패했습니다."),
   USER_AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "사용자 인증에 실패했습니다."),
   INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다."),
-  ACCESS_ONLY_SELF(HttpStatus.FORBIDDEN, "본인만 조회 가능합니다.");
+  ACCESS_ONLY_SELF(HttpStatus.FORBIDDEN, "본인만 가능합니다."),
+  CANNOT_MODIFY_FIELD(HttpStatus.FORBIDDEN, "수정 불가능한 항목입니다.");  // 추가된 부분;
 
   private final HttpStatus httpStatus;
   private final String message;

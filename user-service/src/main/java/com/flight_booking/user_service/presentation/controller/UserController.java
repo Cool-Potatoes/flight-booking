@@ -51,4 +51,15 @@ public class UserController {
     Object response = userService.getUserDetails(id, userDetails);
     return ApiResponse.ok(response, "회원 상세 조회 성공");
   }
+
+  // 회원 정보 수정
+  @PatchMapping("/{id}")
+  public ApiResponse<?> updateUser(
+      @PathVariable(name = "id") Long id,
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @RequestBody UpdateRequest updateRequest) {
+
+    userService.updateUser(id, userDetails, updateRequest);
+    return ApiResponse.ok("회원 정보 수정 성공");
+  }
 }
