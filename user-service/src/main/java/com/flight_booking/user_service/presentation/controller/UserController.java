@@ -6,8 +6,10 @@ import com.flight_booking.user_service.infrastructure.security.authentication.Cu
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
+import com.flight_booking.user_service.presentation.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,6 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
+
+  // 이메일 기반으로 사용자 정보 조회
+  @GetMapping("/{email}")
+  public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+    UserResponse user = userService.findUserByEmail(email);
+    return ResponseEntity.ok(user);
+  }
 
   // 전체 회원 목록 조회
   @PreAuthorize("hasRole('ROLE_ADMIN')")

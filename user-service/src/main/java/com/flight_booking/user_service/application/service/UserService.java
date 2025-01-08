@@ -11,6 +11,7 @@ import com.flight_booking.user_service.presentation.response.AdminUserDetailResp
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
+import com.flight_booking.user_service.presentation.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,12 +24,19 @@ public class UserService {
 
   private final UserRepository userRepository;
 
+  // 이메일 기반으로 사용자 정보 조회
+  @Transactional(readOnly = true)
+  public UserResponse findUserByEmail(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+    return UserResponse.fromEntity(user);
+  }
+
   // 전체 회원 목록 조회
   @Transactional(readOnly = true)
-  public PageResponse<UserListResponse> getUserList(String email, String name, String role,
-      Boolean isBlocked, Pageable pageable) {
+  public PageResponse<UserListResponse> getUserList(
+      String email, String name, String role, Boolean isBlocked, Pageable pageable) {
     Page<UserListResponse> users = userRepository.findAll(email, name, role, isBlocked, pageable);
-
     return PageResponse.from(users);
   }
 
@@ -73,7 +81,6 @@ public class UserService {
   public void deleteUser(Long id, CustomUserDetails userDetails) {
     User user = getUser(id);
     checkUser(userDetails, user);
-
     user.setDeletedBy(userDetails.getUsername());
   }
 
