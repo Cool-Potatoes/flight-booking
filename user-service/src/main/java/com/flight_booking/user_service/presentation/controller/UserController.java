@@ -29,7 +29,7 @@ public class UserController {
   private final UserService userService;
 
   // 이메일 기반으로 사용자 정보 조회
-  @GetMapping("/{email}")
+  @GetMapping("/info/{email}")
   public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
     UserResponse user = userService.findUserByEmail(email);
     return ResponseEntity.ok(user);
@@ -54,7 +54,7 @@ public class UserController {
   // 회원 상세 조회
   @GetMapping("/{id}")
   public ApiResponse<?> getUserDetails(
-      @PathVariable(name = "id") Long id,
+      @PathVariable Long id,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
 
     // 사용자는 본인 정보만 제공
@@ -65,7 +65,7 @@ public class UserController {
   // 회원 정보 수정
   @PatchMapping("/{id}")
   public ApiResponse<?> updateUser(
-      @PathVariable(name = "id") Long id,
+      @PathVariable Long id,
       @AuthenticationPrincipal CustomUserDetails userDetails,
       @RequestBody UpdateRequest updateRequest) {
 
@@ -77,7 +77,7 @@ public class UserController {
   @PreAuthorize("hasRole('ROLE_USER')")
   @DeleteMapping("/{id}")
   public ApiResponse<?> deleteUser(
-      @PathVariable(name = "id") Long id,
+      @PathVariable Long id,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     userService.deleteUser(id, userDetails);
     return ApiResponse.ok("회원 탈퇴 성공");

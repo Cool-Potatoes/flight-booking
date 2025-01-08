@@ -12,6 +12,7 @@ import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
 import com.flight_booking.user_service.presentation.response.UserResponse;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,14 +83,22 @@ public class UserService {
     User user = getUser(id);
     checkUser(userDetails, user);
     user.setDeletedBy(userDetails.getUsername());
+    user.setIsDeleted(true);
+    user.setDeletedAt(LocalDateTime.now());
   }
 
   // -----------------------------------------------------------------------------------------------
 
-  // 존재하는 사용자 확인
+  // 존재하는 사용자 확인 및 삭제된 사용자 확인
   private User getUser(Long id) {
-    return userRepository.findById(id)
-        .orElseThrow(() -> new UserException(ErrorCode.ACCESS_ONLY_SELF));
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new UserException(ErrorCode.ACCESS_ONLY_SELF)); // 사용자 존재 여부 확인
+
+    // 삭제된 사용자 확인
+    if (Boolean.TRUE.equals(user.getIsDeleted())) {
+      throw new UserException(ErrorCode.USER_DELETED);
+    }
+    return user;
   }
 
   // 관리자 권한 확인

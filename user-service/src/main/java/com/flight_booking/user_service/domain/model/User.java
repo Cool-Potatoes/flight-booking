@@ -8,9 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -58,12 +56,6 @@ public class User extends BaseEntity {
   @Builder.Default
   @Column(name = "is_blocked", nullable = false)
   private Boolean isBlocked = false;
-
-  @PreRemove
-  public void preRemove() {
-    this.isDeleted = true;
-    this.deletedAt = LocalDateTime.now();
-  }
 
   @PrePersist
   protected void onCreate() {

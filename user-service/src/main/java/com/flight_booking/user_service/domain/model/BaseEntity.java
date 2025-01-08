@@ -33,6 +33,7 @@ public abstract class BaseEntity {
   @Column(name = "updated_by", length = 100)
   protected String updatedBy;
 
+  @Setter
   @Column(name = "deleted_at")
   protected LocalDateTime deletedAt;
 
@@ -40,6 +41,7 @@ public abstract class BaseEntity {
   @Column(name = "deleted_by", length = 100)
   protected String deletedBy;
 
+  @Setter
   @Column(name = "is_deleted", nullable = false)
   protected Boolean isDeleted = false;
 }
