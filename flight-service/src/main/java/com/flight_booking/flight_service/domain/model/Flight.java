@@ -1,7 +1,5 @@
 package com.flight_booking.flight_service.domain.model;
 
-import com.flight_booking.flight_service.presentation.request.FlightCreateRequestDto;
-import com.flight_booking.flight_service.presentation.request.FlightUpdateRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -40,10 +38,16 @@ public class Flight extends BaseEntity {
 
   @Column(nullable = false)
   @Enumerated(value = EnumType.STRING)
-  private FlightStatusEnum status;
+  private FlightStatusEnum statusEnum;
 
   @Column(nullable = false)
-  private Integer remainingSeat;
+  private Integer totalEconomySeatsCount;
+
+  @Column(nullable = false)
+  private Integer totalBusinessSeatsCount;
+
+  @Column(nullable = false)
+  private Integer totalFirstClassSeatsCount;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "departure_airport_id", nullable = false)
@@ -56,29 +60,34 @@ public class Flight extends BaseEntity {
   @Column(nullable = false, length = 10)
   private String airline;
 
-  public static Flight create(FlightCreateRequestDto requestDto, Airport departureAirport,
-      Airport arrivalAirport) {
-    return Flight.builder()
-        .departureTime(requestDto.departureTime())
-        .departureAirport(departureAirport)
-        .arrivalTime(requestDto.arrivalTime())
-        .arrivalAirport(arrivalAirport)
-        .status(requestDto.status())
-        .remainingSeat(requestDto.remainingSeat())
-        .airline(requestDto.airline()).build();
-  }
-
-  public void update(int remainingSeat,
+  public void update(
       LocalDateTime departureTime,
       LocalDateTime arrivalTime,
-      FlightStatusEnum status) {
-    this.remainingSeat = remainingSeat;
-    this.departureTime = departureTime;
-    this.arrivalTime = arrivalTime;
-    this.status = status;
+      FlightStatusEnum status, Integer totalEconomySeatsCount, Integer totalBusinessSeatsCount,
+      Integer totalFirstClassSeatsCount) {
+    if (departureTime != null) {
+      this.departureTime = departureTime;
+    }
+    if (arrivalTime != null) {
+      this.arrivalTime = arrivalTime;
+    }
+    if (status != null) {
+      this.statusEnum = status;
+    }
+    if (totalEconomySeatsCount != null) {
+      this.totalEconomySeatsCount = totalEconomySeatsCount;
+    }
+    if (totalBusinessSeatsCount != null) {
+      this.totalBusinessSeatsCount = totalBusinessSeatsCount;
+    }
+    if (totalFirstClassSeatsCount != null) {
+      this.totalFirstClassSeatsCount = totalFirstClassSeatsCount;
+    }
   }
 
   public void delete(String deletedBy) {
-    super.delete(deletedBy);
+    this.isDeleted = true;
+    this.deletedAt = LocalDateTime.now();
+    this.deletedBy = deletedBy;
   }
 }
