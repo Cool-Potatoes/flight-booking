@@ -1,37 +1,7 @@
-plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.1'
-	id 'io.spring.dependency-management' version '1.1.7'
-}
-
-group = 'com.flight-booking'
-version = '0.0.1-SNAPSHOT'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
-repositories {
-	mavenCentral()
-	mavenLocal()
-}
-
-ext {
-	set('springCloudVersion', "2024.0.0")
-}
-
 dependencies {
 
 	// 공통 모듈
-	implementation 'com.flight_booking:common:0.0.2-SNAPSHOT'
+	implementation project(path: ':common')
 
 	// Kafka
 	implementation 'org.springframework.kafka:spring-kafka'
@@ -102,14 +72,4 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }
