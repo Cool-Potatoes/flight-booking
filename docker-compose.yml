@@ -135,10 +135,10 @@ services:
       - postgres
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/flight_booking
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin123
-      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-your_email@example.com}
-      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-your_password}
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: systempass
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"

@@ -10,9 +10,4 @@ spring:
     config:
       server:
         native:
-          search-locations: classpath:/config-repo  # Directory path of the resources folder
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+          search-locations: classpath:/config-repo

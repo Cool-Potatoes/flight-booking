@@ -6,7 +6,6 @@ service:
     access-expiration: 86400000  # 24시간
     secret-key: ${SECRET_KEY}
 
-
 spring:
   main:
     web-application-type: reactive  # Spring 애플리케이션이 리액티브 웹 애플리케이션으로 설정됨
