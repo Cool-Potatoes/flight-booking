@@ -13,8 +13,8 @@ eureka:
     fetch-registry: false
     # Default service URL for communication with the Eureka server
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/  # localhost -> eureka-server로 변경
 
   instance:
     # Hostname of the Eureka server instance
-    hostname: localhost
+    hostname: eureka-server  # localhost -> eureka-server로 변경
