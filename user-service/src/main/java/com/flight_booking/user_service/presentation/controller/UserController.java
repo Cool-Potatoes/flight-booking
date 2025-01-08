@@ -10,7 +10,6 @@ import com.flight_booking.user_service.presentation.response.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,9 +30,9 @@ public class UserController {
 
   // 이메일 기반으로 사용자 정보 조회
   @GetMapping("/info/{email}")
-  public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
-    UserResponse user = userService.findUserByEmail(email);
-    return ResponseEntity.ok(user);
+  public ApiResponse<?> getUserByEmail(@PathVariable String email) {
+    UserResponse response = userService.findUserByEmail(email);
+    return ApiResponse.ok(response, "성공");
   }
 
   // 전체 회원 목록 조회
