@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -35,9 +36,11 @@ public class User extends BaseEntity {
   @Column(name = "password", nullable = false)
   private String password;
 
+  @Setter
   @Column(name = "name", nullable = false, length = 30)
   private String name;
 
+  @Setter
   @Column(name = "phone", nullable = false, length = 20)
   private String phone;
 
@@ -45,11 +48,13 @@ public class User extends BaseEntity {
   @Column(name = "mileage", nullable = false)
   private Long mileage = 0L;
 
+  @Setter
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "role", nullable = false)
   private Role role = Role.USER;
 
+  @Setter
   @Builder.Default
   @Column(name = "is_blocked", nullable = false)
   private Boolean isBlocked = false;
@@ -66,20 +71,4 @@ public class User extends BaseEntity {
     this.createdBy = this.email;
   }
 
-  // 수정용 setter
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setPhone(String phone) {
-    this.phone = phone;
-  }
-
-  public void setRole(Role role) {
-    this.role = role;
-  }
-
-  public void setIsBlocked(Boolean isBlocked) {
-    this.isBlocked = isBlocked;
-  }
 }
