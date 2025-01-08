@@ -7,6 +7,7 @@ import com.flight_booking.user_service.presentation.request.UpdateRequest;
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
 import com.flight_booking.user_service.presentation.response.UserResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,6 @@ public class UserController {
 
     PageResponse<UserListResponse> response = userService.getUserList(
         email, name, role, isBlocked, pageable);
-
     return ApiResponse.ok(response, "회원 목록 조회 성공");
   }
 
@@ -67,7 +67,7 @@ public class UserController {
   public ApiResponse<?> updateUser(
       @PathVariable Long id,
       @AuthenticationPrincipal CustomUserDetails userDetails,
-      @RequestBody UpdateRequest updateRequest) {
+      @Valid @RequestBody UpdateRequest updateRequest) {
 
     userService.updateUser(id, userDetails, updateRequest);
     return ApiResponse.ok("회원 정보 수정 성공");

@@ -13,10 +13,7 @@ public record UpdateRequest(
         message = "유효한 전화번호 형식이 아닙니다.")
     String phone,
 
-    Role role,        // 관리자만 수정 가능
-
-    Boolean isBlocked // 관리자만 수정 가능
-
+    Role role   // 관리자만 수정 가능
 ) {
 
 }

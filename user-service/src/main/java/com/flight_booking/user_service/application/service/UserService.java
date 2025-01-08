@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -58,7 +59,6 @@ public class UserService {
   }
 
   // 회원 정보 수정
-  @Transactional
   public void updateUser(Long id, CustomUserDetails userDetails, UpdateRequest updateRequest) {
     User user = getUser(id);
     boolean isAdmin = isAdmin(userDetails);
@@ -72,13 +72,16 @@ public class UserService {
     // 공통 수정 사항
     updateBasic(user, updateRequest);
 
-    // 관리자: 추가 항목 수정
+    // 관리자: role 수정 가능
     if (isAdmin) {
-      updateAdminOnly(user, updateRequest);
+      Role role = updateRequest.role();
+      if (role != null) {
+        user.setRole(role);
+      }
     }
   }
 
-  @Transactional
+  // 사용자 - 회원 탈퇴
   public void deleteUser(Long id, CustomUserDetails userDetails) {
     User user = getUser(id);
     checkUser(userDetails, user);
@@ -95,7 +98,7 @@ public class UserService {
         .orElseThrow(() -> new UserException(ErrorCode.ACCESS_ONLY_SELF)); // 사용자 존재 여부 확인
 
     // 삭제된 사용자 확인
-    if (Boolean.TRUE.equals(user.getIsDeleted())) {
+    if (user.getIsDeleted()) {
       throw new UserException(ErrorCode.USER_DELETED);
     }
     return user;
@@ -126,22 +129,9 @@ public class UserService {
     }
   }
 
-  // 관리자용 추가 수정 항목
-  private void updateAdminOnly(User user, UpdateRequest updateRequest) {
-    Role role = updateRequest.role();
-    if (role != null) {
-      user.setRole(role);
-    }
-
-    Boolean blocked = updateRequest.isBlocked();
-    if (blocked != null) {
-      user.setIsBlocked(blocked);
-    }
-  }
-
   // 사용자 수정 불가 항목 처리
   private void validateUser(UpdateRequest updateRequest) {
-    if (updateRequest.role() != null || updateRequest.isBlocked() != null) {
+    if (updateRequest.role() != null) {
       throw new UserException(ErrorCode.CANNOT_MODIFY_FIELD);
     }
   }
