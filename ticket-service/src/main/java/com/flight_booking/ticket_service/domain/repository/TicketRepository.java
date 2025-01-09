@@ -39,5 +39,5 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID>,
 
   boolean existsByBookingId(UUID uuid);
 
-  Optional<Ticket> findByIdIsDeletedFalse(UUID ticketId);
+  Optional<Ticket> findByTicketIdAndIsDeletedFalse(UUID ticketId);
 }
