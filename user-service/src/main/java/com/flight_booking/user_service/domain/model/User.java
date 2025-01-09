@@ -1,6 +1,7 @@
 package com.flight_booking.user_service.domain.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -8,7 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -57,10 +60,44 @@ public class User extends BaseEntity {
   @Column(name = "is_blocked", nullable = false)
   private Boolean isBlocked = false;
 
+  @Embedded
+  private BlockedInfo blockedInfo;
+
+  @Builder.Default
+  @Column(name = "block_count", nullable = false)
+  private Integer blockCount = 0;
+
   @PrePersist
   protected void onCreate() {
     this.updatedBy = this.email;
     this.createdBy = this.email;
+  }
+
+  @PreRemove
+  public void preRemove() {
+    this.isDeleted = true;
+    this.deletedAt = LocalDateTime.now();
+  }
+
+  public void blockUser(String reason, String blockedBy) {
+    this.isBlocked = true;
+    this.blockCount++;
+    if (this.blockCount >= 3) {
+      // 블락 횟수가 3회 이상이면 자동 탈퇴 처리
+      this.setIsDeleted(true);
+      this.setDeletedAt(LocalDateTime.now());
+      this.setDeletedBy(blockedBy);
+    }
+
+    this.blockedInfo = new BlockedInfo();
+    this.blockedInfo.setBlockedAt(LocalDateTime.now());
+    this.blockedInfo.setBlockedReason(reason);
+    this.blockedInfo.setBlockedBy(blockedBy);
+  }
+
+  public void unblockUser() {
+    this.isBlocked = false;
+    this.blockedInfo = null;
   }
 
 }

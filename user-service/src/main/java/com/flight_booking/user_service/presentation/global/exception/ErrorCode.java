@@ -1,5 +1,6 @@
 package com.flight_booking.user_service.presentation.global.exception;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,10 @@ public enum ErrorCode {
   INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다."),
   ACCESS_ONLY_SELF(HttpStatus.FORBIDDEN, "본인만 가능합니다."),
   CANNOT_MODIFY_FIELD(HttpStatus.FORBIDDEN, "수정 불가능한 항목입니다."),
-  USER_DELETED(HttpStatus.BAD_REQUEST, "탈퇴한 사용자입니다.");  // 추가된 부분;
+  USER_DELETED(HttpStatus.NOT_FOUND, "탈퇴한 사용자입니다."),
+  USER_BLOCKED(HttpStatus.BAD_REQUEST, "블락 설정 상태의 회원입니다."),
+  USER_NOT_BLOCKED(HttpStatus.BAD_REQUEST, "블락 해제 상태의 회원입니다."),
+  CANNOT_ADMIN_BLOCKED(HttpStatus.BAD_REQUEST, "관리자는 블락 설정 할 수 없습니다.");
 
   private final HttpStatus httpStatus;
   private final String message;
