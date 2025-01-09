@@ -3,8 +3,10 @@ package com.flight_booking.user_service.domain.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import lombok.Setter;
 
+@Getter
 @Setter
 @Embeddable
 public class BlockedInfo {

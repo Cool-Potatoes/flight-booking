@@ -1,5 +1,6 @@
 package com.flight_booking.user_service.presentation.response;
 
+import com.flight_booking.user_service.domain.model.BlockedInfo;
 import com.flight_booking.user_service.domain.model.User;
 import lombok.Builder;
 
@@ -13,6 +14,7 @@ public record UserResponse(
     Long mileage,
     String role,
     Boolean isBlocked,
+    BlockedInfo blockedInfo,
     Boolean isDeleted
 ) {
 
@@ -25,6 +27,7 @@ public record UserResponse(
         .mileage(user.getMileage())
         .role(user.getRole().name())
         .isBlocked(user.getIsBlocked())
+        .blockedInfo(user.getBlockedInfo())
         .isDeleted(user.getIsDeleted())
         .build();
   }

@@ -1,6 +1,5 @@
 package com.flight_booking.user_service.presentation.global.exception;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
