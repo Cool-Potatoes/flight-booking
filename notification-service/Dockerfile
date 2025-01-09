@@ -1,21 +1,10 @@
-# Base image
 FROM openjdk:17-jdk-slim
+RUN apt-get update && apt-get install -y curl
 
-# Set environment variables
-ENV APP_HOME=/app
-ENV SERVER_PORT=8160
-
-# Create app directory
-WORKDIR $APP_HOME
-
-# Copy build artifacts
+WORKDIR /app
 COPY build/libs/notification-service-*.jar app.jar
 
-# Expose the server port
-EXPOSE $SERVER_PORT
+# Notification Service 포트
+EXPOSE 8160
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s CMD curl -f http://localhost:$SERVER_PORT/actuator/health || exit 1
-
-# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -27,7 +27,7 @@ public class ConsumerApplicationKafkaConfig {
     // 컨슈머 팩토리 설정을 위한 맵을 생성
     Map<String, Object> configProps = new HashMap<>();
     // Kafka 브로커의 주소를 설정
-    configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
     // 메시지 키의 디시리얼라이저 클래스를 설정
     configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 

@@ -5,24 +5,28 @@ networks:
     driver: bridge
 
 services:
+  # ---------------------
+  # Eureka Server
+  # ---------------------
   eureka-server:
     build: ./eureka-server
     container_name: eureka-server
-    image: ${DOCKER_USERNAME}/eureka-server
     ports:
       - "8761:8761"
     networks:
       - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 20s  # 더 긴 간격 설정
+      interval: 20s
       timeout: 5s
-      retries: 10  # 재시도 횟수 증가
+      retries: 10
 
+  # ---------------------
+  # Config Server
+  # ---------------------
   config-server:
     build: ./config-server
     container_name: config-server
-    image: ${DOCKER_USERNAME}/config-server
     ports:
       - "8888:8888"
     networks:
@@ -32,11 +36,18 @@ services:
         condition: service_healthy
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
 
+  # ---------------------
+  # Gateway Service
+  # ---------------------
   gateway-service:
     build: ./gateway-service
     container_name: gateway-service
-    image: ${DOCKER_USERNAME}/gateway-service
     ports:
       - "8080:8080"
     networks:
@@ -49,157 +60,108 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SECRET_KEY: "66mL7J+B7J206rCQ7J6Q65Ok7J2Y7ZWt6rO16raM7JiI66ek7ISc67mE7Iqk66W87Iuc7J6R7ZW067SF64uI64uk"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
 
+  # ---------------------
+  # User Service
+  # ---------------------
   user-service:
     build: ./user-service
     container_name: user-service
-    image: ${DOCKER_USERNAME}/user-service
     ports:
       - "8100:8100"
     networks:
       - app-network
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
-      DB_HOST: production-db-host
-      DB_PORT: 3306
-      DB_NAME: user_db
-      DB_USER: prod_user
-      DB_PASSWORD: prod_password
+      DB_URL: jdbc:postgresql://postgres:5432/flight_booking
+      DB_USERNAME: postgres
+      DB_PASSWORD: systempass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
 
+  # ---------------------
+  # Booking Service
+  # ---------------------
   booking-service:
     build: ./booking-service
     container_name: booking-service
-    image: ${DOCKER_USERNAME}/booking-service
     ports:
       - "8120:8120"
     networks:
       - app-network
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
-      DB_HOST: production-db-host
-      DB_PORT: 3306
-      DB_NAME: booking_db
-      DB_USER: prod_user
-      DB_PASSWORD: prod_password
+      DB_URL: jdbc:postgresql://postgres:5432/flight_booking
+      DB_USERNAME: postgres
+      DB_PASSWORD: systempass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8120/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
 
+  # ---------------------
+  # Payment Service
+  # ---------------------
   payment-service:
     build: ./payment-service
     container_name: payment-service
-    image: ${DOCKER_USERNAME}/payment-service
     ports:
       - "8130:8130"
     networks:
       - app-network
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
-      DB_HOST: production-db-host
-      DB_PORT: 3306
-      DB_NAME: payment_db
-      DB_USER: prod_user
-      DB_PASSWORD: prod_password
+      DB_URL: jdbc:postgresql://postgres:5432/flight_booking
+      DB_USERNAME: postgres
+      DB_PASSWORD: systempass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8130/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
 
-  ticket-service:
-    build: ./ticket-service
-    container_name: ticket-service
-    image: ${DOCKER_USERNAME}/ticket-service
+  # ---------------------
+  # Redis
+  # ---------------------
+  redis:
+    image: redis:latest
+    container_name: redis
     ports:
-      - "8140:8140"
+      - "6379:6379"
     networks:
       - app-network
-    depends_on:
-      - eureka-server
-    environment:
-      DB_HOST: production-db-host
-      DB_PORT: 3306
-      DB_NAME: ticket_db
-      DB_USER: prod_user
-      DB_PASSWORD: prod_password
-
-  flight-service:
-    build: ./flight-service
-    container_name: flight-service
-    image: ${DOCKER_USERNAME}/flight-service
-    ports:
-      - "8150:8150"
-    networks:
-      - app-network
-    depends_on:
-      - eureka-server
-    environment:
-      DB_HOST: production-db-host
-      DB_PORT: 3306
-      DB_NAME: flight_db
-      DB_USER: prod_user
-      DB_PASSWORD: prod_password
-
-  notification-service:
-    build: ./notification-service
-    container_name: notification-service
-    image: ${DOCKER_USERNAME}/notification-service
-    ports:
-      - "8160:8160"
-    networks:
-      - app-network
-    depends_on:
-      - eureka-server
-      - postgres
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/flight_booking
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: systempass
-      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
-      SPRING_MAIL_HOST: smtp.gmail.com
-      SPRING_MAIL_PORT: 587
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
-
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    environment:
-      POSTGRES_PASSWORD: systempass  # 패스워드 설정
-    ports:
-      - "5432:5432"
-    networks:
-      - app-network
-
-  zipkin:
-    image: openzipkin/zipkin
-    container_name: zipkin
-    ports:
-      - "9411:9411"
-    networks:
-      - app-network
-
-  # Prometheus 추가
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-    networks:
-      - app-network
-    restart: always
-
-  # Grafana 추가
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    networks:
-      - app-network
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin  # 관리자 비밀번호 설정
-    volumes:
-      - grafana-storage:/var/lib/grafana  # 데이터 저장소
-    restart: always
-
-volumes:
-  grafana-storage:
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 20s
+      timeout: 5s
+      retries: 10

@@ -42,7 +42,7 @@ spring:
 management:
   zipkin:
     tracing:
-      endpoint: "http://localhost:9411/api/v2/spans"  # Zipkin 서버의 엔드포인트 지정
+      endpoint: "http://zipkin:9411/api/v2/spans"  # Zipkin 서버의 엔드포인트 지정
   tracing:
     sampling:
       probability: 1.0  # Zipkin 트레이싱 샘플링 비율 (1.0: 100%)
