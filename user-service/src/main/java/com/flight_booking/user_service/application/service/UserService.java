@@ -11,7 +11,6 @@ import com.flight_booking.user_service.presentation.response.AdminUserDetailResp
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
-import com.flight_booking.user_service.presentation.response.UserResponse;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,14 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
-
-  // 이메일 기반으로 사용자 정보 조회
-  @Transactional(readOnly = true)
-  public UserResponse findUserByEmail(String email) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-    return UserResponse.fromEntity(user);
-  }
 
   // 전체 회원 목록 조회
   @Transactional(readOnly = true)
