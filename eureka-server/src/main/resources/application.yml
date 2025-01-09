@@ -1,20 +1,15 @@
-spring:
-  application:
-    name: server
-
 server:
   port: 8761
+  servlet:
+    context-path: /eureka
+
+spring:
+  application:
+    name: eureka-server
 
 eureka:
   client:
-    # Whether to register itself with the Eureka server
     register-with-eureka: false
-    # Whether to fetch the registry from the Eureka server
     fetch-registry: false
-    # Default service URL for communication with the Eureka server
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/  # localhost -> eureka-server로 변경
-
-  instance:
-    # Hostname of the Eureka server instance
-    hostname: eureka-server  # localhost -> eureka-server로 변경
+      defaultZone: http://eureka-server:8761/eureka/
