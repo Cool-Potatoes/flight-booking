@@ -26,6 +26,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
 
+	// QueryDSL 적용을 위한 의존성 (SpringBoot3.0 부터는 jakarta 사용)
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+
+	// QueryDSL APT 의존성 (annotation processing을 위한 의존성)
+	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+
+	// Jakarta API 의존성
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
 	// Eureka client
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 

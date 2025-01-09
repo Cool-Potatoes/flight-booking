@@ -12,20 +12,20 @@ public record UserResponse(
     String phone,
     Long mileage,
     String role,
-    Boolean isBlocked
+    Boolean isBlocked,
+    Boolean isDeleted
 ) {
 
   public static UserResponse fromEntity(User user) {
-    return new UserResponse(
-        user.getId(),
-        user.getEmail(),
-        user.getName(),
-        user.getPhone(),
-        user.getMileage(),
-        user.getRole().name(),
-        user.getIsBlocked()
-    );
+    return UserResponse.builder()
+        .id(user.getId())
+        .email(user.getEmail())
+        .name(user.getName())
+        .phone(user.getPhone())
+        .mileage(user.getMileage())
+        .role(user.getRole().name())
+        .isBlocked(user.getIsBlocked())
+        .isDeleted(user.getIsDeleted())
+        .build();
   }
-
-
 }

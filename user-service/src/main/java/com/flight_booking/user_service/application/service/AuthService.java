@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AuthService {
 
   private final UserRepository userRepository;
@@ -31,6 +30,7 @@ public class AuthService {
   private final JwtUtil jwtUtil;
 
   // 회원가입
+  @Transactional
   public void createUser(SignUpRequest request) {
     if (userRepository.existsByEmail(request.email())) {
       throw new UserException(ErrorCode.DUPLICATE_EMAIL);
