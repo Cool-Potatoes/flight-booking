@@ -1,7 +1,6 @@
 package com.flight_booking.booking_service.application.service;
 
 import com.flight_booking.booking_service.domain.model.Booking;
-import com.flight_booking.booking_service.domain.model.BookingStatusEnum;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
 import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
@@ -9,7 +8,9 @@ import com.flight_booking.booking_service.presentation.request.BookingRequestDto
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
 import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
+import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
@@ -38,9 +39,12 @@ public class BookingService {
     Booking booking = Booking.builder()
         // TODO: 유저아이디는 로그인한 유저 아이디 가져올 것
         // .userId(loggedInUserId)
-        .flightId(bookingRequestDto.flightId())
+        .seatId(bookingRequestDto.seatId())
         .bookingStatus(BookingStatusEnum.BOOKING_WAITING) // 초기 예약 상태 설정
         .build();
+
+    // 임시 이메일, 로그인한 유저한테 가져올것 - 게이트웨이 헤더
+    String email = "test@test.com";
 
     Booking savedBooking = bookingRepository.save(booking);
 
@@ -48,7 +52,8 @@ public class BookingService {
         bookingRequestDto.passengerRequestDtos(), savedBooking);
 
     kafkaTemplate.send("payment-creation-topic", savedBooking.getBookingId().toString(),
-        ApiResponse.ok(new PaymentRequestDto(savedBooking.getBookingId(), 1000), // TODO fare 입력
+        ApiResponse.ok(new PaymentRequestDto(email, savedBooking.getBookingId(), 1000L),
+            // TODO fare 입력
             "message from createBooking"));
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
@@ -74,7 +79,7 @@ public class BookingService {
     Booking booking = bookingRepository.findById(bookingId)
         .orElseThrow(NotFoundBookingException::new);
 
-    booking.updateBooking(bookingRequestDto.flightId(),
+    booking.updateBooking(bookingRequestDto.seatId(),
         bookingRequestDto.bookingStatus());
 
     passengerService.updatePassenger(booking, bookingRequestDto.passengerRequestDtos());
@@ -91,5 +96,16 @@ public class BookingService {
         .orElseThrow(NotFoundBookingException::new);
 
     booking.deleteBooking();
+  }
+
+  @Transactional(readOnly = false)
+  public BookingResponseDto processBooking(BookingProcessRequestDto bookingProcessRequestDto) {
+
+    Booking booking = bookingRepository.findById(bookingProcessRequestDto.bookingId())
+        .orElseThrow(NotFoundBookingException::new);
+
+    booking.updateBookingStatus(bookingProcessRequestDto.bookingStatus());
+
+    return BookingResponseDto.from(booking);
   }
 }
