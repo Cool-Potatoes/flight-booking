@@ -7,7 +7,7 @@ import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
-import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
 import com.flight_booking.user_service.presentation.request.UpdateRequest;

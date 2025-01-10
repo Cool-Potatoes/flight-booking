@@ -2,7 +2,7 @@ package com.flight_booking.user_service.presentation.controller;
 
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.BlockService;
-import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.request.BlockRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
