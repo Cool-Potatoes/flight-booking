@@ -7,7 +7,7 @@ import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
-import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
@@ -15,7 +15,6 @@ import com.flight_booking.user_service.presentation.response.AdminUserDetailResp
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
-import com.flight_booking.user_service.presentation.response.UserResponse;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,20 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
   private final UserRepository userRepository;
   private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
-
-  // 이메일 기반으로 사용자 정보 조회
-  @Transactional(readOnly = true)
-  public UserResponse findUserByEmail(String email) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-    return UserResponse.fromEntity(user);
-  }
 
   // 전체 회원 목록 조회
   @Transactional(readOnly = true)
@@ -65,6 +55,7 @@ public class UserService {
   }
 
   // 회원 정보 수정
+  @Transactional
   public void updateUser(Long id, CustomUserDetails userDetails, UpdateRequest updateRequest) {
     User user = getUser(id);
     boolean isAdmin = isAdmin(userDetails);
@@ -88,6 +79,7 @@ public class UserService {
   }
 
   // 사용자 - 회원 탈퇴
+  @Transactional
   public void deleteUser(Long id, CustomUserDetails userDetails) {
     User user = getUser(id);
     checkUser(userDetails, user);
@@ -101,7 +93,7 @@ public class UserService {
   // 존재하는 사용자 확인 및 삭제된 사용자 확인
   private User getUser(Long id) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new UserException(ErrorCode.ACCESS_ONLY_SELF)); // 사용자 존재 여부 확인
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
     // 삭제된 사용자 확인
     if (user.getIsDeleted()) {
@@ -144,7 +136,7 @@ public class UserService {
 
   // 마일리지 차감
   @Transactional
-  public UserResponse updateUserMileage(UserRequestDto userRequestDto) {
+  public UserDetailResponse updateUserMileage(UserRequestDto userRequestDto) {
 
     User user = userRepository.findByEmail(userRequestDto.email())
         .orElseThrow();
@@ -159,6 +151,6 @@ public class UserService {
                 PaymentStatusEnum.PAYED), // TODO mileage 몇으로?
             "message from updateUserMileage"));
 
-    return UserResponse.fromEntity(user);
+    return UserDetailResponse.fromEntity(user);
   }
 }

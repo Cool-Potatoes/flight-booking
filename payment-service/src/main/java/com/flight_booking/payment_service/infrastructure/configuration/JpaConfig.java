@@ -1,5 +1,6 @@
 package com.flight_booking.payment_service.infrastructure.configuration;
 
+import com.flight_booking.common.infrastructure.auditing.AuditorAwareImpl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -22,11 +23,8 @@ public class JpaConfig {
   }
 
   @Bean
-  public AuditorAware<String> auditorAware() {
-    return () -> {
-      String email = "temp"; // TODO
-
-      return Optional.of(email);
-    };
+  public AuditorAware<String> auditorProvider() {
+    return new AuditorAwareImpl();
   }
+
 }

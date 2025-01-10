@@ -33,7 +33,7 @@ spring:
         - id: booking-service  # 라우트 식별자
           uri: lb://booking-service
           predicates:
-            - Path=/v1/booking/**
+            - Path=/v1/bookings/**
 
       discovery:
         locator:

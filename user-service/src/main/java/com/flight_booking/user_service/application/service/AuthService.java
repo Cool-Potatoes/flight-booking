@@ -62,11 +62,32 @@ public class AuthService {
           .findFirst()
           .orElse(Role.USER.getAuthority());
 
+      // 사용자 상태 확인 (블락/ 탈퇴)
+      checkUserStatus(validatedEmail);
+
       return jwtUtil.createToken(validatedEmail, role);
     } catch (AuthenticationException ex) {
       // 인증 실패 시 처리
       log.error("로그인 실패: {}", ex.getMessage());
       throw new UserException(ErrorCode.LOGIN_FAIL);
+    }
+  }
+
+  // 사용자 상태 확인 (블락되었거나 탈퇴했는지)
+  private void checkUserStatus(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+    if (user.getIsBlocked()) {
+      log.error("블락된 사용자: {}", email);
+      String reason = user.getBlockedInfo().getBlockedReason();
+      String errorMessage = ErrorCode.USER_BLOCKED.getMessage() + " 이유: " + reason;
+      throw new UserException(ErrorCode.USER_BLOCKED, errorMessage);
+    }
+
+    if (user.getIsDeleted()) {  // 탈퇴 여부는 별도로 관리 (예: isActive 필드)
+      log.error("탈퇴된 사용자: {}", email);
+      throw new UserException(ErrorCode.USER_DELETED);
     }
   }
 }

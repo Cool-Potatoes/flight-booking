@@ -1,5 +1,6 @@
 package com.flight_booking.user_service.presentation.response;
 
+import com.flight_booking.user_service.domain.model.BlockedInfo;
 import com.flight_booking.user_service.domain.model.User;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -14,6 +15,7 @@ public record AdminUserDetailResponse(
     Long mileage,
     String role,
     Boolean isBlocked,
+    BlockedInfo blockedInfo,
     LocalDateTime createdAt,
     String createdBy,
     LocalDateTime updatedAt,
@@ -30,6 +32,7 @@ public record AdminUserDetailResponse(
         user.getMileage(),
         user.getRole().getAuthority(),
         user.getIsBlocked(),
+        user.getBlockedInfo(),
         user.getCreatedAt(),
         user.getCreatedBy(),
         user.getUpdatedAt(),
