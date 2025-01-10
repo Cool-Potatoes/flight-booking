@@ -1,9 +1,12 @@
 package com.flight_booking.booking_service.presentation.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
+import com.flight_booking.common.application.dto.BookingProcessRequestDto;
+import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.UUID;
@@ -11,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedModel;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,7 +35,7 @@ public class BookingController {
   @PostMapping
   public ApiResponse<?> createBooking(@RequestBody BookingRequestDto bookingRequestDto) {
 
-    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto), "예약 성공");
+    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto), "예매 성공");
   }
 
   @GetMapping
@@ -65,5 +70,17 @@ public class BookingController {
     bookingService.deleteBooking(bookingId);
 
     return ApiResponse.ok("예매 삭제 성공");
+  }
+
+  @KafkaListener(groupId = "payment-complete-group", topics = "payment-complete-topic")
+  public ApiResponse<?> consumeProcessBooking(@Payload ApiResponse<BookingProcessRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingProcessRequestDto.class);
+
+    bookingService.processBooking(bookingProcessRequestDto);
+
+    return ApiResponse.ok("예매 결제 성공");
   }
 }

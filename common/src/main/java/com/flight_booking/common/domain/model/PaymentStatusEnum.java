@@ -1,4 +1,4 @@
-package com.flight_booking.payment_service.domain.model;
+package com.flight_booking.common.domain.model;
 
 public enum PaymentStatusEnum {
 
