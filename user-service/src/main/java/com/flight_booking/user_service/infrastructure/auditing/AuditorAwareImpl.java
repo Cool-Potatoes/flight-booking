@@ -1,6 +1,6 @@
-package com.flight_booking.user_service.infrastructure.persistence;
+package com.flight_booking.user_service.infrastructure.auditing;
 
-import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
