@@ -17,13 +17,14 @@ public class KafkaSeatEndpoint {
   private final SeatService seatService;
 
   @KafkaListener(groupId = "seat-availability-update-group", topics = "seat-availability-check-and-update-topic")
-  public void consumeSeatAvailabilityCheckAndUpdate(@Payload ApiResponse<SeatBookingRequestDto> message) {
+  public void consumeSeatAvailabilityCheckAndUpdate(
+      @Payload ApiResponse<SeatBookingRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     SeatBookingRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
         SeatBookingRequestDto.class);
 
-    seatService.updateSeatAvailable(seatBookingRequestDto);
+    seatService.consumeSeatAvailabilityCheckAndUpdate(seatBookingRequestDto);
   }
 
   @KafkaListener(groupId = "seat-availability-check-group", topics = "seat-availability-check-topic")

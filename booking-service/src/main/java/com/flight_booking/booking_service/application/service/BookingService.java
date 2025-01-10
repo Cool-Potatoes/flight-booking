@@ -10,7 +10,6 @@ import com.flight_booking.booking_service.presentation.response.BookingResponseC
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
 import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
-import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
@@ -18,6 +17,7 @@ import com.flight_booking.common.application.dto.SeatCheckingRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -54,15 +54,22 @@ public class BookingService {
     List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(
         bookingRequestDto.passengerRequestDtos(), savedBooking);
 
+    List<UUID> seatIdList = new ArrayList<>();
+    for (PassengerResponseDto passengerResponseDto : passengerResponseDtoList) {
+      seatIdList.add(passengerResponseDto.seatId());
+    }
+
+    kafkaTemplate.send(
+        "seat-availability-check-and-update-topic",
+        savedBooking.getBookingId().toString(),
+        ApiResponse.ok(
+            new SeatBookingRequestDto(email, savedBooking.getBookingId(), seatIdList),
+            "Message from createBooking"
+        )
+    );
+
     passengerResponseDtoList.forEach(passenger -> {
-      kafkaTemplate.send(
-          "seat-availability-check-and-update-topic",
-          savedBooking.getBookingId().toString(),
-          ApiResponse.ok(
-              new SeatBookingRequestDto(email, savedBooking.getBookingId(), passenger.seatId()),
-              "Message from createBooking"
-          )
-      );
+
     });
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);

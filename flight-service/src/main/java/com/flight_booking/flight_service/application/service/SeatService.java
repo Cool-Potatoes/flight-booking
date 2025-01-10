@@ -112,36 +112,50 @@ public class SeatService {
   }
 
   @Transactional
-  public void updateSeatAvailable(SeatBookingRequestDto seatBookingRequestDto) {
+  public void consumeSeatAvailabilityCheckAndUpdate(SeatBookingRequestDto seatBookingRequestDto) {
+
+    List<UUID> seatIdList = seatBookingRequestDto.seatIdList();
 
     // TODO : 에러처리 필요
-    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId())
-        .orElseThrow(IllegalArgumentException::new);
+    List<Seat> seatList = seatRepository.findAllById(seatIdList);
 
-    if (seat.getIsDeleted()) {
-      throw new RuntimeException("삭제된 좌석입니다.");
-    }
+//    if (seat.getIsDeleted()) {
+//      throw new RuntimeException("삭제된 좌석입니다.");
+//    }
 
-    if (seat.getIsAvailable()) {
+    if (checkSeatListAvailable(seatList)) {
 
-      seat.updateAvailable(false);
+      Long totalPrice = 0L;
+      for (Seat seat : seatList) {
+        seat.updateAvailable(false);
+        totalPrice += seat.getPrice();
+      }
 
-      kafkaTemplate.send("payment-creation-topic", seat.getSeatId().toString(),
+      kafkaTemplate.send("payment-creation-topic", seatBookingRequestDto.bookingId().toString(),
           ApiResponse.ok(
               new PaymentRequestDto(seatBookingRequestDto.email(),
                   seatBookingRequestDto.bookingId(),
-                  seat.getPrice()),
+                  totalPrice),
               "message from updateSeatAvailable"));
     } else {
 
       // booking status 를 fail으로 변경해줘야하기 때문에 필요함
-      kafkaTemplate.send("booking-fail-topic", seat.getSeatId().toString(),
-          ApiResponse.ok(
-              new PaymentRequestDto(seatBookingRequestDto.email(),
-                  seatBookingRequestDto.bookingId(),
-                  seat.getPrice()),
-              "message from updateSeatAvailable"));
+//      kafkaTemplate.send("booking-fail-topic", seat.getSeatId().toString(),
+//          ApiResponse.ok(
+//              new PaymentRequestDto(seatBookingRequestDto.email(),
+//                  seatBookingRequestDto.bookingId(),
+//                  seat.getPrice()),
+//              "message from updateSeatAvailable"));
     }
+  }
+
+  private boolean checkSeatListAvailable(List<Seat> seatList) {
+    for (Seat seat : seatList) {
+      if (!seat.getIsAvailable()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Transactional(readOnly = false)
