@@ -1,5 +1,8 @@
 package com.flight_booking.flight_service.application.service;
 
+import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
 import com.flight_booking.flight_service.domain.model.SeatClassEnum;
@@ -15,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeatService {
 
   private final SeatRepository seatRepository;
+  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
 
   public void createSeat(Flight flight) {
 
@@ -104,4 +109,35 @@ public class SeatService {
     return String.format("%c%02d", rowLetter, seatNumber);
   }
 
+  @Transactional
+  public void updateSeatAvailable(SeatBookingRequestDto seatBookingRequestDto) {
+
+    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId()).orElseThrow();
+
+    if (seat.getIsDeleted()) {
+      throw new RuntimeException("삭제된 좌석입니다.");
+    }
+
+    if (seat.getIsAvailable()) {
+
+      seat.updateAvailable(false);
+
+      kafkaTemplate.send("payment-creation-topic", seat.getSeatId().toString(),
+          ApiResponse.ok(
+              new PaymentRequestDto(seatBookingRequestDto.email(),
+                  seatBookingRequestDto.bookingId(),
+                  seat.getPrice()),
+              "message from createBooking"));
+    } else {
+
+      kafkaTemplate.send("payment-creation-fail-topic", seat.getSeatId().toString(),
+          ApiResponse.ok(
+              new PaymentRequestDto(seatBookingRequestDto.email(),
+                  seatBookingRequestDto.bookingId(),
+                  seat.getPrice()),
+              "message from createBooking"));
+    }
+
+
+  }
 }

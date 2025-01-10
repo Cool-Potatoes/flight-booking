@@ -2,9 +2,9 @@ package com.flight_booking.flight_service.presentation.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.application.service.SeatService;
 import com.flight_booking.flight_service.domain.model.Seat;
-import com.flight_booking.flight_service.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.presentation.request.SeatRequestDto;
 import com.flight_booking.flight_service.presentation.response.SeatResponseDto;
 import com.querydsl.core.types.Predicate;
@@ -57,10 +57,10 @@ public class SeatController {
   public ApiResponse<?> consumeSeatBooking(@Payload ApiResponse<SeatBookingRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
-    SeatBookingRequestDto flightRequestDto = mapper.convertValue(message.getData(),
+    SeatBookingRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
         SeatBookingRequestDto.class);
 
-//    seatService.processBooking(flightRequestDto);
+    seatService.updateSeatAvailable(seatBookingRequestDto);
 
     return ApiResponse.ok("예매 결제 성공");
   }

@@ -52,6 +52,10 @@ public class Seat extends BaseEntity {
     this.price = price;
   }
 
+  public void updateAvailable(Boolean available) {
+    this.isAvailable = available;
+  }
+
   public void delete(String deletedBy) {
     this.isDeleted = true;
     this.deletedAt = LocalDateTime.now();
