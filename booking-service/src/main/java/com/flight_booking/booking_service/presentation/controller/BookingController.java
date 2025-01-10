@@ -6,7 +6,6 @@ import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
-import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.UUID;
@@ -72,15 +71,13 @@ public class BookingController {
     return ApiResponse.ok("예매 삭제 성공");
   }
 
-  @KafkaListener(groupId = "payment-complete-group", topics = "payment-complete-topic")
-  public ApiResponse<?> consumeProcessBooking(@Payload ApiResponse<BookingProcessRequestDto> message) {
+  @KafkaListener(groupId = "booking-complete-group", topics = "booking-complete-topic")
+  public void consumeBookingComplete(@Payload ApiResponse<BookingProcessRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
         BookingProcessRequestDto.class);
 
     bookingService.processBooking(bookingProcessRequestDto);
-
-    return ApiResponse.ok("예매 결제 성공");
   }
 }

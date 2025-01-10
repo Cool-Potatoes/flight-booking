@@ -9,7 +9,7 @@ import com.flight_booking.booking_service.presentation.response.BookingResponseC
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
 import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
-import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
@@ -51,10 +51,14 @@ public class BookingService {
     List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(
         bookingRequestDto.passengerRequestDtos(), savedBooking);
 
-    kafkaTemplate.send("seat-booking-topic", savedBooking.getBookingId().toString(),
-        ApiResponse.ok(new SeatBookingRequestDto(email, savedBooking.getBookingId(),
-                bookingRequestDto.seatId()),
+    kafkaTemplate.send("payment-creation-topic", savedBooking.getBookingId().toString(),
+        ApiResponse.ok(new PaymentRequestDto(email, savedBooking.getBookingId(), 1000L),
             "message from createBooking"));
+
+//    kafkaTemplate.send("seat-booking-topic", savedBooking.getBookingId().toString(),
+//        ApiResponse.ok(new SeatBookingRequestDto(email, savedBooking.getBookingId(),
+//                bookingRequestDto.seatId()),
+//            "message from createBooking"));
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
   }
@@ -99,13 +103,11 @@ public class BookingService {
   }
 
   @Transactional(readOnly = false)
-  public BookingResponseDto processBooking(BookingProcessRequestDto bookingProcessRequestDto) {
+  public void processBooking(BookingProcessRequestDto bookingProcessRequestDto) {
 
     Booking booking = bookingRepository.findById(bookingProcessRequestDto.bookingId())
         .orElseThrow(NotFoundBookingException::new);
 
-    booking.updateBookingStatus(bookingProcessRequestDto.bookingStatus());
-
-    return BookingResponseDto.from(booking);
+    booking.updateBookingStatus(BookingStatusEnum.BOOKING_COMPLETE);
   }
 }

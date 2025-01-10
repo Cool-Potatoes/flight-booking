@@ -4,7 +4,6 @@ import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
-import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.domain.model.Payment;
@@ -50,11 +49,10 @@ public class PaymentService {
     Payment savedPayment = paymentRepository.save(payment);
 
     // TODO 마일리지 확인 및 차감 -> 성공적으로 이루어지면 status 변경 -> 탑승객 생성
-    kafkaTemplate.send("payment-mile-topic", savedPayment.getPaymentId().toString(),
+    kafkaTemplate.send("user-update-mileage-topic", savedPayment.getPaymentId().toString(),
         ApiResponse.ok(new UserRequestDto(paymentRequestDto.email(), // user email
-            paymentRequestDto.fare(),
-            paymentRequestDto.bookingId(),
-                1000L), // TODO mileage 몇으로?
+                savedPayment.getFare(),
+                savedPayment.getPaymentId()),
             "message from createPayment"));
 
     return PaymentResponseDto.from(payment);
@@ -128,18 +126,15 @@ public class PaymentService {
   }
 
   @Transactional
-  public PaymentResponseDto processPayment(ProcessPaymentRequestDto processPaymentRequestDto) {
+  public void processPaymentSuccess(ProcessPaymentRequestDto processPaymentRequestDto) {
 
-    Payment payment = paymentRepository.findByBookingId(processPaymentRequestDto.bookingId()).orElseThrow();
+    Payment payment = paymentRepository.findById(processPaymentRequestDto.paymentId())
+        .orElseThrow(() -> new RuntimeException("PaymentId를 찾을 수 없음."));
 
-    payment.updateFare(processPaymentRequestDto.fair());
-    payment.updateStatus(processPaymentRequestDto.statusEnum());
+    Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED);
 
-    kafkaTemplate.send("payment-complete-topic", payment.getPaymentId().toString(),
-        ApiResponse.ok(new BookingProcessRequestDto(processPaymentRequestDto.bookingId(),
-                BookingStatusEnum.BOOKING_COMPLETE), // TODO mileage 몇으로?
+    kafkaTemplate.send("booking-complete-topic", updatedPayment.getPaymentId().toString(),
+        ApiResponse.ok(new BookingProcessRequestDto(payment.getBookingId()),
             "message from updateUserMileage"));
-
-    return PaymentResponseDto.from(payment);
   }
 }

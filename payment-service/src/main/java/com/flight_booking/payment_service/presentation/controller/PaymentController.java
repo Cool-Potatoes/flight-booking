@@ -102,15 +102,13 @@ public class PaymentController {
 
   }
 
-  @KafkaListener(groupId = "payment-process-group", topics = "payment-process-topic")
-  public ApiResponse<?> processPayment(@Payload ApiResponse<ProcessPaymentRequestDto> message) {
+  @KafkaListener(groupId = "payment-process-group", topics = "payment-success-process-topic")
+  public void consumePaymentSuccessProcess(@Payload ApiResponse<ProcessPaymentRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     ProcessPaymentRequestDto paymentRequestDto = mapper.convertValue(message.getData(),
         ProcessPaymentRequestDto.class);
 
-    PaymentResponseDto paymentResponseDto = paymentService.processPayment(paymentRequestDto);
-
-    return ApiResponse.ok(paymentResponseDto, "결제 성공");
+    paymentService.processPaymentSuccess(paymentRequestDto);
   }
 }

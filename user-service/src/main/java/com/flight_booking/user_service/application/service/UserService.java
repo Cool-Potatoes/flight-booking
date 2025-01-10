@@ -2,7 +2,6 @@ package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
-import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
@@ -144,21 +143,27 @@ public class UserService {
 
   // 마일리지 차감
   @Transactional
-  public UserResponse updateUserMileage(UserRequestDto userRequestDto) {
+  public void updateUserMileage(UserRequestDto userRequestDto) {
 
+    // TODO lock 걸어서 유저 정보 변경 할 때 중복변경 되지 않게
     User user = userRepository.findByEmail(userRequestDto.email())
         .orElseThrow();
 
-    // 마일리지 있으면 마일리지 차감, 요금 할인
-    user.updateMile(userRequestDto.Mileage());
-    Long fair = userRequestDto.fare();
-    fair -= userRequestDto.Mileage();
+    // 마일리지가 충분한지 확인
+    if (user.getMileage() < userRequestDto.fare()) {
 
-    kafkaTemplate.send("payment-process-topic", user.getId().toString(),
-        ApiResponse.ok(new ProcessPaymentRequestDto(userRequestDto.bookingId(), fair,
-                PaymentStatusEnum.PAYED), // TODO mileage 몇으로?
+      // TODO fallback 로직
+
+      throw new RuntimeException("현재 마일리지가 fare보다 적습니다.");
+    }
+
+    // 마일리지 차감
+    user.updateMile(userRequestDto.fare());
+
+    // 결제 상태 업데이트
+    kafkaTemplate.send("payment-success-process-topic", user.getId().toString(),
+        ApiResponse.ok(new ProcessPaymentRequestDto(userRequestDto.paymentId()),
             "message from updateUserMileage"));
 
-    return UserResponse.fromEntity(user);
   }
 }

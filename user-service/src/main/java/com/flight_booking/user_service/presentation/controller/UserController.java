@@ -86,16 +86,14 @@ public class UserController {
     return ApiResponse.ok("회원 탈퇴 성공");
   }
 
-  @KafkaListener(groupId = "payment-mile-group", topics = "payment-mile-topic")
-  public ApiResponse<?> consumeMileageUpdate(@Payload ApiResponse<UserRequestDto> message) {
+  @KafkaListener(groupId = "user-mileage-group", topics = "user-update-mileage-topic")
+  public void consumeUpdateMileage(@Payload ApiResponse<UserRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     UserRequestDto userRequestDto = mapper.convertValue(message.getData(),
         UserRequestDto.class);
 
-    UserResponse userResponse = userService.updateUserMileage(userRequestDto);
-
-    return ApiResponse.ok(userResponse, "유저 마일리지 변경 성공");
+    userService.updateUserMileage(userRequestDto);
   }
 }
 
