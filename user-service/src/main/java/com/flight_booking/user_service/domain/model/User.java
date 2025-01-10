@@ -12,6 +12,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -89,19 +91,25 @@ public class User extends BaseEntity {
       this.setDeletedBy(blockedBy);
     }
 
-    this.blockedInfo = new BlockedInfo();
+    if (this.blockedInfo == null) {
+      this.blockedInfo = new BlockedInfo();
+    }
+
     this.blockedInfo.setBlockedAt(LocalDateTime.now());
-    this.blockedInfo.setBlockedReason(reason);
     this.blockedInfo.setBlockedBy(blockedBy);
+
+    List<String> reasons = this.blockedInfo.getBlockedReason();
+    if (reasons == null) {
+      reasons = new ArrayList<>();
+    }
+    reasons.add(reason);
+    this.blockedInfo.setBlockedReason(reasons);
   }
 
   public void unblockUser() {
     this.isBlocked = false;
-    this.blockedInfo = null;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
+    this.blockedInfo.setBlockedAt(null);
+    this.blockedInfo.setBlockedBy(null);
   }
 
   public void updateMile(Long mileage){
