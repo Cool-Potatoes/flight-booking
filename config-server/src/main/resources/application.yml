@@ -1,22 +1,19 @@
+server:
+  port: 8888  # 포트를 명시적으로 지정합니다.
+
 spring:
-  profiles:
-    active: native
   application:
     name: config-server
   cloud:
     config:
       server:
         native:
-          search-locations: classpath:/config-repo
-
-server:
-  port: 8888
-
+          search-locations: classpath:/config-repo/
+      # Eureka Server를 통해 Config Server를 찾도록 설정합니다.
+      discovery:
+        enabled: true
+        service-id: config-server
 eureka:
   client:
-    # Eureka 서버의 기본 서비스 URL
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
-    # Config Server도 Eureka에 등록
-    register-with-eureka: true
-    fetch-registry: true
+      defaultZone: http://eureka-server:8761/eureka/

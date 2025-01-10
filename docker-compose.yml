@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 networks:
   app-network:
@@ -15,11 +15,21 @@ services:
       - "8761:8761"
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/eureka/" ]
       interval: 20s
       timeout: 5s
       retries: 10
+    environment: # Spring 프로파일 명시
+      SPRING_PROFILES_ACTIVE: native
 
   # ---------------------
   # Config Server
@@ -33,9 +43,10 @@ services:
       - app-network
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: native
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
       interval: 20s
@@ -150,7 +161,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
       - app-network

@@ -1,11 +1,11 @@
 server:
-  port: 0  # Temporary port, will be overwritten by Config server settings later.
+  port: 0 # Config Server에서 포트 설정
 
 spring:
   application:
     name: booking-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: "optional:configserver:"
   cloud:
     config:
       discovery:
