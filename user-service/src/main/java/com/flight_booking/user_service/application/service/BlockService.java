@@ -21,7 +21,7 @@ public class BlockService {
   @Transactional
   public void blockUser(Long id, BlockRequest request, CustomUserDetails userDetails) {
     User user = getUser(id);
-    if (user.getRole() != Role.ADMIN) {
+    if (user.getRole() == Role.ADMIN) {
       throw new UserException(ErrorCode.CANNOT_ADMIN_BLOCKED);
     }
     if (user.getIsBlocked()) {
