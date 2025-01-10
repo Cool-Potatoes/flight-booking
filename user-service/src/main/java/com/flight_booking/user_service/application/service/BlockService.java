@@ -13,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class BlockService {
 
   private final UserRepository userRepository;
 
   // 관리자 - 회원 블락 처리
+  @Transactional
   public void blockUser(Long id, BlockRequest request, CustomUserDetails userDetails) {
     User user = getUser(id);
     if (user.getRole() != Role.ADMIN) {
@@ -31,6 +31,7 @@ public class BlockService {
   }
 
   // 관리자 - 회원 블락 해제
+  @Transactional
   public void unblockUser(Long id) {
     User user = getUser(id);
     if (!user.getIsBlocked()) {

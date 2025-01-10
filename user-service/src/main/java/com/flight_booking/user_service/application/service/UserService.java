@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -50,6 +49,7 @@ public class UserService {
   }
 
   // 회원 정보 수정
+  @Transactional
   public void updateUser(Long id, CustomUserDetails userDetails, UpdateRequest updateRequest) {
     User user = getUser(id);
     boolean isAdmin = isAdmin(userDetails);
@@ -73,6 +73,7 @@ public class UserService {
   }
 
   // 사용자 - 회원 탈퇴
+  @Transactional
   public void deleteUser(Long id, CustomUserDetails userDetails) {
     User user = getUser(id);
     checkUser(userDetails, user);
