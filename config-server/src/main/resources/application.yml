@@ -15,16 +15,10 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-    initialInstanceInfoReplicationIntervalSeconds: 60
+      defaultZone: http://172.20.0.5:8761/eureka/
   instance:
     hostname: config-server
     nonSecurePort: 8888
-    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}} # 추가
-    appName: ${spring.application.name}  # 추가
-    appGroupName: config-server-group  # 추가 - 원하는 그룹 이름으로 변경 가능
-    virtualHostName: config-server  # 추가
-    secureVirtualHostName: config-server  # 추가
 logging:
   level:
     org.springframework.cloud.netflix.eureka: DEBUG

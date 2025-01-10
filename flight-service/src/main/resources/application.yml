@@ -5,7 +5,7 @@ spring:
   application:
     name: flight-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: "optional:configserver:"
   cloud:
     config:
       discovery:
@@ -15,4 +15,4 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://172.20.0.5:8761/eureka/  # Eureka Server 컨테이너의 IP 주소로 변경

@@ -1,9 +1,10 @@
-
-
 networks:
   app-network:
     driver: bridge
-
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16  # 다른 서브넷으로 변경
+          gateway: 172.20.0.1
 services:
   # ---------------------
   # Eureka Server
@@ -24,12 +25,14 @@ services:
           cpus: '0.5'
           memory: 256M
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8761/eureka/" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8761/eureka/ || exit 1" ]  # 헬스 체크 명령어 수정
       interval: 20s
       timeout: 5s
       retries: 10
+      start_period: 60s  # 컨테이너 시작 후 헬스 체크까지 대기 시간 추가
     environment: # Spring 프로파일 명시
       SPRING_PROFILES_ACTIVE: native
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: true  # IP 주소 우선 사용
 
   # ---------------------
   # Config Server
@@ -41,8 +44,6 @@ services:
       - "8888:8888"
     networks:
       - app-network
-    links:
-      - eureka-server
     deploy:
       resources:
         limits:
@@ -53,9 +54,9 @@ services:
           memory: 256M
     depends_on:
       eureka-server:
-        condition: service_healthy  # service_started 대신 service_healthy 사용
+        condition: service_healthy
     environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://172.20.0.5:8761/eureka/  # IP 주소 사용
       SPRING_PROFILES_ACTIVE: native
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/info" ]
@@ -221,9 +222,10 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://172.20.0.5:8761/eureka/  # IP 주소 사용
       SECRET_KEY: "66mL7J+B7J206rCQ7J6Q65Ok7J2Y7ZWt6rO16raM7JiI66ek7ISc67mE7Iqk66W87Iuc7J6R7ZW067SF64uI64uk"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 20s
       timeout: 5s
       retries: 10
@@ -251,6 +253,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://172.20.0.5:8761/eureka/  # IP 주소 사용
       DB_URL: jdbc:postgresql://postgres:5432/flight_booking
       DB_USERNAME: postgres
       DB_PASSWORD: systempass
@@ -287,6 +290,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://172.20.0.5:8761/eureka/  # IP 주소 사용
       DB_URL: jdbc:postgresql://postgres:5432/flight_booking
       DB_USERNAME: postgres
       DB_PASSWORD: systempass
@@ -323,6 +327,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://172.20.0.5:8761/eureka/  # IP 주소 사용
       DB_URL: jdbc:postgresql://postgres:5432/flight_booking
       DB_USERNAME: postgres
       DB_PASSWORD: systempass
@@ -357,6 +362,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://172.20.0.5:8761/eureka/  # IP 주소 사용
       DB_URL: jdbc:postgresql://postgres:5432/flight_booking
       DB_USERNAME: postgres
       DB_PASSWORD: systempass
@@ -390,6 +396,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://172.20.0.5:8761/eureka/  # IP 주소 사용
       DB_URL: jdbc:postgresql://postgres:5432/flight_booking
       DB_USERNAME: postgres
       DB_PASSWORD: systempass
