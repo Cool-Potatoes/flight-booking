@@ -100,4 +100,7 @@ public class User extends BaseEntity {
     this.blockedInfo = null;
   }
 
+  public void updateMile(Long mileage){
+    if(this.mileage > 1000) this.mileage = this.mileage - mileage;
+  }
 }

@@ -1,4 +1,4 @@
-package com.flight_booking.booking_service.domain.config;
+package com.flight_booking.booking_service.infrastructure.config;
 
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;

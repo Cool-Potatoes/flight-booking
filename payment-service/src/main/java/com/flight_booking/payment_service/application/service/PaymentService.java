@@ -1,8 +1,13 @@
 package com.flight_booking.payment_service.application.service;
 
+import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.UserRequestDto;
+import com.flight_booking.common.domain.model.BookingStatusEnum;
+import com.flight_booking.common.domain.model.PaymentStatusEnum;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.domain.model.Payment;
-import com.flight_booking.payment_service.domain.model.PaymentStatusEnum;
 import com.flight_booking.payment_service.domain.repository.PaymentRepository;
 import com.flight_booking.payment_service.presentation.request.UpdateFareRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
@@ -14,6 +19,7 @@ import org.apache.kafka.common.errors.ApiException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentService {
 
   private final PaymentRepository paymentRepository;
+  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
 
   @Transactional
   public PaymentResponseDto createPayment(PaymentRequestDto paymentRequestDto) {
@@ -40,9 +47,15 @@ public class PaymentService {
         .status(PaymentStatusEnum.PENDING)
         .build();
 
-    paymentRepository.save(payment);
+    Payment savedPayment = paymentRepository.save(payment);
 
     // TODO 마일리지 확인 및 차감 -> 성공적으로 이루어지면 status 변경 -> 탑승객 생성
+    kafkaTemplate.send("payment-mile-topic", savedPayment.getPaymentId().toString(),
+        ApiResponse.ok(new UserRequestDto(paymentRequestDto.email(), // user email
+            paymentRequestDto.fare(),
+            paymentRequestDto.bookingId(),
+                1000L), // TODO mileage 몇으로?
+            "message from createPayment"));
 
     return PaymentResponseDto.from(payment);
   }
@@ -76,7 +89,7 @@ public class PaymentService {
     }
 
     // 기존 결제 금액 확인
-    Integer currentFare = payment.getFare();
+    Long currentFare = payment.getFare();
 
     // 충돌 여부 확인
     if (!currentFare.equals(updateFareRequestDto.previousFare())) {
@@ -114,4 +127,19 @@ public class PaymentService {
     return payment;
   }
 
+  @Transactional
+  public PaymentResponseDto processPayment(ProcessPaymentRequestDto processPaymentRequestDto) {
+
+    Payment payment = paymentRepository.findByBookingId(processPaymentRequestDto.bookingId()).orElseThrow();
+
+    payment.updateFare(processPaymentRequestDto.fair());
+    payment.updateStatus(processPaymentRequestDto.statusEnum());
+
+    kafkaTemplate.send("payment-complete-topic", payment.getPaymentId().toString(),
+        ApiResponse.ok(new BookingProcessRequestDto(processPaymentRequestDto.bookingId(),
+                BookingStatusEnum.BOOKING_COMPLETE), // TODO mileage 몇으로?
+            "message from updateUserMileage"));
+
+    return PaymentResponseDto.from(payment);
+  }
 }
