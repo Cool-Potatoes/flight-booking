@@ -9,6 +9,7 @@ import com.flight_booking.booking_service.presentation.response.BookingResponseC
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
 import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
+import com.flight_booking.common.application.dto.FlightRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
@@ -51,10 +52,16 @@ public class BookingService {
     List<PassengerResponseDto> passengerResponseDtoList = passengerService.createPassenger(
         bookingRequestDto.passengerRequestDtos(), savedBooking);
 
-    kafkaTemplate.send("payment-creation-topic", savedBooking.getBookingId().toString(),
-        ApiResponse.ok(new PaymentRequestDto(email, savedBooking.getBookingId(), 1000L),
+    // seat가 대신 들어오고 이 코드는 flight로 이동
+    kafkaTemplate.send("seat-booking-topic", savedBooking.getBookingId().toString(),
+        ApiResponse.ok(new FlightRequestDto(email, savedBooking.getBookingId()),
             // TODO fare 입력
             "message from createBooking"));
+
+//    kafkaTemplate.send("payment-creation-topic", savedBooking.getBookingId().toString(),
+//        ApiResponse.ok(new PaymentRequestDto(email, savedBooking.getBookingId(), 1000L),
+//            // TODO fare 입력
+//            "message from createBooking"));
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
   }
