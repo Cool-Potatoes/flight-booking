@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk
 WORKDIR /app
 COPY build/libs/config-server-*.jar app.jar
 COPY src/main/resources/config-repo /app/config-repo

@@ -1,17 +1,19 @@
-FROM openjdk:17-jdk-buster
+# Debian 기반 OpenJDK 이미지 사용
+FROM openjdk:17-jdk-slim-buster
 
-# Debian/Ubuntu
+# 시스템 패키지 업데이트 및 curl 설치
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        curl \
-        # nftables \  (주석 처리)
-        && rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# # nf_tables 설정 (주석 처리)
-# RUN nft add rule ip filter input tcp dport 8761 accept  # 8761 포트(Eureka Server) 열기
-# RUN nft add rule ip filter input drop  # 다른 모든 INPUT 트래픽 차단
-
+# 작업 디렉토리 설정
 WORKDIR /app
+
+# JAR 파일 복사
 COPY build/libs/eureka-server-*.jar app.jar
+
+# Eureka Server 포트 노출
 EXPOSE 8761
+
+# 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]

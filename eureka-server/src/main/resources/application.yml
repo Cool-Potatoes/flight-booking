@@ -15,4 +15,9 @@ eureka:
     enableSelfPreservation: false
 logging:
   level:
-    org.springframework.cloud.netflix.eureka: DEBUG  # eureka 패키지 로깅 레벨 설정
+    com.netflix.discovery: DEBUG  # Eureka Server 로깅 레벨 설정
+
+# 네트워크 설정 추가
+networks:
+  app-network:
+    ipv4_address: 172.20.0.5  # 고정 IP 주소 할당

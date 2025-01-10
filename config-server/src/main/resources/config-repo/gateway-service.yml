@@ -50,7 +50,10 @@ management:
     web:
       exposure:
         include: refresh  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신)
-
+eureka:
+  client:
+    service-url:
+      defaultZone: http://172.20.0.5:8761/eureka/  # Eureka Server 컨테이너의 IP 주소로 변경
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
