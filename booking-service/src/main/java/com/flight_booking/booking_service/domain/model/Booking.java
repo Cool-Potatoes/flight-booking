@@ -35,9 +35,6 @@ public class Booking extends BaseEntity {
   private Long userId;
 
   @Column
-  private UUID seatId;
-
-  @Column
   @Enumerated(value = EnumType.STRING)
   private BookingStatusEnum bookingStatus;
 
@@ -45,11 +42,8 @@ public class Booking extends BaseEntity {
   @OneToMany(mappedBy = "booking")
   private List<Passenger> passengers = new ArrayList<>();
 
-  public void updateBooking(UUID seatId, BookingStatusEnum bookingStatus) {
+  public void updateBooking(BookingStatusEnum bookingStatus) {
 
-    if (seatId != null) {
-      this.seatId = seatId;
-    }
     if (bookingStatus != null) {
       this.bookingStatus = bookingStatus;
     }

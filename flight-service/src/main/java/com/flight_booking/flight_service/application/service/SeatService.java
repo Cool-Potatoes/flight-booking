@@ -1,7 +1,9 @@
 package com.flight_booking.flight_service.application.service;
 
+import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.application.dto.SeatCheckingRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
@@ -112,7 +114,9 @@ public class SeatService {
   @Transactional
   public void updateSeatAvailable(SeatBookingRequestDto seatBookingRequestDto) {
 
-    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId()).orElseThrow();
+    // TODO : 에러처리 필요
+    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId())
+        .orElseThrow(IllegalArgumentException::new);
 
     if (seat.getIsDeleted()) {
       throw new RuntimeException("삭제된 좌석입니다.");
@@ -127,17 +131,76 @@ public class SeatService {
               new PaymentRequestDto(seatBookingRequestDto.email(),
                   seatBookingRequestDto.bookingId(),
                   seat.getPrice()),
-              "message from createBooking"));
+              "message from updateSeatAvailable"));
     } else {
 
-      kafkaTemplate.send("payment-creation-fail-topic", seat.getSeatId().toString(),
+      // booking status 를 fail으로 변경해줘야하기 때문에 필요함
+      kafkaTemplate.send("booking-fail-topic", seat.getSeatId().toString(),
           ApiResponse.ok(
               new PaymentRequestDto(seatBookingRequestDto.email(),
                   seatBookingRequestDto.bookingId(),
                   seat.getPrice()),
-              "message from createBooking"));
+              "message from updateSeatAvailable"));
+    }
+  }
+
+  @Transactional(readOnly = false)
+  public void checkSeatAvailable(SeatCheckingRequestDto seatCheckingRequestDto) {
+
+    // TODO : 에러처리 필요
+    Seat oldSeat = seatRepository.findById(seatCheckingRequestDto.seatId())
+        .orElseThrow(IllegalArgumentException::new);
+
+    if (oldSeat.getIsDeleted()) {
+      throw new RuntimeException("삭제된 좌석입니다.");
     }
 
+    if (oldSeat.getIsAvailable()) {
 
+      kafkaTemplate.send("seat-availability-check-success-topic", oldSeat.getSeatId().toString(),
+          ApiResponse.ok(
+              new BookingSeatCheckRequestDto(true, seatCheckingRequestDto.bookingId(),
+                  seatCheckingRequestDto.passengerRequestDto()),
+              "message from checkSeatAvailable"));
+    } else {
+      kafkaTemplate.send("seat-availability-check-fail-topic", oldSeat.getSeatId().toString(),
+          ApiResponse.ok(
+              new BookingSeatCheckRequestDto(false, seatCheckingRequestDto.bookingId(),
+                  seatCheckingRequestDto.passengerRequestDto()),
+              "message from checkSeatAvailable"));
+    }
   }
 }
+
+//// 기존 좌석을 사용 가능(true) 상태로 변경
+//Seat oldSeat = seatRepository.findById(seatChangeRequestDto.oldSeatId())
+//    .orElseThrow(() -> new IllegalArgumentException("기존 좌석을 찾을 수 없습니다."));
+//
+//    if (oldSeat.getIsDeleted()) {
+//    throw new RuntimeException("삭제된 좌석입니다: " + seatChangeRequestDto.oldSeatId());
+//    }
+//
+//    oldSeat.updateAvailable(true);
+//    seatRepository.save(oldSeat);
+//
+//// 새로운 좌석을 사용 불가능(false) 상태로 변경
+//Seat newSeat = seatRepository.findById(seatChangeRequestDto.newSeatId())
+//    .orElseThrow(() -> new IllegalArgumentException("새로운 좌석을 찾을 수 없습니다."));
+//
+//    if (newSeat.getIsDeleted()) {
+//    throw new RuntimeException("삭제된 좌석입니다: " + seatChangeRequestDto.newSeatId());
+//    }
+//
+//    if (!newSeat.getIsAvailable()) {
+//    throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seatChangeRequestDto.newSeatId());
+//    }
+//
+//    newSeat.updateAvailable(false);
+//    seatRepository.save(newSeat);
+//
+//// Kafka로 성공 메시지 전송
+//    kafkaTemplate.send("seat-availability-check-success-topic", newSeat.getSeatId().toString(),
+//        ApiResponse.ok(
+//            new BookingSeatCheckRequestDto(true, seatChangeRequestDto.bookingId(),
+//                seatChangeRequestDto.passengerRequestDto()),
+//    "좌석 변경 성공: 기존 좌석 -> " + oldSeat.getSeatId() + ", 새로운 좌석 -> " + newSeat.getSeatId()));
