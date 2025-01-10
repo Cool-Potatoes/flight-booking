@@ -2,9 +2,6 @@ dependencies {
 
 	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
 
-	// 공통 모듈
-	implementation project(path: ':common')
-
 	// Redis Session Clustering
 	implementation 'org.springframework.session:spring-session-data-redis'
 
