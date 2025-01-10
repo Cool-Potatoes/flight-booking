@@ -18,6 +18,7 @@ import org.apache.kafka.common.errors.ApiException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -128,13 +129,26 @@ public class PaymentService {
   @Transactional
   public void processPaymentSuccess(ProcessPaymentRequestDto processPaymentRequestDto) {
 
-    Payment payment = paymentRepository.findById(processPaymentRequestDto.paymentId())
-        .orElseThrow(() -> new RuntimeException("PaymentId를 찾을 수 없음."));
+    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
 
     Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED);
 
     kafkaTemplate.send("booking-complete-topic", updatedPayment.getPaymentId().toString(),
         ApiResponse.ok(new BookingProcessRequestDto(payment.getBookingId()),
-            "message from updateUserMileage"));
+            "message from processPaymentSuccess"));
+  }
+
+  @Transactional
+  public void processPaymentFail(ProcessPaymentRequestDto requestDto) {
+
+    Payment payment = getPaymentById(requestDto.paymentId());
+
+    Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED_FAIL);
+
+    kafkaTemplate.send("booking-fail-topic", updatedPayment.getPaymentId().toString(),
+        ApiResponse.of(new BookingProcessRequestDto(updatedPayment.getBookingId()),
+            "message from processPaymentFail",
+            HttpStatus.BAD_REQUEST
+        ));
   }
 }

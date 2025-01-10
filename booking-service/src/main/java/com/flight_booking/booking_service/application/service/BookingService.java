@@ -110,4 +110,13 @@ public class BookingService {
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_COMPLETE);
   }
+
+  @Transactional
+  public void failBooking(BookingProcessRequestDto bookingProcessRequestDto) {
+
+    Booking booking = bookingRepository.findById(bookingProcessRequestDto.bookingId())
+        .orElseThrow(NotFoundBookingException::new);
+
+    booking.updateBookingStatus(BookingStatusEnum.BOOKING_FAIL);
+  }
 }

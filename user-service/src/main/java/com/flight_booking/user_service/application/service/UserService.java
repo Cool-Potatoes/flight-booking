@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -152,9 +153,15 @@ public class UserService {
     // 마일리지가 충분한지 확인
     if (user.getMileage() < userRequestDto.fare()) {
 
-      // TODO fallback 로직
+      // payment fallback 로직
+      kafkaTemplate.send("payment-fail-process-topic", user.getId().toString(),
+          ApiResponse.of(
+              new ProcessPaymentRequestDto(userRequestDto.paymentId()),
+              "message from updateUserMileage -Not enough mileage.",
+              HttpStatus.BAD_REQUEST
+          ));
 
-      throw new RuntimeException("현재 마일리지가 fare보다 적습니다.");
+      return;
     }
 
     // 마일리지 차감

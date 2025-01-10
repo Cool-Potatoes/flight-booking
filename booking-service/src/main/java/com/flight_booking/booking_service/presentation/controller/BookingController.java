@@ -80,4 +80,14 @@ public class BookingController {
 
     bookingService.processBooking(bookingProcessRequestDto);
   }
+
+  @KafkaListener(groupId = "booking-fail-group", topics = "booking-fail-topic")
+  public void consumeBookingFail(@Payload ApiResponse<BookingProcessRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingProcessRequestDto.class);
+
+    bookingService.failBooking(bookingProcessRequestDto);
+  }
 }

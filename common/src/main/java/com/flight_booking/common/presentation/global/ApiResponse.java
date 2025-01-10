@@ -44,6 +44,14 @@ public class ApiResponse<T> {
         .build();
   }
 
+  public static <T> ApiResponse<?> of(T data, String message, HttpStatus status) {
+    return ApiResponse.builder()
+        .message(message)
+        .httpStatus(status.value())
+        .data(data)
+        .build();
+  }
+
   public static ApiResponse<?> noContent() {
     return ApiResponse.builder()
         .httpStatus(HttpStatus.NO_CONTENT.value())
