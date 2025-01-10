@@ -135,7 +135,7 @@ public class PaymentService {
 
     Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED);
 
-    kafkaTemplate.send("booking-complete-topic", updatedPayment.getPaymentId().toString(),
+    kafkaTemplate.send("booking-complete-topic", updatedPayment.getBookingId().toString(),
         ApiResponse.ok(new BookingProcessRequestDto(payment.getBookingId()),
             "message from processPaymentSuccess"));
   }
@@ -147,7 +147,7 @@ public class PaymentService {
 
     Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED_FAIL);
 
-    kafkaTemplate.send("booking-fail-topic", updatedPayment.getPaymentId().toString(),
+    kafkaTemplate.send("booking-fail-topic", updatedPayment.getBookingId().toString(),
         ApiResponse.of(new BookingProcessRequestDto(updatedPayment.getBookingId()),
             "message from processPaymentFail",
             HttpStatus.BAD_REQUEST

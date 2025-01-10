@@ -1,5 +1,6 @@
 package com.flight_booking.flight_service.application.service;
 
+import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
@@ -16,10 +17,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,16 +117,14 @@ public class SeatService {
   @Transactional
   public void consumeSeatAvailabilityCheckAndUpdate(SeatBookingRequestDto seatBookingRequestDto) {
 
+    // TODO 조회 할 때 lock?
     List<UUID> seatIdList = seatBookingRequestDto.seatIdList();
 
-    // TODO : 에러처리 필요
-    List<Seat> seatList = seatRepository.findAllById(seatIdList);
+    List<Seat> seatList = seatRepository.findAllById(seatIdList).stream()
+        .filter(seat -> seat.getIsAvailable() && !seat.getIsDeleted()).collect(Collectors.toList());
 
-//    if (seat.getIsDeleted()) {
-//      throw new RuntimeException("삭제된 좌석입니다.");
-//    }
-
-    if (checkSeatListAvailable(seatList)) {
+    // 받아온 seatIdList가 유효한지 확인
+    if ((seatList.size() == seatIdList.size()) && checkSeatListAvailable(seatList)) {
 
       Long totalPrice = 0L;
       for (Seat seat : seatList) {
@@ -136,16 +137,15 @@ public class SeatService {
               new PaymentRequestDto(seatBookingRequestDto.email(),
                   seatBookingRequestDto.bookingId(),
                   totalPrice),
-              "message from updateSeatAvailable"));
+              "message from consumeSeatAvailabilityCheckAndUpdate"));
     } else {
 
-      // booking status 를 fail으로 변경해줘야하기 때문에 필요함
-//      kafkaTemplate.send("booking-fail-topic", seat.getSeatId().toString(),
-//          ApiResponse.ok(
-//              new PaymentRequestDto(seatBookingRequestDto.email(),
-//                  seatBookingRequestDto.bookingId(),
-//                  seat.getPrice()),
-//              "message from updateSeatAvailable"));
+      kafkaTemplate.send("booking-fail-topic", seatBookingRequestDto.bookingId().toString(),
+          ApiResponse.of(
+              new BookingProcessRequestDto(seatBookingRequestDto.bookingId()),
+              "좌석이 이미 예약되었습니다.",
+              HttpStatus.BAD_REQUEST
+          ));
     }
   }
 

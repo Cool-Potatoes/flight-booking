@@ -154,7 +154,7 @@ public class UserService {
     if (user.getMileage() < userRequestDto.fare()) {
 
       // payment fallback 로직
-      kafkaTemplate.send("payment-fail-process-topic", user.getId().toString(),
+      kafkaTemplate.send("payment-fail-process-topic", userRequestDto.paymentId().toString(),
           ApiResponse.of(
               new ProcessPaymentRequestDto(userRequestDto.paymentId()),
               "message from updateUserMileage -Not enough mileage.",
