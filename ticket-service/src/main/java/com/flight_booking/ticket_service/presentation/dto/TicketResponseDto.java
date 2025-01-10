@@ -9,7 +9,6 @@ public record TicketResponseDto(
     UUID bookingId,
     UUID passengerId,
     UUID seatId,
-    UUID flightId,
     String ticketState
 ) {
 
@@ -20,7 +19,6 @@ public record TicketResponseDto(
         ticket.getBookingId(),
         ticket.getPassengerId(),
         ticket.getSeatId(),
-        ticket.getFlightId(),
         ticket.getState().getDescription()
     );
   }

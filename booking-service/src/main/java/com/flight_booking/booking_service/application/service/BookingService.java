@@ -1,6 +1,7 @@
 package com.flight_booking.booking_service.application.service;
 
 import com.flight_booking.booking_service.domain.model.Booking;
+import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
 import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
@@ -14,6 +15,7 @@ import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
 import com.flight_booking.common.application.dto.SeatCheckingRequestDto;
+import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
@@ -127,6 +129,19 @@ public class BookingService {
         .orElseThrow(NotFoundBookingException::new);
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_COMPLETE);
+
+    // 항공권 생성
+    for (Passenger passenger : booking.getPassengers()) {
+
+      kafkaTemplate.send(
+          "ticket-creation-topic",
+          ApiResponse.ok(
+              new TicketRequestDto(booking.getBookingId(),
+                  passenger.getPassengerId(),
+                  passenger.getSeatId()),
+              "from processBooking to make ticket"
+          ));
+    }
   }
 
   @Transactional

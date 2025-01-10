@@ -1,9 +1,9 @@
 package com.flight_booking.ticket_service.application.service;
 
+import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
-import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
@@ -34,7 +34,6 @@ public class TicketService {
         .bookingId(ticketRequestDto.bookingId())
         .passengerId(ticketRequestDto.passengerId())
         .seatId(ticketRequestDto.seatId())
-        .flightId(ticketRequestDto.flightId())
         .state(TicketStateEnum.BOOKED)
         .build();
 
@@ -68,9 +67,6 @@ public class TicketService {
 
     if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
       throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
-    }
-    if (!ticketRequestDto.flightId().equals(ticket.getFlightId())) {
-      throw new RuntimeException("항공편 변경은 불가합니다.");
     }
     if (!ticketRequestDto.passengerId().equals(ticket.getPassengerId())) {
       throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");

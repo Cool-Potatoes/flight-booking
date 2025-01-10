@@ -1,4 +1,4 @@
-package com.flight_booking.flight_service.presentation.endpoint;
+package com.flight_booking.flight_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class KafkaSeatEndpoint {
+public class SeatKafkaEndpoint {
 
   private final SeatService seatService;
 
