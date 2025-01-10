@@ -1,9 +1,9 @@
 package com.flight_booking.flight_service.presentation.controller;
 
 
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.application.service.FlightService;
 import com.flight_booking.flight_service.domain.model.Flight;
-import com.flight_booking.flight_service.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.presentation.request.FlightRequestDto;
 import com.flight_booking.flight_service.presentation.response.FlightResponseDto;
 import com.querydsl.core.types.Predicate;
