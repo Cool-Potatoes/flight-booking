@@ -1,6 +1,6 @@
 package com.flight_booking.common.infrastructure.security;
 
-import com.flight_booking.common.domain.model.Role;
+import com.flight_booking.common.domain.model.UserRoleEnum;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public record CustomUserDetails(
     String email,
-    Role role
+    UserRoleEnum role
 ) implements UserDetails {
 
   @Override
