@@ -9,3 +9,10 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+  instance:
+    appStartupSleepMs: 10000  # 10초 지연
+  server:
+    enableSelfPreservation: false
+logging:
+  level:
+    org.springframework.cloud.netflix.eureka: DEBUG  # eureka 패키지 로깅 레벨 설정
