@@ -15,6 +15,7 @@ import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.ApiException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -139,6 +141,10 @@ public class PaymentService {
         ApiResponse.ok(new BookingProcessRequestDto(processPaymentRequestDto.bookingId(),
                 BookingStatusEnum.BOOKING_COMPLETE), // TODO mileage 몇으로?
             "message from updateUserMileage"));
+
+    log.info("1111111111111111111111111111111111111111111111");
+    log.info(String.valueOf(processPaymentRequestDto.bookingId()),
+        BookingStatusEnum.BOOKING_COMPLETE);
 
     return PaymentResponseDto.from(payment);
   }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
+import com.flight_booking.booking_service.presentation.request.BookingUpdateRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
@@ -35,7 +36,7 @@ public class BookingController {
   @PostMapping
   public ApiResponse<?> createBooking(@RequestBody BookingRequestDto bookingRequestDto) {
 
-    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto), "예매 성공");
+    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto), "예매 생성 성공, 결제 대기중");
   }
 
   @GetMapping
@@ -59,7 +60,7 @@ public class BookingController {
 
   @PatchMapping("/{bookingId}")
   public ApiResponse<?> updateBooking(@PathVariable UUID bookingId,
-      @RequestBody BookingRequestDto bookingRequestDto) {
+      @RequestBody BookingUpdateRequestDto bookingRequestDto) {
 
     return ApiResponse.ok(bookingService.updateBooking(bookingId, bookingRequestDto), "예매 수정 성공");
   }
@@ -72,15 +73,5 @@ public class BookingController {
     return ApiResponse.ok("예매 삭제 성공");
   }
 
-  @KafkaListener(groupId = "payment-complete-group", topics = "payment-complete-topic")
-  public ApiResponse<?> consumeProcessBooking(@Payload ApiResponse<BookingProcessRequestDto> message) {
 
-    ObjectMapper mapper = new ObjectMapper();
-    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
-        BookingProcessRequestDto.class);
-
-    bookingService.processBooking(bookingProcessRequestDto);
-
-    return ApiResponse.ok("예매 결제 성공");
-  }
 }

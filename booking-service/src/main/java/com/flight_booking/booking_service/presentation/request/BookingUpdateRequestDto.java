@@ -4,8 +4,9 @@ import com.flight_booking.common.domain.model.BookingStatusEnum;
 import java.util.List;
 import java.util.UUID;
 
-public record BookingRequestDto(
+public record BookingUpdateRequestDto(
     List<UUID> seatId,
-    List<PassengerRequestDto> passengerRequestDtos
+    List<PassengerRequestDto> passengerRequestDtos,
+    BookingStatusEnum bookingStatusEnum
 ) {
 }

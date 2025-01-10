@@ -112,7 +112,8 @@ public class SeatService {
   @Transactional
   public void updateSeatAvailable(SeatBookingRequestDto seatBookingRequestDto) {
 
-    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId()).orElseThrow();
+    // TODO : 에러처리 필요
+    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId()).orElseThrow(IllegalArgumentException::new);
 
     if (seat.getIsDeleted()) {
       throw new RuntimeException("삭제된 좌석입니다.");
@@ -127,17 +128,15 @@ public class SeatService {
               new PaymentRequestDto(seatBookingRequestDto.email(),
                   seatBookingRequestDto.bookingId(),
                   seat.getPrice()),
-              "message from createBooking"));
+              "message from updateSeatAvailable"));
     } else {
 
-      kafkaTemplate.send("payment-creation-fail-topic", seat.getSeatId().toString(),
+      kafkaTemplate.send("booking-fail-topic", seat.getSeatId().toString(),
           ApiResponse.ok(
               new PaymentRequestDto(seatBookingRequestDto.email(),
                   seatBookingRequestDto.bookingId(),
                   seat.getPrice()),
-              "message from createBooking"));
+              "message from updateSeatAvailable"));
     }
-
-
   }
 }
