@@ -1,11 +1,10 @@
 package com.flight_booking.booking_service.domain.model;
 
-import jakarta.persistence.CascadeType;
+import com.flight_booking.common.domain.model.BookingStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,7 +35,7 @@ public class Booking extends BaseEntity {
   private Long userId;
 
   @Column
-  private UUID flightId;
+  private UUID seatId;
 
   @Column
   @Enumerated(value = EnumType.STRING)
@@ -46,10 +45,10 @@ public class Booking extends BaseEntity {
   @OneToMany(mappedBy = "booking")
   private List<Passenger> passengers = new ArrayList<>();
 
-  public void updateBooking(UUID flightId, BookingStatusEnum bookingStatus) {
+  public void updateBooking(UUID seatId, BookingStatusEnum bookingStatus) {
 
-    if (flightId != null) {
-      this.flightId = flightId;
+    if (seatId != null) {
+      this.seatId = seatId;
     }
     if (bookingStatus != null) {
       this.bookingStatus = bookingStatus;
@@ -61,5 +60,9 @@ public class Booking extends BaseEntity {
     this.deletedAt = LocalDateTime.now();
     // TODO
     //    this.deletedBy =
+  }
+
+  public void updateBookingStatus(BookingStatusEnum bookingStatus) {
+    this.bookingStatus = bookingStatus;
   }
 }

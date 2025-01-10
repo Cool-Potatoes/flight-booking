@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
 
-public record PaymentResponseDto(UUID paymentId, UUID bookingId, Integer fare, String status,
+public record PaymentResponseDto(UUID paymentId, UUID bookingId, Long fare, String status,
                                  LocalDateTime createdAt, LocalDateTime updatedAt) {
 
   @QueryProjection

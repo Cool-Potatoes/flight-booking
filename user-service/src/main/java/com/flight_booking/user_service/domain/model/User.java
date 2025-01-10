@@ -63,4 +63,7 @@ public class User extends BaseEntity {
     this.createdBy = this.email;
   }
 
+  public void updateMile(Long mileage){
+    if(this.mileage > 1000) this.mileage = this.mileage - mileage;
+  }
 }

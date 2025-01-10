@@ -102,7 +102,7 @@ public class TicketService {
 
 
   private Ticket getTicketById(UUID ticketId) {
-    Ticket ticket = ticketRepository.findByIdIsDeletedFalse(ticketId)
+    Ticket ticket = ticketRepository.findByTicketIdAndIsDeletedFalse(ticketId)
         .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
     return ticket;
   }
