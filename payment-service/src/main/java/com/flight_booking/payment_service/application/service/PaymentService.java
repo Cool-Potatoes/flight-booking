@@ -142,10 +142,6 @@ public class PaymentService {
                 BookingStatusEnum.BOOKING_COMPLETE), // TODO mileage 몇으로?
             "message from updateUserMileage"));
 
-    log.info("1111111111111111111111111111111111111111111111");
-    log.info(String.valueOf(processPaymentRequestDto.bookingId()),
-        BookingStatusEnum.BOOKING_COMPLETE);
-
     return PaymentResponseDto.from(payment);
   }
 }

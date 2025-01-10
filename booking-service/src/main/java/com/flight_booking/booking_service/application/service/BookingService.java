@@ -10,7 +10,10 @@ import com.flight_booking.booking_service.presentation.response.BookingResponseC
 import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
 import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
+import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
+import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.application.dto.SeatCheckingRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
@@ -81,18 +84,25 @@ public class BookingService {
   public BookingResponseDto updateBooking(UUID bookingId,
       BookingUpdateRequestDto bookingRequestDto) {
 
+    for (PassengerRequestDto passengerRequestDto : bookingRequestDto.passengerRequestDtos()) {
+      kafkaTemplate.send(
+          "seat-availability-check-topic",
+          passengerRequestDto.seatId().toString(),
+          ApiResponse.ok(
+              new SeatCheckingRequestDto(passengerRequestDto.seatId(), bookingId,
+                  passengerRequestDto),
+              "Message from updateBooking"
+          )
+      );
+    }
+
     Booking booking = bookingRepository.findById(bookingId)
         .orElseThrow(NotFoundBookingException::new);
-
-    booking.updateBooking(bookingRequestDto.bookingStatusEnum());
-
-    passengerService.updatePassenger(booking, bookingRequestDto.passengerRequestDtos());
-
-    bookingRepository.save(booking);
 
     return BookingResponseDto.from(booking);
   }
 
+  // TODO : 예약 취소 메서드
   @Transactional(readOnly = false)
   public void deleteBooking(UUID bookingId) {
 
@@ -111,5 +121,24 @@ public class BookingService {
     booking.updateBookingStatus(bookingProcessRequestDto.bookingStatus());
 
     return BookingResponseDto.from(booking);
+  }
+
+  @Transactional(readOnly = false)
+  public void updateBookingFromKafka(BookingSeatCheckRequestDto bookingSeatCheckRequestDto) {
+
+    Booking booking = bookingRepository.findById(bookingSeatCheckRequestDto.bookingId())
+        .orElseThrow(NotFoundBookingException::new);
+
+    if (bookingSeatCheckRequestDto.check()) {
+
+      booking.updateBooking(BookingStatusEnum.BOOKING_COMPLETE);
+
+      passengerService.updatePassenger(booking, bookingSeatCheckRequestDto.passengerRequestDto());
+
+      bookingRepository.save(booking);
+
+    } else {
+      booking.updateBooking(BookingStatusEnum.BOOKING_FAIL);
+    }
   }
 }

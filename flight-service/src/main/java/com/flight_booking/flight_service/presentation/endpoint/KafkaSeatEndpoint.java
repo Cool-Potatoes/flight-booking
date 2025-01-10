@@ -2,6 +2,7 @@ package com.flight_booking.flight_service.presentation.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.application.dto.SeatCheckingRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.application.service.SeatService;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +16,23 @@ public class KafkaSeatEndpoint {
 
   private final SeatService seatService;
 
-  @KafkaListener(groupId = "seat-availability-group", topics = "seat-availability-check-and-update-topic")
-  public ApiResponse<?> consumeSeatBooking(@Payload ApiResponse<SeatBookingRequestDto> message) {
+  @KafkaListener(groupId = "seat-availability-update-group", topics = "seat-availability-check-and-update-topic")
+  public void consumeSeatAvailabilityCheckAndUpdate(@Payload ApiResponse<SeatBookingRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     SeatBookingRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
         SeatBookingRequestDto.class);
 
     seatService.updateSeatAvailable(seatBookingRequestDto);
+  }
 
-    return ApiResponse.ok("예매 결제 성공");
+  @KafkaListener(groupId = "seat-availability-check-group", topics = "seat-availability-check-topic")
+  public void consumeSeatAvailabilityCheck(@Payload ApiResponse<SeatCheckingRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    SeatCheckingRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
+        SeatCheckingRequestDto.class);
+
+    seatService.checkSeatAvailable(seatBookingRequestDto);
   }
 }
