@@ -1,5 +1,5 @@
 server:
-  port: 8888  # 포트를 명시적으로 지정합니다.
+  port: 8888
 
 spring:
   application:
@@ -9,11 +9,22 @@ spring:
       server:
         native:
           search-locations: classpath:/config-repo/
-      # Eureka Server를 통해 Config Server를 찾도록 설정합니다.
       discovery:
         enabled: true
-        service-id: config-server
+        service-id: eureka-server
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 60
+  instance:
+    hostname: config-server
+    nonSecurePort: 8888
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}} # 추가
+    appName: ${spring.application.name}  # 추가
+    appGroupName: config-server-group  # 추가 - 원하는 그룹 이름으로 변경 가능
+    virtualHostName: config-server  # 추가
+    secureVirtualHostName: config-server  # 추가
+logging:
+  level:
+    org.springframework.cloud.netflix.eureka: DEBUG

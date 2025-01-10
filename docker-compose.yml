@@ -41,14 +41,24 @@ services:
       - "8888:8888"
     networks:
       - app-network
+    links:
+      - eureka-server
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy  # service_started 대신 service_healthy 사용
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_PROFILES_ACTIVE: native
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/info" ]
       interval: 20s
       timeout: 5s
       retries: 10
