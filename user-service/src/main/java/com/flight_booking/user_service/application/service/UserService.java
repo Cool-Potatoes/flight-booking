@@ -97,51 +97,10 @@ public class UserService {
     user.setDeletedAt(LocalDateTime.now());
   }
 
-  // -----------------------------------------------------------------------------------------------
 
-  // 존재하는 사용자 확인 및 삭제된 사용자 확인
-  private User getUser(Long id) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new UserException(ErrorCode.ACCESS_ONLY_SELF)); // 사용자 존재 여부 확인
-
-    // 삭제된 사용자 확인
-    if (user.getIsDeleted()) {
-      throw new UserException(ErrorCode.USER_DELETED);
-    }
-    return user;
-  }
-
-  // 관리자 권한 확인
-  private boolean isAdmin(CustomUserDetails userDetails) {
-    return userDetails.getAuthorities().stream()
-        .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-  }
-
-  // 사용자 본인 확인
-  private void checkUser(CustomUserDetails userDetails, User user) {
-    if (!userDetails.getUsername().equals(user.getEmail())) {
-      throw new UserException(ErrorCode.ACCESS_ONLY_SELF);
-    }
-  }
-
-  // 기본 수정 항목
-  private void updateBasic(User user, UpdateRequest updateRequest) {
-    String name = updateRequest.name();
-    if (name != null) {
-      user.setName(name);
-    }
-    String phone = updateRequest.phone();
-    if (phone != null) {
-      user.setPhone(phone);
-    }
-  }
-
-  // 사용자 수정 불가 항목 처리
-  private void validateUser(UpdateRequest updateRequest) {
-    if (updateRequest.role() != null) {
-      throw new UserException(ErrorCode.CANNOT_MODIFY_FIELD);
-    }
-  }
+  /**
+   * Kafka methods
+   */
 
   // 마일리지 차감
   @Transactional
@@ -209,4 +168,54 @@ public class UserService {
                 userRefundRequestDto.passengerRequestDtos()),
             "message from refundPayment"));
   }
+
+
+  /**
+   * private methods
+   */
+
+  // 존재하는 사용자 확인 및 삭제된 사용자 확인
+  private User getUser(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new UserException(ErrorCode.ACCESS_ONLY_SELF)); // 사용자 존재 여부 확인
+
+    // 삭제된 사용자 확인
+    if (user.getIsDeleted()) {
+      throw new UserException(ErrorCode.USER_DELETED);
+    }
+    return user;
+  }
+
+  // 관리자 권한 확인
+  private boolean isAdmin(CustomUserDetails userDetails) {
+    return userDetails.getAuthorities().stream()
+        .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+  }
+
+  // 사용자 본인 확인
+  private void checkUser(CustomUserDetails userDetails, User user) {
+    if (!userDetails.getUsername().equals(user.getEmail())) {
+      throw new UserException(ErrorCode.ACCESS_ONLY_SELF);
+    }
+  }
+
+  // 기본 수정 항목
+  private void updateBasic(User user, UpdateRequest updateRequest) {
+    String name = updateRequest.name();
+    if (name != null) {
+      user.setName(name);
+    }
+    String phone = updateRequest.phone();
+    if (phone != null) {
+      user.setPhone(phone);
+    }
+  }
+
+  // 사용자 수정 불가 항목 처리
+  private void validateUser(UpdateRequest updateRequest) {
+    if (updateRequest.role() != null) {
+      throw new UserException(ErrorCode.CANNOT_MODIFY_FIELD);
+    }
+  }
+
 }
