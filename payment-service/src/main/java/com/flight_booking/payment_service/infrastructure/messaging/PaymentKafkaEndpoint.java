@@ -2,6 +2,7 @@ package com.flight_booking.payment_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
+import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.application.service.PaymentService;
@@ -15,6 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentKafkaEndpoint {
 
   private final PaymentService paymentService;
+
+  @KafkaListener(groupId = "payment-service-group", topics = "payment-creation-topic")
+  public void consumePaymentCreation(@Payload ApiResponse<PaymentRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    PaymentRequestDto paymentRequestDto = mapper.convertValue(message.getData(),
+        PaymentRequestDto.class);
+
+    paymentService.createPayment(paymentRequestDto);
+  }
 
   @KafkaListener(groupId = "payment-process-group", topics = "payment-success-process-topic")
   public void consumePaymentSuccessProcess(@Payload ApiResponse<ProcessPaymentRequestDto> message) {
@@ -48,7 +59,8 @@ public class PaymentKafkaEndpoint {
   }
 
   @KafkaListener(groupId = "payment-refund-success-group", topics = "payment-refund-success-process-topic")
-  public void consumePaymentRefundFailProcess(@Payload ApiResponse<ProcessPaymentRequestDto> message) {
+  public void consumePaymentRefundFailProcess(
+      @Payload ApiResponse<ProcessPaymentRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     ProcessPaymentRequestDto paymentRequestDto = mapper.convertValue(message.getData(),
@@ -58,7 +70,8 @@ public class PaymentKafkaEndpoint {
   }
 
   @KafkaListener(groupId = "payment-refund-fail-group", topics = "payment-refund-fail-process-topic")
-  public void consumePaymentRefundSuccessProcess(@Payload ApiResponse<ProcessPaymentRequestDto> message) {
+  public void consumePaymentRefundSuccessProcess(
+      @Payload ApiResponse<ProcessPaymentRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     ProcessPaymentRequestDto paymentRequestDto = mapper.convertValue(message.getData(),
