@@ -15,4 +15,4 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://172.20.0.5:8761/eureka/  # Use Eureka server name within Docker network
+      defaultZone: http://eureka-server:8761/eureka/

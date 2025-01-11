@@ -1,18 +1,19 @@
 server:
-  port: 8160  # Temporary port, will be overwritten by Config server settings later.
+  port: 8160
 
 spring:
   application:
     name: notification-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: "optional:configserver:"
   cloud:
     config:
       discovery:
-        enabled: true  # Discover Config Server through Eureka
+        enabled: true
         service-id: config-server
 
 eureka:
   client:
     service-url:
-      defaultZone: http://172.20.0.5:8761/eureka/  # Use Eureka server name within Docker network
+      defaultZone: http://eureka-server:8761/eureka/
+    fetch-registry: true  # Eureka 서버로부터 registry 정보를 가져오도록 설정

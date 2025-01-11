@@ -69,4 +69,4 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://172.20.0.5:8761/eureka/  # Eureka Server 컨테이너의 IP 주소로 변경
+      defaultZone: http://eureka-server:8761/eureka/
