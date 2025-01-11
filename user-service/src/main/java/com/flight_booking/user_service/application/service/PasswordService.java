@@ -5,6 +5,7 @@ import com.flight_booking.user_service.domain.repository.UserRepository;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
 import com.flight_booking.user_service.presentation.request.ChangePwRequest;
+import com.flight_booking.user_service.presentation.request.ResetPwRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,19 @@ public class PasswordService {
     if (passwordEncoder.matches(request.newPw(), user.getPassword())) {
       throw new UserException(ErrorCode.PASSWORDS_SAME);
     }
+
+    // 새로운 비밀번호와 확인 비밀번호가 일치하는지 확인
+    if (!request.newPw().equals(request.confirmPw())) {
+      throw new UserException(ErrorCode.PASSWORDS_DO_NOT_MATCH);
+    }
+
+    user.setPassword(passwordEncoder.encode(request.newPw()));
+  }
+
+  // 비밀번호 찾기: 비밀번호 변경
+  @Transactional
+  public void resetPw(String email, ResetPwRequest request) {
+    User user = getUser(email);
 
     // 새로운 비밀번호와 확인 비밀번호가 일치하는지 확인
     if (!request.newPw().equals(request.confirmPw())) {

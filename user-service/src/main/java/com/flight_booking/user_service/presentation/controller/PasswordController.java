@@ -4,6 +4,7 @@ import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.PasswordService;
 import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
 import com.flight_booking.user_service.presentation.request.ChangePwRequest;
+import com.flight_booking.user_service.presentation.request.ResetPwRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,16 @@ public class PasswordController {
     String email = userDetails.getUsername();
     passwordService.changePw(email, request);
     return ApiResponse.ok("비밀번호가 변경되었습니다.");
+  }
+
+  // 비밀번호 찾기: 비밀번호 변경
+  @PatchMapping("/reset-pw")
+  public ApiResponse<?> resetPw(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody ResetPwRequest request) {
+    String email = userDetails.getUsername();
+    passwordService.resetPw(email, request);
+    return ApiResponse.ok("비밀번호가 재설정되었습니다.");
   }
 
 }
