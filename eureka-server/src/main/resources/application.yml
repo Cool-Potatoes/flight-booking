@@ -9,15 +9,10 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
-  instance:
-    appStartupSleepMs: 10000  # 10초 지연
+
   server:
     enableSelfPreservation: false
 logging:
   level:
     com.netflix.discovery: DEBUG  # Eureka Server 로깅 레벨 설정
 
-# 네트워크 설정 추가
-networks:
-  app-network:
-    ipv4_address: 172.20.0.5  # 고정 IP 주소 할당

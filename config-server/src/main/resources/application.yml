@@ -15,7 +15,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://172.20.0.5:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
   instance:
     hostname: config-server
     nonSecurePort: 8888
