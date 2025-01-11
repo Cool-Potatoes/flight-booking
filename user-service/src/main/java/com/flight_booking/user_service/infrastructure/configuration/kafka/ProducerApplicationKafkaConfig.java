@@ -1,4 +1,4 @@
-package com.flight_booking.ticket_service.infrastructure.configuration;
+package com.flight_booking.user_service.infrastructure.configuration.kafka;
 
 import com.flight_booking.common.presentation.global.ApiResponse;
 import java.util.HashMap;
@@ -14,7 +14,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 @Configuration
 public class ProducerApplicationKafkaConfig {
-
   @Bean
   public ProducerFactory<String, ApiResponse<?>> apiResponseProducerFactory() {
     Map<String, Object> configProps = new HashMap<>();

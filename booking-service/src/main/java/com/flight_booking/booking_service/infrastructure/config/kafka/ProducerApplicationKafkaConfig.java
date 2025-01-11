@@ -1,4 +1,4 @@
-package com.flight_booking.payment_service.infrastructure.configuration;
+package com.flight_booking.booking_service.infrastructure.config.kafka;
 
 import com.flight_booking.common.presentation.global.ApiResponse;
 import java.util.HashMap;

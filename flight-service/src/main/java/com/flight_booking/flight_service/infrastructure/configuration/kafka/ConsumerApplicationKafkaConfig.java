@@ -1,4 +1,4 @@
-package com.flight_booking.user_service.infrastructure.configuration;
+package com.flight_booking.flight_service.infrastructure.configuration.kafka;
 
 import com.flight_booking.common.presentation.global.ApiResponse;
 import java.util.HashMap;
@@ -40,7 +40,8 @@ public class ConsumerApplicationKafkaConfig {
     // 특정 클래스(메세지 값)만 신뢰하도록 설정
     jsonDeserializer.addTrustedPackages(ApiResponse.class.getPackage().getName());
 
-    return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), jsonDeserializer);
+    return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(),
+        jsonDeserializer);
   }
 
   // Kafka 리스너 컨테이너 팩토리를 생성하는 빈을 정의합니다.

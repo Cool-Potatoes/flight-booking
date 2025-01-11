@@ -1,4 +1,4 @@
-package com.flight_booking.flight_service.infrastructure.messaging;
+package com.flight_booking.flight_service.infrastructure.messaging.kafkaEndpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;

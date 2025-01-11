@@ -1,6 +1,5 @@
-package com.flight_booking.booking_service.infrastructure.config;
+package com.flight_booking.payment_service.infrastructure.configuration.kafka;
 
-import com.flight_booking.common.presentation.global.ApiResponse;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -13,6 +12,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import com.flight_booking.common.presentation.global.ApiResponse;
 
 // 이 클래스는 Kafka 컨슈머 설정을 위한 Spring 설정 클래스입니다.
 @EnableKafka // Kafka 리스너를 활성화하는 어노테이션입니다.
