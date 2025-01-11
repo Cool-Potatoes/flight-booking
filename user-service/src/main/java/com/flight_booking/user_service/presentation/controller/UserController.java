@@ -8,7 +8,6 @@ import com.flight_booking.user_service.infrastructure.security.authentication.Cu
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
-import com.flight_booking.user_service.presentation.response.UserResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -31,13 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
-
-  // 이메일 기반으로 사용자 정보 조회
-  @GetMapping("/info/{email}")
-  public ApiResponse<?> getUserByEmail(@PathVariable String email) {
-    UserResponse response = userService.findUserByEmail(email);
-    return ApiResponse.ok(response, "성공");
-  }
 
   // 전체 회원 목록 조회
   @PreAuthorize("hasRole('ROLE_ADMIN')")
