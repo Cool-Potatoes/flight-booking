@@ -1,4 +1,4 @@
-package com.flight_booking.user_service.infrastructure.persistence;
+package com.flight_booking.user_service.infrastructure.security.persistence;
 
 import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
 import java.util.Optional;
