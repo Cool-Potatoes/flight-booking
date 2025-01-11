@@ -3,7 +3,6 @@ package com.flight_booking.booking_service.application.service;
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
-import com.flight_booking.booking_service.infrastructure.repository.BookingRepositoryImpl;
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.request.BookingUpdateRequestDto;
@@ -35,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookingService {
 
   private final BookingRepository bookingRepository;
-  private final BookingRepositoryImpl bookingRepositoryImpl;
   private final PassengerService passengerService;
   private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
 
@@ -75,7 +73,7 @@ public class BookingService {
 
   public PagedModel<BookingResponseCustomDto> getBookings(Predicate predicate, Pageable pageable) {
 
-    return new PagedModel<>(bookingRepositoryImpl.findAllBookings(predicate, pageable));
+    return new PagedModel<>(bookingRepository.findAllBookings(predicate, pageable));
   }
 
   public BookingResponseDto getBooking(UUID bookingId) {
