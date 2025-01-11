@@ -1,16 +1,18 @@
-package com.flight_booking.user_service.infrastructure;
+package com.flight_booking.user_service.infrastructure.configuration;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+@EnableJpaAuditing
 @Configuration
-@RequiredArgsConstructor
-public class QueryDslConfig {
+public class JpaConfig {
 
-  private final EntityManager entityManager;
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Bean
   public JPAQueryFactory jpaQueryFactory() {
