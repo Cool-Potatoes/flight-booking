@@ -44,7 +44,8 @@ public class SecurityConfig {
         .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 비활성화
         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))// 세션을 Stateless로 설정
         .authorizeHttpRequests(auth -> {
-          auth.requestMatchers("/v1/auth/signup", "/v1/auth/signin").permitAll(); // 로그인, 회원가입 URL 허용
+          auth.requestMatchers("/v1/auth/**").permitAll(); // 허용
+          auth.requestMatchers("/v1/auth/change-pw").authenticated(); // 인증 필요
           auth.anyRequest().authenticated(); // 모든 요청은 인증 필요
         })
         .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
