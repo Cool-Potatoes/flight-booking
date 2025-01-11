@@ -94,4 +94,15 @@ public class AuthService {
       throw new UserException(ErrorCode.USER_DELETED);
     }
   }
+
+  // 아이디 찾기
+  @Transactional(readOnly = true)
+  public String findId(FindIdRequest request) {
+    String name = request.name();
+    String phone = request.phone();
+    User user = userRepository.findByNameAndPhone(name, phone)
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+    return user.getEmail();
+  }
 }
