@@ -82,6 +82,15 @@ public class SeatService {
   }
 
   @Transactional(readOnly = true)
+  public SeatResponseDto getSeat(UUID seatId) {
+
+    Seat seat = seatRepository.findById(seatId)
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
+
+    return SeatResponseDto.from(seat);
+  }
+
+  @Transactional(readOnly = true)
   public PagedModel<SeatResponseDto> getSeatsPage(
       UUID flightId, List<UUID> seatIdList, Predicate predicate, Pageable pageable) {
 

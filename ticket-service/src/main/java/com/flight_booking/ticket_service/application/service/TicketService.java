@@ -1,6 +1,8 @@
 package com.flight_booking.ticket_service.application.service;
 
+import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
@@ -9,17 +11,21 @@ import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TicketService {
 
   private final TicketRepository ticketRepository;
+  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
 
 
   @Transactional
@@ -91,9 +97,26 @@ public class TicketService {
 
     Ticket ticket = getTicketById(ticketId);
 
+    if (!ticket.getState().equals(TicketStateEnum.BOOKED)) {
+      throw new RuntimeException("취소 불가");
+    }
+
     // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
+    kafkaTemplate.send(
+        "flight-cancel-availability",
+        ticket.getTicketId().toString(),
+        ApiResponse.ok(
+            new FlightCancelRequestDto(ticket.getTicketId(), ticket.getBookingId(),
+                ticket.getPassengerId(), ticket.getSeatId()), "message from cancelTicket"));
 
     ticket.updateState(TicketStateEnum.CANCEL_PENDING);
+  }
+
+  @Transactional
+  public void cancelFail(FlightCancelRequestDto flightCancelRequestDto) {
+    Ticket ticket = getTicketById(flightCancelRequestDto.ticketId());
+
+    ticket.updateState(TicketStateEnum.CANNOT_CANCEL);
   }
 
 

@@ -1,6 +1,7 @@
 package com.flight_booking.ticket_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.application.service.TicketService;
@@ -23,6 +24,16 @@ public class TicketKafkaEndpoint {
         TicketRequestDto.class);
 
     ticketService.createTicket(ticketRequestDto);
+  }
+
+  @KafkaListener(groupId = "ticket-cancel-unavailable-group", topics = "ticket-cancel-unavailable-topic")
+  public void consumeCancelUnavailable(@Payload ApiResponse<FlightCancelRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    FlightCancelRequestDto flightCancelRequestDto
+        = mapper.convertValue(message.getData(), FlightCancelRequestDto.class);
+
+    ticketService.cancelFail(flightCancelRequestDto);
   }
 
 }
