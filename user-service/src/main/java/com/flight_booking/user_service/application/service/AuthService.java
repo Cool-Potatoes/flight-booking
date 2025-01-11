@@ -7,6 +7,7 @@ import com.flight_booking.user_service.infrastructure.security.authentication.Cu
 import com.flight_booking.user_service.infrastructure.security.jwt.JwtUtil;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
+import com.flight_booking.user_service.presentation.request.ChangePwRequest;
 import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
 import java.util.List;
@@ -105,4 +106,35 @@ public class AuthService {
 
     return user.getEmail();
   }
+
+  // 비밀번호 변경
+  @Transactional
+  public void changePw(String email, ChangePwRequest request) {
+    User user = getUser(email);
+
+    // 기존 비밀번호 검증
+    if (!passwordEncoder.matches(request.currentPw(), user.getPassword())) {
+      throw new UserException(ErrorCode.INVALID_CURRENT_PASSWORD);
+    }
+
+    // 기존 비밀번호와 새로운 비밀번호가 같은지 확인
+    if (passwordEncoder.matches(request.newPw(), user.getPassword())) {
+      throw new UserException(ErrorCode.PASSWORDS_SAME);
+    }
+
+    // 새로운 비밀번호와 확인 비밀번호가 일치하는지 확인
+    if (!request.newPw().equals(request.confirmPw())) {
+      throw new UserException(ErrorCode.PASSWORDS_DO_NOT_MATCH);
+    }
+
+    user.setPassword(passwordEncoder.encode(request.newPw()));
+  }
+
+
+  // 사용자 찾기
+  private User getUser(String email) {
+    return userRepository.findByEmail(email)
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+  }
+
 }
