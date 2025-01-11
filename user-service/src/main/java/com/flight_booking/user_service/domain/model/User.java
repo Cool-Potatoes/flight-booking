@@ -44,7 +44,7 @@ public class User extends BaseEntity {
   private String name;
 
   @Setter
-  @Column(name = "phone", nullable = false, length = 20)
+  @Column(name = "phone", nullable = false, unique = true, length = 20)
   private String phone;
 
   @Builder.Default
@@ -115,4 +115,9 @@ public class User extends BaseEntity {
   public void updateMile(Long mileage){
     if(this.mileage > 1000) this.mileage = this.mileage - mileage;
   }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
 }
