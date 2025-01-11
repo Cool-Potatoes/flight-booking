@@ -1,4 +1,4 @@
-package com.flight_booking.notification_service.application.service;
+package com.flight_booking.notification_service.infrastructure.mail;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
