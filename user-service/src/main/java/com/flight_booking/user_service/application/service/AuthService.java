@@ -7,7 +7,9 @@ import com.flight_booking.user_service.infrastructure.security.authentication.Cu
 import com.flight_booking.user_service.infrastructure.security.jwt.JwtUtil;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
+import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,6 +50,7 @@ public class AuthService {
     userRepository.save(user);
   }
 
+  // 로그인
   public String signIn(String email, String password) {
     try {
       log.info("service");
@@ -73,19 +76,20 @@ public class AuthService {
     }
   }
 
-  // 사용자 상태 확인 (블락되었거나 탈퇴했는지)
+  // 사용자 상태 확인 (블락/ 탈퇴)
   private void checkUserStatus(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
     if (user.getIsBlocked()) {
       log.error("블락된 사용자: {}", email);
-      String reason = user.getBlockedInfo().getBlockedReason();
+      List<String> reasons = user.getBlockedInfo().getBlockedReason();
+      String reason = reasons.get(reasons.size() - 1);
       String errorMessage = ErrorCode.USER_BLOCKED.getMessage() + " 이유: " + reason;
       throw new UserException(ErrorCode.USER_BLOCKED, errorMessage);
     }
 
-    if (user.getIsDeleted()) {  // 탈퇴 여부는 별도로 관리 (예: isActive 필드)
+    if (user.getIsDeleted()) {
       log.error("탈퇴된 사용자: {}", email);
       throw new UserException(ErrorCode.USER_DELETED);
     }
