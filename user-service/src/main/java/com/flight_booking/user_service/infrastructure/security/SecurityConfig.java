@@ -45,7 +45,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))// 세션을 Stateless로 설정
         .authorizeHttpRequests(auth -> {
           auth.requestMatchers("/v1/auth/**").permitAll(); // 허용
-          auth.requestMatchers("/v1/auth/change-pw").authenticated(); // 인증 필요
+          auth.requestMatchers("/v1/auth/change-pw","/v1/auth/reset-pw").authenticated(); // 인증 필요
           auth.anyRequest().authenticated(); // 모든 요청은 인증 필요
         })
         .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
