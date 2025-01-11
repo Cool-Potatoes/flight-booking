@@ -2,9 +2,11 @@ package com.flight_booking.flight_service.application.service;
 
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
+import com.flight_booking.common.application.dto.PassengerRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
-import com.flight_booking.common.application.dto.SeatCheckingRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
@@ -142,7 +144,7 @@ public class SeatService {
 
       kafkaTemplate.send("booking-fail-topic", seatBookingRequestDto.bookingId().toString(),
           ApiResponse.of(
-              new BookingProcessRequestDto(seatBookingRequestDto.bookingId()),
+              new BookingProcessRequestDto(seatBookingRequestDto.bookingId(), null),
               "좌석이 이미 예약되었습니다.",
               HttpStatus.BAD_REQUEST
           ));
@@ -159,62 +161,34 @@ public class SeatService {
   }
 
   @Transactional(readOnly = false)
-  public void checkSeatAvailable(SeatCheckingRequestDto seatCheckingRequestDto) {
+  public void changeSeatAvailability(
+      SeatAvailabilityChangeRequestDto seatAvailabilityChangeRequestDto) {
 
-    // TODO : 에러처리 필요
-    Seat oldSeat = seatRepository.findById(seatCheckingRequestDto.seatId())
-        .orElseThrow(IllegalArgumentException::new);
+    Long newSeatTotalPrice = 0L;
 
-    if (oldSeat.getIsDeleted()) {
-      throw new RuntimeException("삭제된 좌석입니다.");
+    for (PassengerRequestDto dto : seatAvailabilityChangeRequestDto.passengerRequestDtos()) {
+      Seat seat = seatRepository.findById(dto.seatId()).orElseThrow(IllegalArgumentException::new);
+      if (!seat.getIsAvailable()) {
+        throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seat.getSeatId());
+      }
+      if (seat.getIsDeleted()) {
+        throw new RuntimeException("삭제된 좌석입니다.");
+      }
+      // TODO : 여기서 미리 좌석을 false로 바꿔놓는다면
+      //  -> 새로운 로직을 만들어서 좌석 예매 구현
+      //  만약 false로 바꾸지 않고 Lock 을 통해서 이 좌석을 건들지 못하게 한다면?
+      //  -> 기존 로직 재활용 가능?
+//      seat.updateAvailable(false);
+      newSeatTotalPrice += seat.getPrice();
     }
 
-    if (oldSeat.getIsAvailable()) {
-
-      kafkaTemplate.send("seat-availability-check-success-topic", oldSeat.getSeatId().toString(),
-          ApiResponse.ok(
-              new BookingSeatCheckRequestDto(true, seatCheckingRequestDto.bookingId(),
-                  seatCheckingRequestDto.passengerRequestDto()),
-              "message from checkSeatAvailable"));
-    } else {
-      kafkaTemplate.send("seat-availability-check-fail-topic", oldSeat.getSeatId().toString(),
-          ApiResponse.ok(
-              new BookingSeatCheckRequestDto(false, seatCheckingRequestDto.bookingId(),
-                  seatCheckingRequestDto.passengerRequestDto()),
-              "message from checkSeatAvailable"));
-    }
+    kafkaTemplate.send("payment-refund-topic",
+        seatAvailabilityChangeRequestDto.bookingId().toString(),
+        ApiResponse.ok(
+            new PaymentRefundRequestDto(seatAvailabilityChangeRequestDto.email(),
+                seatAvailabilityChangeRequestDto.bookingId(),
+                seatAvailabilityChangeRequestDto.passengerRequestDtos(),
+                newSeatTotalPrice),
+            "message from checkSeatAvailable"));
   }
 }
-
-//// 기존 좌석을 사용 가능(true) 상태로 변경
-//Seat oldSeat = seatRepository.findById(seatChangeRequestDto.oldSeatId())
-//    .orElseThrow(() -> new IllegalArgumentException("기존 좌석을 찾을 수 없습니다."));
-//
-//    if (oldSeat.getIsDeleted()) {
-//    throw new RuntimeException("삭제된 좌석입니다: " + seatChangeRequestDto.oldSeatId());
-//    }
-//
-//    oldSeat.updateAvailable(true);
-//    seatRepository.save(oldSeat);
-//
-//// 새로운 좌석을 사용 불가능(false) 상태로 변경
-//Seat newSeat = seatRepository.findById(seatChangeRequestDto.newSeatId())
-//    .orElseThrow(() -> new IllegalArgumentException("새로운 좌석을 찾을 수 없습니다."));
-//
-//    if (newSeat.getIsDeleted()) {
-//    throw new RuntimeException("삭제된 좌석입니다: " + seatChangeRequestDto.newSeatId());
-//    }
-//
-//    if (!newSeat.getIsAvailable()) {
-//    throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seatChangeRequestDto.newSeatId());
-//    }
-//
-//    newSeat.updateAvailable(false);
-//    seatRepository.save(newSeat);
-//
-//// Kafka로 성공 메시지 전송
-//    kafkaTemplate.send("seat-availability-check-success-topic", newSeat.getSeatId().toString(),
-//        ApiResponse.ok(
-//            new BookingSeatCheckRequestDto(true, seatChangeRequestDto.bookingId(),
-//                seatChangeRequestDto.passengerRequestDto()),
-//    "좌석 변경 성공: 기존 좌석 -> " + oldSeat.getSeatId() + ", 새로운 좌석 -> " + newSeat.getSeatId()));

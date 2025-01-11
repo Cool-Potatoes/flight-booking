@@ -72,23 +72,7 @@ public class BookingController {
     return ApiResponse.ok("예매 삭제 성공");
   }
 
-  @KafkaListener(groupId = "booking-complete-group", topics = "booking-complete-topic")
-  public void consumeBookingComplete(@Payload ApiResponse<BookingProcessRequestDto> message) {
 
-    ObjectMapper mapper = new ObjectMapper();
-    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
-        BookingProcessRequestDto.class);
 
-    bookingService.processBooking(bookingProcessRequestDto);
-  }
 
-  @KafkaListener(groupId = "booking-fail-group", topics = "booking-fail-topic")
-  public void consumeBookingFail(@Payload ApiResponse<BookingProcessRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
-        BookingProcessRequestDto.class);
-
-    bookingService.failBooking(bookingProcessRequestDto);
-  }
 }

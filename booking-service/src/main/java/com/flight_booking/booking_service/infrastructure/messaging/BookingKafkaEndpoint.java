@@ -1,4 +1,4 @@
-package com.flight_booking.booking_service.presentation.endpoint;
+package com.flight_booking.booking_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.booking_service.application.service.BookingService;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class KafkaBookingEndpoint {
+public class BookingKafkaEndpoint {
 
   private final BookingService bookingService;
 
@@ -58,5 +58,45 @@ public class KafkaBookingEndpoint {
         BookingSeatCheckRequestDto.class);
 
     bookingService.updateBookingFromKafka(bookingSeatCheckRequestDto);
+  }
+
+  @KafkaListener(groupId = "booking-complete-group", topics = "booking-complete-topic")
+  public void consumeBookingComplete(@Payload ApiResponse<BookingProcessRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingProcessRequestDto.class);
+
+    bookingService.processBooking(bookingProcessRequestDto);
+  }
+
+  @KafkaListener(groupId = "booking-fail-group", topics = "booking-fail-topic")
+  public void consumeBookingFail(@Payload ApiResponse<BookingProcessRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingProcessRequestDto.class);
+
+    bookingService.failBooking(bookingProcessRequestDto);
+  }
+
+  @KafkaListener(groupId = "booking-refund-success-group", topics = "booking-refund-success-topic")
+  public void consumeBookingRefundComplete(@Payload ApiResponse<BookingProcessRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingProcessRequestDto.class);
+
+    bookingService.processRefundBooking(bookingProcessRequestDto);
+  }
+
+  @KafkaListener(groupId = "booking-refund-fail-group", topics = "booking-refund-fail-topic")
+  public void consumeBookingRefundFail(@Payload ApiResponse<BookingProcessRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingProcessRequestDto.class);
+
+    bookingService.failRefundBooking(bookingProcessRequestDto);
   }
 }

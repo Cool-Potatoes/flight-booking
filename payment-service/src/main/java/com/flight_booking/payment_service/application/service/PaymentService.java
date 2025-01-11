@@ -1,8 +1,10 @@
 package com.flight_booking.payment_service.application.service;
 
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
@@ -136,7 +138,7 @@ public class PaymentService {
     Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED);
 
     kafkaTemplate.send("booking-complete-topic", updatedPayment.getBookingId().toString(),
-        ApiResponse.ok(new BookingProcessRequestDto(payment.getBookingId()),
+        ApiResponse.ok(new BookingProcessRequestDto(payment.getBookingId(), null),
             "message from processPaymentSuccess"));
   }
 
@@ -148,9 +150,57 @@ public class PaymentService {
     Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED_FAIL);
 
     kafkaTemplate.send("booking-fail-topic", updatedPayment.getBookingId().toString(),
-        ApiResponse.of(new BookingProcessRequestDto(updatedPayment.getBookingId()),
+        ApiResponse.of(new BookingProcessRequestDto(updatedPayment.getBookingId(), null),
             "message from processPaymentFail",
             HttpStatus.BAD_REQUEST
         ));
   }
+
+  @Transactional
+  public void refundPayment(PaymentRefundRequestDto paymentRefundRequestDto) {
+
+    Payment payment = paymentRepository.findPaymentByBookingId(paymentRefundRequestDto.bookingId())
+        .orElseThrow();
+
+    Long refundFare = payment.getFare();
+
+    payment.updateStatus(PaymentStatusEnum.REFUND_IN_PROGRESS);
+
+    kafkaTemplate.send("user-refund-topic", paymentRefundRequestDto.bookingId().toString(),
+        ApiResponse.of(new UserRefundRequestDto(paymentRefundRequestDto.email(),
+                payment.getPaymentId(),
+                refundFare, paymentRefundRequestDto.newSeatTotalPrice(),
+                paymentRefundRequestDto.passengerRequestDtos()),
+            "message from refundPayment",
+            HttpStatus.BAD_REQUEST
+        ));
+  }
+
+  @Transactional
+  public void processPaymentRefundSuccess(ProcessPaymentRequestDto processPaymentRequestDto) {
+
+    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+
+    Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_COMPLETE);
+
+    kafkaTemplate.send("booking-refund-success-topic", refundPayment.getBookingId().toString(),
+        ApiResponse.ok(new BookingProcessRequestDto(payment.getBookingId(),
+                processPaymentRequestDto.passengerRequestDtos()),
+            "message from processPaymentRefundSuccess"));
+  }
+
+  @Transactional
+  public void processPaymentRefundFail(ProcessPaymentRequestDto processPaymentRequestDto) {
+
+    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+
+    Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_FAIL);
+
+    kafkaTemplate.send("booking-refund-fail-topic", refundPayment.getBookingId().toString(),
+        ApiResponse.of(new BookingProcessRequestDto(refundPayment.getBookingId(), null),
+            "message from processPaymentRefundFail",
+            HttpStatus.BAD_REQUEST
+        ));
+  }
+
 }

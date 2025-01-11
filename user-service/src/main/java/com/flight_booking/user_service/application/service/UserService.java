@@ -1,6 +1,7 @@
 package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.domain.model.Role;
@@ -156,7 +157,7 @@ public class UserService {
       // payment fallback 로직
       kafkaTemplate.send("payment-fail-process-topic", userRequestDto.paymentId().toString(),
           ApiResponse.of(
-              new ProcessPaymentRequestDto(userRequestDto.paymentId()),
+              new ProcessPaymentRequestDto(userRequestDto.paymentId(), null),
               "message from updateUserMileage -Not enough mileage.",
               HttpStatus.BAD_REQUEST
           ));
@@ -169,8 +170,43 @@ public class UserService {
 
     // 결제 상태 업데이트
     kafkaTemplate.send("payment-success-process-topic", user.getId().toString(),
-        ApiResponse.ok(new ProcessPaymentRequestDto(userRequestDto.paymentId()),
+        ApiResponse.ok(new ProcessPaymentRequestDto(userRequestDto.paymentId(), null),
             "message from updateUserMileage"));
 
+  }
+
+  // 환불
+  @Transactional
+  public void refundPayment(UserRefundRequestDto userRefundRequestDto) {
+
+    User user = userRepository.findByEmail(userRefundRequestDto.email())
+        .orElseThrow();
+
+    Long difference = Math.abs(
+        userRefundRequestDto.newSeatTotalPrice() - userRefundRequestDto.refundFair());
+    // 마일리지가 충분한지 확인
+    if (user.getMileage() < difference) {
+
+      // payment fallback 로직
+      kafkaTemplate.send("payment-refund-fail-process-topic",
+          userRefundRequestDto.paymentId().toString(),
+          ApiResponse.of(
+              new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(),
+                  null),
+              "message from updateUserMileage -Not enough mileage.",
+              HttpStatus.BAD_REQUEST
+          ));
+
+      return;
+    }
+
+    // 환불해줌 ( 마일리지가 여유가 있으니 재 결제 )
+    user.refundMile(userRefundRequestDto.refundFair());
+
+    // 결제 상태 업데이트
+    kafkaTemplate.send("payment-refund-success-process-topic", user.getId().toString(),
+        ApiResponse.ok(new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(),
+                userRefundRequestDto.passengerRequestDtos()),
+            "message from refundPayment"));
   }
 }

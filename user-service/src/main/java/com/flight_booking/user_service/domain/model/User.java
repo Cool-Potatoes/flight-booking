@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,5 +66,9 @@ public class User extends BaseEntity {
 
   public void updateMile(Long mileage) {
     this.mileage = this.mileage - mileage;
+  }
+
+  public void refundMile(Long refundFair) {
+    this.mileage = this.mileage + refundFair;
   }
 }

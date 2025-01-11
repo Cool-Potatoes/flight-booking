@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record BookingRequestDto(
-    List<UUID> seatId,
     List<PassengerRequestDto> passengerRequestDtos
 ) {
 

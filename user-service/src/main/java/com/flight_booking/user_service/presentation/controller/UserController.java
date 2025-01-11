@@ -86,15 +86,7 @@ public class UserController {
     return ApiResponse.ok("회원 탈퇴 성공");
   }
 
-  @KafkaListener(groupId = "user-mileage-group", topics = "user-update-mileage-topic")
-  public void consumeUpdateMileage(@Payload ApiResponse<UserRequestDto> message) {
 
-    ObjectMapper mapper = new ObjectMapper();
-    UserRequestDto userRequestDto = mapper.convertValue(message.getData(),
-        UserRequestDto.class);
-
-    userService.updateUserMileage(userRequestDto);
-  }
 }
 
 
