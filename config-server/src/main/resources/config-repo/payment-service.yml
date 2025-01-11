@@ -28,7 +28,10 @@ spring:
         format_sql: true
         use_sql_comments: true
   kafka:
-    bootstrap-servers: kafka:9092  # Kafka가 실행중인 포트번호
+    bootstrap-servers: localhost:9092  # Kafka가 실행중인 포트번호
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -59,7 +62,7 @@ resilience4j:
 management:
   zipkin:
     tracing:
-      endpoint: "http://zipkin:9411/api/v2/spans"  # Zipkin 서버의 엔드포인트 지정
+      endpoint: "http://localhost:9411/api/v2/spans"  # Zipkin 서버의 엔드포인트 지정
   tracing:
     sampling:
       probability: 1.0  # Zipkin 트레이싱 샘플링 비율 (1.0: 100%)
@@ -71,7 +74,3 @@ management:
     metrics:
       export:
         enabled: true
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/

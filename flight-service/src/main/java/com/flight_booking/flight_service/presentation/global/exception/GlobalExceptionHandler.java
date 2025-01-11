@@ -1,6 +1,6 @@
 package com.flight_booking.flight_service.presentation.global.exception;
 
-import com.flight_booking.flight_service.presentation.global.ApiResponse;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +54,14 @@ public class GlobalExceptionHandler {
 
     ApiResponse<?> apiResponse = ApiResponse.of(HttpStatus.BAD_REQUEST,
         List.of(e.getMessage()));
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+  }
+
+  @ExceptionHandler(RuntimeException.class)
+  protected ResponseEntity<ApiResponse<?>> handleRunTimeException(RuntimeException e) {
+
+    ApiResponse<?> apiResponse = ApiResponse.of(HttpStatus.BAD_REQUEST, List.of(e.getMessage()));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
   }
