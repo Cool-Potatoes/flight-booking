@@ -22,7 +22,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     // 로그인 및 회원가입 경로는 인증 없이 처리
     String path = exchange.getRequest().getURI().getPath();
-    if (path.startsWith("/v1/auth/") && !path.endsWith("change-pw")) {
+    if (path.startsWith("/v1/auth/") && !path.endsWith("pw")) {
       return chain.filter(exchange); // 인증 없이 다음 필터로 넘김
     }
 
