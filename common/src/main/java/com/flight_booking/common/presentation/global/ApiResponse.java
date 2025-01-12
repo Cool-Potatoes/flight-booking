@@ -36,6 +36,13 @@ public class ApiResponse<T> {
         .build();
   }
 
+  public static <T> ApiResponse<?> ok(T data) {
+    return ApiResponse.builder()
+        .httpStatus(HttpStatus.OK.value())
+        .data(data)
+        .build();
+  }
+
   public static ApiResponse<?> of(HttpStatus status, List<String> errorMessages) {
     return ApiResponse.builder()
         .httpStatus(status.value())
