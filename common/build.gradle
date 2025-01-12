@@ -3,6 +3,11 @@ project(':common') {
     jar { enabled = true }
 
     dependencies {
+
+        // Kafka
+        implementation 'org.springframework.kafka:spring-kafka'
+        testImplementation 'org.springframework.kafka:spring-kafka-test'
+
         // Valid
         implementation 'org.springframework.boot:spring-boot-starter-validation'
 

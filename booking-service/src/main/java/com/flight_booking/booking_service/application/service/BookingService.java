@@ -3,6 +3,7 @@ package com.flight_booking.booking_service.application.service;
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
+import com.flight_booking.booking_service.infrastructure.messaging.BookingKafkaSender;
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.request.BookingUpdateRequestDto;
@@ -16,7 +17,6 @@ import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDt
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
-import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +34,7 @@ public class BookingService {
 
   private final BookingRepository bookingRepository;
   private final PassengerService passengerService;
-  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
+  private final BookingKafkaSender bookingKafkaSender;
 
   @Transactional(readOnly = false)
   public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto) {
@@ -59,13 +58,11 @@ public class BookingService {
       seatIdList.add(passengerResponseDto.seatId());
     }
 
-    kafkaTemplate.send(
+    bookingKafkaSender.sendMessage(
         "seat-availability-check-and-update-topic",
         savedBooking.getBookingId().toString(),
-        ApiResponse.ok(
-            new SeatBookingRequestDto(email, savedBooking.getBookingId(), seatIdList),
-            "Message from createBooking"
-        )
+        new SeatBookingRequestDto(
+            email, savedBooking.getBookingId(), seatIdList)
     );
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
@@ -96,14 +93,11 @@ public class BookingService {
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_CHANGE_PENDING);
 
-    kafkaTemplate.send(
+    bookingKafkaSender.sendMessage(
         "seat-availability-change-topic",
         bookingId.toString(),
-        ApiResponse.ok(
-            new SeatAvailabilityChangeRequestDto(email, bookingId,
-                bookingRequestDto.passengerRequestDtos()),
-            "Message from updateBooking"
-        )
+        new SeatAvailabilityChangeRequestDto(
+            email, bookingId, bookingRequestDto.passengerRequestDtos())
     );
 
     return BookingResponseDto.from(booking);
@@ -130,14 +124,13 @@ public class BookingService {
     // 항공권 생성
     for (Passenger passenger : booking.getPassengers()) {
 
-      kafkaTemplate.send(
+      bookingKafkaSender.sendMessage(
           "ticket-creation-topic",
-          ApiResponse.ok(
-              new TicketRequestDto(booking.getBookingId(),
-                  passenger.getPassengerId(),
-                  passenger.getSeatId()),
-              "from processBooking to make ticket"
-          ));
+          booking.getBookingId().toString(),
+          new TicketRequestDto(
+              booking.getBookingId(), passenger.getPassengerId(), passenger.getSeatId())
+      );
+
     }
   }
 

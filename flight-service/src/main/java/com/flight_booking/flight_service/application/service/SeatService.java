@@ -1,17 +1,16 @@
 package com.flight_booking.flight_service.application.service;
 
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
-import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
-import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
 import com.flight_booking.flight_service.domain.model.SeatClassEnum;
 import com.flight_booking.flight_service.domain.repository.SeatRepository;
+import com.flight_booking.flight_service.infrastructure.messaging.kafkaSender.SeatKafkaSender;
 import com.flight_booking.flight_service.presentation.request.SeatRequestDto;
 import com.flight_booking.flight_service.presentation.response.SeatResponseDto;
 import com.querydsl.core.types.Predicate;
@@ -24,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeatService {
 
   private final SeatRepository seatRepository;
-  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
+  private final SeatKafkaSender seatKafkaSender;
 
   public void createSeat(Flight flight) {
 
@@ -143,20 +140,21 @@ public class SeatService {
         totalPrice += seat.getPrice();
       }
 
-      kafkaTemplate.send("payment-creation-topic", seatBookingRequestDto.bookingId().toString(),
-          ApiResponse.ok(
-              new PaymentRequestDto(seatBookingRequestDto.email(),
-                  seatBookingRequestDto.bookingId(),
-                  totalPrice),
-              "message from consumeSeatAvailabilityCheckAndUpdate"));
+      seatKafkaSender.sendMessage(
+          "payment-creation-topic",
+          seatBookingRequestDto.bookingId().toString(),
+          new PaymentRequestDto(
+              seatBookingRequestDto.email(), seatBookingRequestDto.bookingId(), totalPrice)
+      );
+
     } else {
 
-      kafkaTemplate.send("booking-fail-topic", seatBookingRequestDto.bookingId().toString(),
-          ApiResponse.of(
-              new BookingProcessRequestDto(seatBookingRequestDto.bookingId(), null),
-              "좌석이 이미 예약되었습니다.",
-              HttpStatus.BAD_REQUEST
-          ));
+      seatKafkaSender.sendMessage(
+          "booking-fail-topic",
+          seatBookingRequestDto.bookingId().toString(),
+          new BookingProcessRequestDto(seatBookingRequestDto.bookingId(), null)
+      );
+
     }
   }
 
@@ -191,13 +189,17 @@ public class SeatService {
       newSeatTotalPrice += seat.getPrice();
     }
 
-    kafkaTemplate.send("payment-refund-topic",
+    seatKafkaSender.sendMessage(
+        "payment-refund-topic",
         seatAvailabilityChangeRequestDto.bookingId().toString(),
-        ApiResponse.ok(
-            new PaymentRefundRequestDto(seatAvailabilityChangeRequestDto.email(),
-                seatAvailabilityChangeRequestDto.bookingId(),
-                seatAvailabilityChangeRequestDto.passengerRequestDtos(),
-                newSeatTotalPrice),
-            "message from checkSeatAvailable"));
+        new PaymentRefundRequestDto(
+            seatAvailabilityChangeRequestDto.email(),
+            seatAvailabilityChangeRequestDto.bookingId(),
+            seatAvailabilityChangeRequestDto.passengerRequestDtos(),
+            newSeatTotalPrice)
+    );
+
   }
+
+
 }
