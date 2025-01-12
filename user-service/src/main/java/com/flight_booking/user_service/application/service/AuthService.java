@@ -9,8 +9,11 @@ import com.flight_booking.user_service.presentation.global.exception.UserExcepti
 import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,11 +31,16 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
+  private final RedisTemplate<String, Object> redisTemplate;
+
+  @Value("${service.jwt.access-expiration}")
+  private long TOKEN_EXPIRATION;
 
   // 회원가입
   @Transactional
   public void createUser(SignUpRequest request) {
-    if (userRepository.existsByEmail(request.email()) && userRepository.existsByPhone(request.phone())) {
+    if (userRepository.existsByEmail(request.email()) && userRepository.existsByPhone(
+        request.phone())) {
       throw new UserException(ErrorCode.DUPLICATE_EMAIL);
     }
 
@@ -63,7 +71,14 @@ public class AuthService {
       // 사용자 상태 확인 (블락/ 탈퇴)
       checkUserStatus(validatedEmail);
 
-      return jwtUtil.createToken(validatedEmail, role);
+      // JWT 생성
+      String token = jwtUtil.createToken(validatedEmail, role);
+
+      // JWT를 Redis에 저장 (토큰 저장은 JwtUtil에서 처리하는 방식으로도 가능)
+      redisTemplate.opsForValue()
+          .set(token, validatedEmail, TOKEN_EXPIRATION, TimeUnit.MILLISECONDS);
+
+      return token;
     } catch (AuthenticationException ex) {
       // 인증 실패 시 처리
       log.error("로그인 실패: {}", ex.getMessage());
@@ -99,5 +114,20 @@ public class AuthService {
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
     return user.getEmail();
+  }
+
+  // 로그아웃
+  @Transactional
+  public void logout(String token) {
+    // "Bearer " 접두어 제거
+    if (token.startsWith("Bearer ")) {
+      token = token.substring(7);  // "Bearer " 부분 제거
+    }
+
+    // Redis에서 토큰이 존재하는지 확인하고 삭제
+    if (redisTemplate.opsForValue().get(token) != null) {
+      log.info("토큰 존재함: {}", token);
+      redisTemplate.delete(token);
+    }
   }
 }
