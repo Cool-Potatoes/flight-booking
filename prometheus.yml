@@ -1,10 +1,16 @@
 global:
   scrape_interval: 15s
+  evaluation_interval: 15s  # 경고 조건 평가 주기
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']  # Alertmanager와 연동
 
 scrape_configs:
   - job_name: 'gateway'
     static_configs:
-      - targets: ['gateway-server:8080']
+      - targets: ['gateway-service:8080']
 
   - job_name: 'user-service'
     static_configs:
@@ -33,3 +39,8 @@ scrape_configs:
   - job_name: 'notification-service'
     static_configs:
       - targets: ['notification-service:8160']
+
+  # 🔍 Prometheus 자체 모니터링 추가
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

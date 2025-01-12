@@ -1,9 +1,47 @@
 global:
-  resolve_timeout: 5m
+  resolve_timeout: 5m  # 알림 해결 대기 시간
 
 route:
   group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
   receiver: 'default-receiver'
 
 receivers:
   - name: 'default-receiver'
+    email_configs:
+      - to: 'wogus146@gmail.com'
+        from: 'Carry9691@gmail.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'Carry9691@gmail.com'
+        auth_password: 'xrxt hjjz bwlg atlm'
+        require_tls: true
+
+      - to: 'wkdehf217@gmail.com'
+        from: 'Carry9691@gmail.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'Carry9691@gmail.com'
+        auth_password: 'xrxt hjjz bwlg atlm'
+        require_tls: true
+
+      - to: 'ykybkoft2@gmail.com'
+        from: 'Carry9691@gmail.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'Carry9691@gmail.com'
+        auth_password: 'xrxt hjjz bwlg atlm'
+        require_tls: true
+
+      - to: 'Carry9691@gmail.com'
+        from: 'Carry9691@gmail.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'Carry9691@gmail.com'
+        auth_password: 'xrxt hjjz bwlg atlm'
+        require_tls: true
+
+      - to: 'letty0322@gmail.com'
+        from: 'Carry9691@gmail.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'Carry9691@gmail.com'
+        auth_password: 'xrxt hjjz bwlg atlm'
+        require_tls: true
