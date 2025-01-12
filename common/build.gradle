@@ -11,6 +11,12 @@ project(':common') {
         // Valid
         implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+        // JPA
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+        // Security
+        implementation 'org.springframework.security:spring-security-core:5.8.1'
+
         implementation 'org.springframework.boot:spring-boot-starter-web:3.4.1'  // 버전 추가
         implementation 'com.fasterxml.jackson.core:jackson-annotations:2.14.1' // 버전 추가
 

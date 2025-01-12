@@ -1,20 +1,15 @@
-package com.flight_booking.user_service.infrastructure.configuration;
+package com.flight_booking.payment_service.infrastructure.configuration;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
-import com.flight_booking.user_service.infrastructure.security.AuthenticationFilter;
-import com.flight_booking.user_service.infrastructure.security.CustomUserDetailsService;
+import com.flight_booking.common.infrastructure.security.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -24,22 +19,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final CustomUserDetailsService customUserDetailsService;
-
-  @Bean
-  public AuthenticationManager authenticationManager(
-      AuthenticationConfiguration authenticationConfiguration) throws Exception {
-    return authenticationConfiguration.getAuthenticationManager();
-  }
-
   @Bean
   public AuthenticationFilter authenticationFilter() {
-    return new AuthenticationFilter(customUserDetailsService);
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder(10);
+    return new AuthenticationFilter();
   }
 
   // SecurityFilterChain 설정
@@ -51,8 +33,6 @@ public class SecurityConfig {
         .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 비활성화
         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))// 세션을 Stateless로 설정
         .authorizeHttpRequests(auth -> {
-          auth.requestMatchers("/v1/auth/signup", "/v1/auth/signin")
-              .permitAll(); // 로그인, 회원가입 URL 허용
           auth.anyRequest().authenticated(); // 모든 요청은 인증 필요
         })
         .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
