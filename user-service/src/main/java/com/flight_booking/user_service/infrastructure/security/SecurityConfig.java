@@ -2,8 +2,6 @@ package com.flight_booking.user_service.infrastructure.security;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
-import com.flight_booking.user_service.infrastructure.security.authentication.AuthenticationFilter;
-import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -2,7 +2,7 @@ package com.flight_booking.user_service.presentation.controller;
 
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.PasswordService;
-import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.request.ChangePwRequest;
 import com.flight_booking.user_service.presentation.request.ResetPwRequest;
 import jakarta.validation.Valid;
