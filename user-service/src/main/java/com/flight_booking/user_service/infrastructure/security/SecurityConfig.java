@@ -23,6 +23,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final CustomUserDetailsService customUserDetailsService;
+  private final String[] permitPaths = {
+      "/v1/auth/signup",
+      "/v1/auth/signin",
+      "/v1/auth/fins-id",
+      "/v1/users/send-code",
+      "/v1/users/verify-code"
+  };
 
   @Bean
   public AuthenticationManager authenticationManager(
@@ -44,8 +51,7 @@ public class SecurityConfig {
         .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 비활성화
         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))// 세션을 Stateless로 설정
         .authorizeHttpRequests(auth -> {
-          auth.requestMatchers("/v1/auth/**").permitAll(); // 허용
-          auth.requestMatchers("/v1/auth/change-pw","/v1/auth/reset-pw").authenticated(); // 인증 필요
+          auth.requestMatchers(permitPaths).permitAll(); // 허용
           auth.anyRequest().authenticated(); // 모든 요청은 인증 필요
         })
         .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
