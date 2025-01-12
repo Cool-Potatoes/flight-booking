@@ -1,17 +1,20 @@
 package com.flight_booking.notification_service.application.service;
 
-import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
-import com.flight_booking.notification_service.presentation.dto.NotificationResponse;
-import com.flight_booking.notification_service.global.exception.NotificationNotFoundException;
+import com.flight_booking.common.application.dto.NotificationRequestDto;
 import com.flight_booking.notification_service.domain.model.Notification;
 import com.flight_booking.notification_service.domain.repository.NotificationRepository;
+import com.flight_booking.notification_service.global.exception.NotificationNotFoundException;
+import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
+import com.flight_booking.notification_service.presentation.dto.NotificationResponse;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -51,7 +54,8 @@ public class NotificationService {
   public NotificationResponse getNotificationById(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
-        .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
+        .orElseThrow(
+            () -> new NotificationNotFoundException("Notification not found with ID: " + id));
     return toResponse(notification);
   }
 
@@ -64,7 +68,8 @@ public class NotificationService {
   public NotificationResponse markAsRead(UUID id) {
     Notification notification = repository.findById(id)
         .filter(n -> !n.getIsDeleted())
-        .orElseThrow(() -> new NotificationNotFoundException("Notification not found with ID: " + id));
+        .orElseThrow(
+            () -> new NotificationNotFoundException("Notification not found with ID: " + id));
     notification.setRead(true);
     repository.save(notification);
     return toResponse(notification);
@@ -90,5 +95,34 @@ public class NotificationService {
         notification.getStatus(),
         notification.getErrorMessage()
     );
+  }
+
+  // 비밀번호 변경을 위한 인증 코드 발송
+  @Transactional
+  public NotificationResponse sendCode(NotificationRequestDto requestDto) {
+    log.info("Kafka 메시지 수신: {}", requestDto);
+
+    // 알림 엔티티 생성
+    Notification notification = Notification.builder()
+        .userId(requestDto.userId())
+        .receiverEmail(requestDto.receiverEmail())
+        .notificationType("SEND_CODE")
+        .title("비밀번호 변경을 위한 인증 코드 발급")
+        .content("인증 코드: " + requestDto.code())
+        .isRead(false)
+        .isSent(false)
+        .status("PENDING")
+        .build();
+
+    // 알림을 DB에 저장
+    Notification saved = repository.save(notification);
+
+    // 이메일 전송 (비동기 처리 가능)
+    emailService.sendNotification(saved);
+
+    log.info("Kafka 메시지 수신 완료");
+
+    // 응답 반환
+    return toResponse(saved);
   }
 }
