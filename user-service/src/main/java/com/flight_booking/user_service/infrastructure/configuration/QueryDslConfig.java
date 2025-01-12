@@ -1,4 +1,4 @@
-package com.flight_booking.user_service.infrastructure;
+package com.flight_booking.user_service.infrastructure.configuration;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

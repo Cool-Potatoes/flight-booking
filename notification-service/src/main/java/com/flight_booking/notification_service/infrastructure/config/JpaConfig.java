@@ -1,10 +1,6 @@
-package com.flight_booking.flight_service.infrastructure.configuration;
+package com.flight_booking.notification_service.infrastructure.config;
 
 import com.flight_booking.common.infrastructure.auditing.AuditorAwareImpl;
-import com.querydsl.jpa.JPQLTemplates;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
