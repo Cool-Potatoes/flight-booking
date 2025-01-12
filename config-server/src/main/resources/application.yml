@@ -13,6 +13,8 @@ spring:
           password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
           default-label: dev
           search-paths: config-server/src/main/resources/config-repo
+          clone-on-start: false
+
 
 eureka:
   client:
