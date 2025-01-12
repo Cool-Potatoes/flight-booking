@@ -55,3 +55,14 @@ ehthumbs.db
 
 # 환경 파일
 .env
+
+# macOS 시스템 파일 무시
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
+**/.Spotlight-V100
+**/.Trashes
+**/._*
+
+# Github 이슈 템플릿 숨김 파일 무시
+.github/ISSUE_TEMPLATE/._*
