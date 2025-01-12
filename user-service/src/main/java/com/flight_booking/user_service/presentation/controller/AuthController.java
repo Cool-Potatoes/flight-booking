@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,4 +44,12 @@ public class AuthController {
     return ApiResponse.ok("아이디 찾기 성공", email);
   }
 
+  // 로그아웃
+  @PostMapping("/logout")
+  public ApiResponse<?> logout(@RequestHeader("Authorization") String token) {
+    log.info(token);
+    // 로그아웃 서비스 호출
+    authService.logout(token);
+    return ApiResponse.ok("로그아웃 성공");
+  }
 }
