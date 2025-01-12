@@ -99,6 +99,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # 6️⃣ Redis
   redis:
@@ -139,10 +144,16 @@ services:
     volumes:
       - kafka_data:/bitnami/kafka
     environment:
+      KAFKA_CLUSTER_ID: kafka-cluster-01
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z kafka 9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # 9️⃣ Zipkin (분산 추적)
   zipkin:
