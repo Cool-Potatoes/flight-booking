@@ -1,11 +1,14 @@
 package com.flight_booking.flight_service.application.service;
 
+import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.flight_service.domain.model.Airport;
 import com.flight_booking.flight_service.domain.model.Flight;
-import com.flight_booking.flight_service.domain.repository.AirportRepository;
+import com.flight_booking.flight_service.domain.model.FlightStatusEnum;
 import com.flight_booking.flight_service.domain.repository.FlightRepository;
+import com.flight_booking.flight_service.infrastructure.messaging.kafkaSender.FlightKafkaSender;
 import com.flight_booking.flight_service.presentation.request.FlightRequestDto;
 import com.flight_booking.flight_service.presentation.response.FlightResponseDto;
+import com.flight_booking.flight_service.presentation.response.SeatResponseDto;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
@@ -20,9 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class FlightService {
 
-  private final AirportRepository airportRepository;
   private final FlightRepository flightRepository;
+  private final AirportService airportService;
   private final SeatService seatService;
+  private final FlightKafkaSender flightKafkaSender;
 
   @Transactional(readOnly = true)
   public FlightResponseDto getFlightById(UUID flightId) {
@@ -47,15 +51,8 @@ public class FlightService {
   @Transactional
   public FlightResponseDto createFlight(FlightRequestDto requestDto) {
 
-    Airport departureAirport = airportRepository.findByCityName(requestDto.departureAirport())
-        .orElseThrow(
-            //TODO: Error 타입 정해지면 수정
-            () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
-        );
-    Airport arrivalAirport = airportRepository.findByCityName(requestDto.arrivalAirport())
-        .orElseThrow(
-            () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
-        );
+    Airport departureAirport = airportService.getAirportByCityName(requestDto.departureAirport());
+    Airport arrivalAirport = airportService.getAirportByCityName(requestDto.arrivalAirport());
 
     Flight flight = Flight.builder()
         .departureTime(requestDto.departureTime())
@@ -99,6 +96,37 @@ public class FlightService {
     seatService.deleteFlightSeats(flightId, deletedBy);
 
     return FlightResponseDto.from(flight);
+  }
+
+  public void checkAndCancelFlight(FlightCancelRequestDto flightCancelRequestDto) {
+
+    SeatResponseDto seatResponseDto = seatService.getSeat(flightCancelRequestDto.seatId());
+
+    Flight flight = flightRepository.findById(seatResponseDto.flightId()).orElse(null);
+
+    // 취소 불가 상태
+    if (flight == null
+        || FlightStatusEnum.DEPARTED.equals(flight.getStatusEnum())
+        || FlightStatusEnum.LANDED.equals(flight.getStatusEnum())) {
+
+      flightKafkaSender.sendMessage(
+          "ticket-cancel-unavailable-topic",
+          seatResponseDto.seatId().toString(),
+          flightCancelRequestDto
+      );
+
+      return;
+    }
+
+//    // 취소 진행 1.환불결제생성(기존 예약 변경) 2.마일리지반환 3.환불결제완료 4.좌석상태변경 + 예약상태변경,탑승객상태변경
+//
+//    List<PassengerRequestDto> passengerRequestDtoList = new ArrayList<>();
+//    PassengerRequestDto passengerRequestDto =
+//
+//    // TODO email
+//    kafkaTemplate.send("payment-refund-topic",
+//        ApiResponse.ok(new PaymentRefundRequestDto("email", flightCancelRequestDto.bookingId(), )));
+
   }
 
   /**

@@ -14,15 +14,23 @@ public class AuditorAwareImpl implements AuditorAware<String> {
   @Override
   @NonNull
   public Optional<String> getCurrentAuditor() {
+    // 인증된 사용자 정보
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    // 인증되지 않은 경우
+    // 인증되지 않는 경우
     if (authentication == null || !authentication.isAuthenticated()) {
       return Optional.of("SYSTEM");
     }
 
-    // 인증된 경우 CustomUserDetails의 getUsername 이용
-    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-    return Optional.ofNullable(userDetails.getUsername());
+    // 타입 확인
+    Object principal = authentication.getPrincipal();
+    if (principal instanceof CustomUserDetails userDetails) {
+      return Optional.ofNullable(userDetails.getUsername());
+    } else {
+      // 예상한 타입이 아닌 경우 로그 기록
+      log.warn("Principal CustomUserDetails 인스턴스가 아닙니다: {}", principal);
+      return Optional.empty();
+    }
   }
 }
+

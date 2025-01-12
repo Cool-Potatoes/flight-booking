@@ -28,15 +28,15 @@ public class PaymentServiceTest {
     // 초기 데이터 설정
     logger.info("초기 아이템 데이터를 설정합니다.");
     UUID bookingId = UUID.randomUUID();
-    PaymentRequestDto paymentRequestDto = new PaymentRequestDto(bookingId, 1000);
+    PaymentRequestDto paymentRequestDto = new PaymentRequestDto("email", bookingId, 1000L);
     PaymentResponseDto paymentResponseDto = paymentService.createPayment(paymentRequestDto);
 
     UUID paymentId = paymentResponseDto.paymentId();
 
     UpdateFareRequestDto updateFareRequestDto1
-        = new UpdateFareRequestDto(bookingId, 1000, 2000);
+        = new UpdateFareRequestDto(bookingId, 1000L, 2000L);
     UpdateFareRequestDto updateFareRequestDto2
-        = new UpdateFareRequestDto(bookingId, 1000, 3000);
+        = new UpdateFareRequestDto(bookingId, 1000L, 3000L);
 
     // 트랜잭션1: 결제 금액을 2000으로 업데이트 시도
     Thread thread1 = new Thread(() -> {

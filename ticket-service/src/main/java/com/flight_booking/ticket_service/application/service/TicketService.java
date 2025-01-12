@@ -1,14 +1,17 @@
 package com.flight_booking.ticket_service.application.service;
 
+import com.flight_booking.common.application.dto.FlightCancelRequestDto;
+import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
-import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
+import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -17,9 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TicketService {
 
   private final TicketRepository ticketRepository;
+  private final TicketKafkaSender ticketKafkaSender;
 
 
   @Transactional
@@ -34,7 +39,6 @@ public class TicketService {
         .bookingId(ticketRequestDto.bookingId())
         .passengerId(ticketRequestDto.passengerId())
         .seatId(ticketRequestDto.seatId())
-        .flightId(ticketRequestDto.flightId())
         .state(TicketStateEnum.BOOKED)
         .build();
 
@@ -69,9 +73,6 @@ public class TicketService {
     if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
       throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
     }
-    if (!ticketRequestDto.flightId().equals(ticket.getFlightId())) {
-      throw new RuntimeException("항공편 변경은 불가합니다.");
-    }
     if (!ticketRequestDto.passengerId().equals(ticket.getPassengerId())) {
       throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");
     }
@@ -95,9 +96,27 @@ public class TicketService {
 
     Ticket ticket = getTicketById(ticketId);
 
+    if (!ticket.getState().equals(TicketStateEnum.BOOKED)) {
+      throw new RuntimeException("취소 불가");
+    }
+
     // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
+    ticketKafkaSender.sendMessage(
+        "flight-cancel-availability",
+        ticket.getTicketId().toString(),
+        new FlightCancelRequestDto(
+            ticket.getTicketId(), ticket.getBookingId(),
+            ticket.getPassengerId(), ticket.getSeatId())
+    );
 
     ticket.updateState(TicketStateEnum.CANCEL_PENDING);
+  }
+
+  @Transactional
+  public void cancelFail(FlightCancelRequestDto flightCancelRequestDto) {
+    Ticket ticket = getTicketById(flightCancelRequestDto.ticketId());
+
+    ticket.updateState(TicketStateEnum.CANNOT_CANCEL);
   }
 
 

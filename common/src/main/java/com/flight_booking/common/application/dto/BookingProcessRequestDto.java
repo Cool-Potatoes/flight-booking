@@ -1,12 +1,14 @@
 package com.flight_booking.common.application.dto;
 
-import com.flight_booking.common.domain.model.BookingStatusEnum;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record BookingProcessRequestDto(
     @NotNull(message = "Booking ID cannot be null") UUID bookingId,
-    @NotNull(message = "BookingStatus cannot be null") BookingStatusEnum bookingStatus) {
+    List<PassengerRequestDto> passengerRequestDtos
+) {
+
 }

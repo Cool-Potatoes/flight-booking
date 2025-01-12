@@ -1,12 +1,12 @@
 package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
-import com.flight_booking.common.domain.model.PaymentStatusEnum;
-import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
+import com.flight_booking.user_service.infrastructure.messaging.UserKafkaSender;
 import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
-  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
+  private final UserKafkaSender userKafkaSender;
 
   // 전체 회원 목록 조회
   @Transactional(readOnly = true)
@@ -88,7 +87,83 @@ public class UserService {
     user.setDeletedAt(LocalDateTime.now());
   }
 
-  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Kafka methods
+   */
+
+  // 마일리지 차감
+  @Transactional
+  public void updateUserMileage(UserRequestDto userRequestDto) {
+
+    // TODO lock 걸어서 유저 정보 변경 할 때 중복변경 되지 않게
+    User user = userRepository.findByEmail(userRequestDto.email())
+        .orElseThrow();
+
+    // 마일리지가 충분한지 확인
+    if (user.getMileage() < userRequestDto.fare()) {
+
+      // payment fallback 로직
+      userKafkaSender.sendMessage(
+          "payment-fail-process-topic",
+          userRequestDto.paymentId().toString(),
+          new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+      );
+
+      return;
+    }
+
+    // 마일리지 차감
+    user.updateMile(userRequestDto.fare());
+
+    // 결제 상태 업데이트
+    userKafkaSender.sendMessage(
+        "payment-success-process-topic",
+        user.getId().toString(),
+        new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+    );
+
+  }
+
+  // 환불
+  @Transactional
+  public void refundPayment(UserRefundRequestDto userRefundRequestDto) {
+
+    User user = userRepository.findByEmail(userRefundRequestDto.email())
+        .orElseThrow();
+
+    Long difference = Math.abs(
+        userRefundRequestDto.newSeatTotalPrice() - userRefundRequestDto.refundFair());
+    // 마일리지가 충분한지 확인
+    if (user.getMileage() < difference) {
+
+      // payment fallback 로직
+      userKafkaSender.sendMessage(
+          "payment-refund-fail-process-topic",
+          userRefundRequestDto.paymentId().toString(),
+          new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(), null)
+      );
+
+      return;
+    }
+
+    // 환불해줌 ( 마일리지가 여유가 있으니 재 결제 )
+    user.refundMile(userRefundRequestDto.refundFair());
+
+    // 결제 상태 업데이트
+    userKafkaSender.sendMessage(
+        "payment-refund-success-process-topic",
+        user.getId().toString(),
+        new ProcessPaymentRequestDto(
+            userRefundRequestDto.paymentId(), userRefundRequestDto.passengerRequestDtos())
+    );
+
+  }
+
+
+  /**
+   * private methods
+   */
 
   // 존재하는 사용자 확인 및 삭제된 사용자 확인
   private User getUser(Long id) {
@@ -134,23 +209,4 @@ public class UserService {
     }
   }
 
-  // 마일리지 차감
-  @Transactional
-  public UserDetailResponse updateUserMileage(UserRequestDto userRequestDto) {
-
-    User user = userRepository.findByEmail(userRequestDto.email())
-        .orElseThrow();
-
-    // 마일리지 있으면 마일리지 차감, 요금 할인
-    user.updateMile(userRequestDto.Mileage());
-    Long fair = userRequestDto.fare();
-    fair -= userRequestDto.Mileage();
-
-    kafkaTemplate.send("payment-process-topic", user.getId().toString(),
-        ApiResponse.ok(new ProcessPaymentRequestDto(userRequestDto.bookingId(), fair,
-                PaymentStatusEnum.PAYED), // TODO mileage 몇으로?
-            "message from updateUserMileage"));
-
-    return UserDetailResponse.fromEntity(user);
-  }
 }
