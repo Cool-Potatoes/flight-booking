@@ -93,7 +93,7 @@ public class UserService {
   // 존재하는 사용자 확인 및 삭제된 사용자 확인
   private User getUser(Long id) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new UserException(ErrorCode.ACCESS_ONLY_SELF)); // 사용자 존재 여부 확인
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
     // 삭제된 사용자 확인
     if (user.getIsDeleted()) {
@@ -136,7 +136,7 @@ public class UserService {
 
   // 마일리지 차감
   @Transactional
-  public UserResponse updateUserMileage(UserRequestDto userRequestDto) {
+  public UserDetailResponse updateUserMileage(UserRequestDto userRequestDto) {
 
     User user = userRepository.findByEmail(userRequestDto.email())
         .orElseThrow();
@@ -151,6 +151,6 @@ public class UserService {
                 PaymentStatusEnum.PAYED), // TODO mileage 몇으로?
             "message from updateUserMileage"));
 
-    return UserResponse.fromEntity(user);
+    return UserDetailResponse.fromEntity(user);
   }
 }
