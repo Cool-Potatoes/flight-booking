@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      uri: http://config-server:8888
+      label: dev
+      name: config-server
