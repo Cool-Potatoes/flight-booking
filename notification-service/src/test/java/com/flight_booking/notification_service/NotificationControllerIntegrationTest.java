@@ -1,8 +1,7 @@
 package com.flight_booking.notification_service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flight_booking.notification_service.application.service.NotificationService;
-import com.flight_booking.notification_service.application.service.SmtpMailSender;
+import com.flight_booking.notification_service.infrastructure.mail.SmtpMailSender;
 import com.flight_booking.notification_service.domain.model.Notification;
 import com.flight_booking.notification_service.domain.repository.NotificationRepository;
 import com.flight_booking.notification_service.presentation.dto.NotificationRequest;

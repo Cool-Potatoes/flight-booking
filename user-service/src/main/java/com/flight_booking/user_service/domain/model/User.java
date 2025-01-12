@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +76,14 @@ public class User extends BaseEntity {
     this.createdBy = this.email;
   }
 
+  public void updateMile(Long mileage) {
+    this.mileage = this.mileage - mileage;
+  }
+
+  public void refundMile(Long refundFair) {
+    this.mileage = this.mileage + refundFair;
+  }
+
   @PreRemove
   public void preRemove() {
     this.isDeleted = true;
@@ -112,12 +121,7 @@ public class User extends BaseEntity {
     this.blockedInfo.setBlockedBy(null);
   }
 
-  public void updateMile(Long mileage){
-    if(this.mileage > 1000) this.mileage = this.mileage - mileage;
-  }
-
   public void setPassword(String password) {
     this.password = password;
   }
-
 }

@@ -36,9 +36,6 @@ public class Ticket extends BaseEntity {
   private UUID seatId;
 
   @Column(nullable = false)
-  private UUID flightId;
-
-  @Column(nullable = false)
   @Enumerated(value = EnumType.STRING)
   TicketStateEnum state;
 
