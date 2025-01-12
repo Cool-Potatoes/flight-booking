@@ -90,7 +90,7 @@ public class VerificationCodeService {
   }
 
   // 인증 코드 생성
-  public String createCode() {
+  private String createCode() {
     Random random = new Random();
     StringBuilder code = new StringBuilder();
 
