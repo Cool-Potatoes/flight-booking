@@ -1,4 +1,4 @@
-package com.flight_booking.user_service.infrastructure.security;
+package com.flight_booking.user_service.infrastructure.configuration;
 
 import java.time.Duration;
 import org.springframework.cache.annotation.EnableCaching;
