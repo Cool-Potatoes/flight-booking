@@ -1,18 +1,30 @@
 server:
-  port: 0  # Temporary port, will be overwritten by Config Server
+  port: 8080
 
 spring:
   application:
     name: gateway-service
+
+  main:
+    web-application-type: reactive  # ✅ 추가
+
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: "optional:configserver:"
+
   cloud:
     config:
+      enabled: true
       discovery:
         enabled: true
         service-id: config-server
+      fail-fast: true
 
 eureka:
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}

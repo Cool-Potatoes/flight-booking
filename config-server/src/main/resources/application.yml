@@ -2,23 +2,19 @@ server:
   port: 8888
 
 spring:
+  profiles:
+    active: native
   application:
     name: config-server
   cloud:
     config:
-      server:
-        native:
-          search-locations: classpath:/config-repo/
       discovery:
         enabled: true
-        service-id: eureka-server
+        service-id: config-server
+
 eureka:
   client:
+    register-with-eureka: true   # Eureka에 서비스 등록
+    fetch-registry: true         # 다른 서비스 정보 조회
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-  instance:
-    hostname: config-server
-    nonSecurePort: 8888
-logging:
-  level:
-    org.springframework.cloud.netflix.eureka: DEBUG
+      defaultZone: http://eureka-server:8761/eureka/  # Eureka 서버 주소 (컨테이너 이름 사용)

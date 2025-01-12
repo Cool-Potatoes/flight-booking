@@ -38,5 +38,9 @@ logging:
 
 eureka:
   client:
+    register-with-eureka: true   # Eureka에 서비스 등록
+    fetch-registry: true         # 다른 서비스 정보 조회
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    prefer-ip-address: true      # IP 주소로 등록
