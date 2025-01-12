@@ -3,10 +3,10 @@ package com.flight_booking.user_service.application.service;
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
-import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
+import com.flight_booking.user_service.infrastructure.messaging.UserKafkaSender;
 import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
@@ -20,8 +20,6 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
-  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
+  private final UserKafkaSender userKafkaSender;
 
   // 이메일 기반으로 사용자 정보 조회
   @Transactional(readOnly = true)
@@ -155,12 +153,11 @@ public class UserService {
     if (user.getMileage() < userRequestDto.fare()) {
 
       // payment fallback 로직
-      kafkaTemplate.send("payment-fail-process-topic", userRequestDto.paymentId().toString(),
-          ApiResponse.of(
-              new ProcessPaymentRequestDto(userRequestDto.paymentId(), null),
-              "message from updateUserMileage -Not enough mileage.",
-              HttpStatus.BAD_REQUEST
-          ));
+      userKafkaSender.sendMessage(
+          "payment-fail-process-topic",
+          userRequestDto.paymentId().toString(),
+          new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+      );
 
       return;
     }
@@ -169,9 +166,11 @@ public class UserService {
     user.updateMile(userRequestDto.fare());
 
     // 결제 상태 업데이트
-    kafkaTemplate.send("payment-success-process-topic", user.getId().toString(),
-        ApiResponse.ok(new ProcessPaymentRequestDto(userRequestDto.paymentId(), null),
-            "message from updateUserMileage"));
+    userKafkaSender.sendMessage(
+        "payment-success-process-topic",
+        user.getId().toString(),
+        new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+    );
 
   }
 
@@ -188,14 +187,11 @@ public class UserService {
     if (user.getMileage() < difference) {
 
       // payment fallback 로직
-      kafkaTemplate.send("payment-refund-fail-process-topic",
+      userKafkaSender.sendMessage(
+          "payment-refund-fail-process-topic",
           userRefundRequestDto.paymentId().toString(),
-          ApiResponse.of(
-              new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(),
-                  null),
-              "message from updateUserMileage -Not enough mileage.",
-              HttpStatus.BAD_REQUEST
-          ));
+          new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(), null)
+      );
 
       return;
     }
@@ -204,9 +200,12 @@ public class UserService {
     user.refundMile(userRefundRequestDto.refundFair());
 
     // 결제 상태 업데이트
-    kafkaTemplate.send("payment-refund-success-process-topic", user.getId().toString(),
-        ApiResponse.ok(new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(),
-                userRefundRequestDto.passengerRequestDtos()),
-            "message from refundPayment"));
+    userKafkaSender.sendMessage(
+        "payment-refund-success-process-topic",
+        user.getId().toString(),
+        new ProcessPaymentRequestDto(
+            userRefundRequestDto.paymentId(), userRefundRequestDto.passengerRequestDtos())
+    );
+
   }
 }
