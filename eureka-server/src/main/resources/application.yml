@@ -7,7 +7,12 @@ spring:
 
 eureka:
   client:
-    register-with-eureka: false   # Eureka 서버는 자신을 등록하지 않음
-    fetch-registry: false         # 다른 서비스 정보를 조회하지 않음
-  instance:
-    prefer-ip-address: true       # IP 주소로 등록
+    register-with-eureka: false
+    fetch-registry: false
+
+  server:
+    enableSelfPreservation: false
+logging:
+  level:
+    com.netflix.discovery: DEBUG  # Eureka Server 로깅 레벨 설정
+

@@ -4,40 +4,16 @@ server:
 spring:
   application:
     name: notification-service
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/flight_booking
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:systempass}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        show_sql: true
-        format_sql: true
-
-  sql:
-    init:
-      mode: always  # schema.sql 및 data.sql 파일 자동 실행
-
+  config:
+    import: "optional:configserver:"
   cloud:
     config:
       discovery:
-        enabled: true  # Config Server를 Eureka에서 검색
-        service-id: config-server  # Config Server의 서비스 ID
-
-  config:
-    import: "optional:configserver:"  # Config Server에서 설정 가져오기
+        enabled: true
+        service-id: config-server
 
 eureka:
   client:
-    register-with-eureka: true   # Eureka에 서비스 등록
-    fetch-registry: true         # 다른 서비스 정보 조회
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
-  instance:
-    prefer-ip-address: true      # IP 주소로 등록
+    fetch-registry: true  # Eureka 서버로부터 registry 정보를 가져오도록 설정

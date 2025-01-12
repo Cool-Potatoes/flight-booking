@@ -5,17 +5,14 @@ spring:
   application:
     name: flight-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: "optional:configserver:"
   cloud:
     config:
       discovery:
         enabled: true
         service-id: config-server
+
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
-  instance:
-    prefer-ip-address: true
