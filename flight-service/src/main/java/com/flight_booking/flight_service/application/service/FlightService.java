@@ -1,27 +1,21 @@
 package com.flight_booking.flight_service.application.service;
 
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
-import com.flight_booking.common.application.dto.PassengerRequestDto;
-import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
-import com.flight_booking.common.application.dto.PaymentRequestDto;
-import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.domain.model.Airport;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.FlightStatusEnum;
-import com.flight_booking.flight_service.domain.repository.AirportRepository;
 import com.flight_booking.flight_service.domain.repository.FlightRepository;
+import com.flight_booking.flight_service.infrastructure.messaging.kafkaSender.FlightKafkaSender;
 import com.flight_booking.flight_service.presentation.request.FlightRequestDto;
 import com.flight_booking.flight_service.presentation.response.FlightResponseDto;
 import com.flight_booking.flight_service.presentation.response.SeatResponseDto;
 import com.querydsl.core.types.Predicate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class FlightService {
 
-  private final AirportRepository airportRepository;
   private final FlightRepository flightRepository;
+  private final AirportService airportService;
   private final SeatService seatService;
-  private final KafkaTemplate<String, ApiResponse<?>> kafkaTemplate;
+  private final FlightKafkaSender flightKafkaSender;
 
   @Transactional(readOnly = true)
   public FlightResponseDto getFlightById(UUID flightId) {
@@ -57,15 +51,8 @@ public class FlightService {
   @Transactional
   public FlightResponseDto createFlight(FlightRequestDto requestDto) {
 
-    Airport departureAirport = airportRepository.findByCityName(requestDto.departureAirport())
-        .orElseThrow(
-            //TODO: Error 타입 정해지면 수정
-            () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
-        );
-    Airport arrivalAirport = airportRepository.findByCityName(requestDto.arrivalAirport())
-        .orElseThrow(
-            () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
-        );
+    Airport departureAirport = airportService.getAirportByCityName(requestDto.departureAirport());
+    Airport arrivalAirport = airportService.getAirportByCityName(requestDto.arrivalAirport());
 
     Flight flight = Flight.builder()
         .departureTime(requestDto.departureTime())
@@ -122,8 +109,11 @@ public class FlightService {
         || FlightStatusEnum.DEPARTED.equals(flight.getStatusEnum())
         || FlightStatusEnum.LANDED.equals(flight.getStatusEnum())) {
 
-      kafkaTemplate.send("ticket-cancel-unavailable-topic", seatResponseDto.seatId().toString(),
-          ApiResponse.ok(flightCancelRequestDto, "message from checkAndCancelFlight"));
+      flightKafkaSender.sendMessage(
+          "ticket-cancel-unavailable-topic",
+          seatResponseDto.seatId().toString(),
+          flightCancelRequestDto
+      );
 
       return;
     }
@@ -136,7 +126,6 @@ public class FlightService {
 //    // TODO email
 //    kafkaTemplate.send("payment-refund-topic",
 //        ApiResponse.ok(new PaymentRefundRequestDto("email", flightCancelRequestDto.bookingId(), )));
-
 
   }
 
