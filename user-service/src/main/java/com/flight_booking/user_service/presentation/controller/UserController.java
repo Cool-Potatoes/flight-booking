@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.UserService;
-import com.flight_booking.user_service.infrastructure.security.authentication.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
 import com.flight_booking.user_service.presentation.response.PageResponse;
+import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/users")
+@Slf4j
 public class UserController {
 
   private final UserService userService;
@@ -85,7 +88,7 @@ public class UserController {
     UserRequestDto userRequestDto = mapper.convertValue(message.getData(),
         UserRequestDto.class);
 
-    UserResponse userResponse = userService.updateUserMileage(userRequestDto);
+    UserDetailResponse userResponse = userService.updateUserMileage(userRequestDto);
 
     return ApiResponse.ok(userResponse, "유저 마일리지 변경 성공");
   }

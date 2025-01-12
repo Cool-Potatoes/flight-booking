@@ -1,4 +1,4 @@
-package com.flight_booking.user_service.infrastructure.security.authentication;
+package com.flight_booking.user_service.infrastructure.security;
 
 import com.flight_booking.user_service.domain.model.User;
 import java.util.Collection;
