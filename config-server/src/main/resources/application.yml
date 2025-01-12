@@ -1,3 +1,6 @@
+server:
+  port: 8888
+
 spring:
   application:
     name: config-server
@@ -9,18 +12,17 @@ spring:
           username: ${SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME}
           password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
           default-label: dev
-          search-paths: config-repo
+          search-paths: config-server/src/main/resources/config-repo
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-  instance:
-    hostname: config-server
-    nonSecurePort: 8888
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}
 
-logging:
-  level:
-    org.springframework.cloud.netflix.eureka: DEBUG
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

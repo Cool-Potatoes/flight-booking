@@ -1,4 +1,3 @@
-version: '3.8'
 
 networks:
   app-network:
@@ -8,26 +7,29 @@ volumes:
   postgres_data:
   prometheus_data:
   grafana_data:
+  zookeeper_data:
+  kafka_data:
 
 services:
-  # 1️⃣ Eureka Server
+  # 2️⃣ Eureka Server
   eureka-server:
-    build: ./eureka-server
+    build:
+      context: ./eureka-server
     container_name: eureka-server
     ports:
       - "8761:8761"
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://eureka-server:8761/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
       interval: 10s
       timeout: 10s
-      retries: 20
+      retries: 5
 
-
-  # 2️⃣ Config Server
+  # 3️⃣ Config Server
   config-server:
-    build: ./config-server
+    build:
+      context: ./config-server
     container_name: config-server
     ports:
       - "8888:8888"
@@ -38,21 +40,19 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka/
-      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: https://github.com/Cool-Potatoes/flight-booking.git
-      SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME: HanBeom98  # ✅ GitHub 사용자 이름
-      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: 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  # ✅ GitHub 토큰 (노출 주의!)
-      SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: dev
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://config-server:8888/actuator/health || exit 1" ]
-      interval: 5s
+      test: [ "CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1" ]
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 3
+    env_file:
+      - .env
 
-
-  # 3️⃣ Gateway Service
+  # 4️⃣ Gateway Service
   gateway-service:
-    build: ./gateway-service
+    build:
+      context: ./gateway-service
     container_name: gateway-service
     ports:
       - "8080:8080"
@@ -66,34 +66,41 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      SECRET_KEY: "66mL7J+B7J206rCQ7J6Q65Ok7J2Y7ZWt6rO16raM7JiI66ek7ISc67mE7Iqk66W87Iuc7J6R7ZW067SF64uI64uk"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://gateway-service:8080/actuator/health" ]
-      interval: 20s
-      timeout: 5s
-      retries: 10
+      SECRET_KEY: ${SECRET_KEY}
 
-  # 4️⃣ PostgreSQL
+  # 1️⃣ Common Module (공통 모듈)
+  common:
+    build:
+      context: ./common
+    container_name: common
+    networks:
+      - app-network
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+    restart: always # depends_on 제거, restart 정책 추가
+
+
+  # 5️⃣ PostgreSQL
   postgres:
     image: postgres:latest
     container_name: postgres
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_DB: flight_booking
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: systempass
     networks:
       - app-network
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
-  # 5️⃣ Redis
+  # 6️⃣ Redis
   redis:
     image: redis:latest
     container_name: redis
@@ -101,54 +108,43 @@ services:
       - "6379:6379"
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
-  # ✅ Zookeeper
+  # 7️⃣ Zookeeper
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: zookeeper:latest
     container_name: zookeeper
     ports:
       - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "echo ruok | nc zookeeper 2181 || exit 1"]
+      test: [ "CMD-SHELL", "nc -z localhost 2181" ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 3
+    volumes:
+      - zookeeper_data:/data
 
-  # 7️⃣ Kafka
+  # 8️⃣ Kafka
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: bitnami/kafka:latest
     container_name: kafka
     ports:
       - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       zookeeper:
         condition: service_healthy
     networks:
       - app-network
-    healthcheck:
-      test: [ "CMD-SHELL", "nc -z kafka 9092 && nc -z localhost 29092 || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+    volumes:
+      - kafka_data:/bitnami/kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  # 8️⃣ Zipkin
+  # 9️⃣ Zipkin (분산 추적)
   zipkin:
     image: openzipkin/zipkin
     container_name: zipkin
@@ -157,7 +153,7 @@ services:
     networks:
       - app-network
 
-  # 9️⃣ Prometheus
+  # 🔟 Prometheus (모니터링)
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -165,10 +161,11 @@ services:
       - "9090:9090"
     volumes:
       - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - app-network
 
-  # 🔟 Grafana
+  # 11️⃣ Grafana (시각화)
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -181,7 +178,8 @@ services:
 
   # 🔔 Notification Service
   notification-service:
-    build: ./notification-service
+    build:
+      context: ./notification-service
     container_name: notification-service
     ports:
       - "8160:8160"
@@ -196,22 +194,17 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/flight_booking
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: systempass
 
   # 🔑 User Service
   user-service:
-    build: ./user-service
+    build:
+      context: ./user-service
     container_name: user-service
     ports:
       - "8100:8100"
     networks:
       - app-network
     depends_on:
-      postgres:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
       config-server:
@@ -219,15 +212,14 @@ services:
 
   # 📦 Booking Service
   booking-service:
-    build: ./booking-service
+    build:
+      context: ./booking-service
     container_name: booking-service
     ports:
       - "8120:8120"
     networks:
       - app-network
     depends_on:
-      postgres:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
       config-server:
@@ -235,15 +227,14 @@ services:
 
   # 💳 Payment Service
   payment-service:
-    build: ./payment-service
+    build:
+      context: ./payment-service
     container_name: payment-service
     ports:
       - "8130:8130"
     networks:
       - app-network
     depends_on:
-      postgres:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
       config-server:
@@ -251,15 +242,14 @@ services:
 
   # ✈️ Flight Service
   flight-service:
-    build: ./flight-service
+    build:
+      context: ./flight-service
     container_name: flight-service
     ports:
       - "8150:8150"
     networks:
       - app-network
     depends_on:
-      postgres:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
       config-server:
@@ -267,15 +257,14 @@ services:
 
   # 🎟️ Ticket Service
   ticket-service:
-    build: ./ticket-service
+    build:
+      context: ./ticket-service
     container_name: ticket-service
     ports:
       - "8140:8140"
     networks:
       - app-network
     depends_on:
-      postgres:
-        condition: service_healthy
       eureka-server:
         condition: service_healthy
       config-server:

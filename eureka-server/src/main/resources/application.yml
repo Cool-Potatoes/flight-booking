@@ -12,7 +12,7 @@ eureka:
 
   server:
     enableSelfPreservation: false
+
 logging:
   level:
-    com.netflix.discovery: DEBUG  # Eureka Server 로깅 레벨 설정
-
+    com.netflix.discovery: DEBUG

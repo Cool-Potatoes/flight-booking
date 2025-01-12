@@ -12,19 +12,20 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # Checkout repository code
+      # 1️⃣ Checkout repository code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Set up JDK 17
+      # 2️⃣ Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'zulu'
 
-      # Cache Gradle dependencies
+      # 3️⃣ Cache Gradle dependencies
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
@@ -33,29 +34,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # Build the project using Gradle
+      # 4️⃣ Build the project using Gradle
       - name: Build with Gradle
         run: ./gradlew build -x test
 
-      # Docker Compose Build and Push
+      # 5️⃣ Docker Compose Build and Push (공통 모듈 포함)
       - name: Build and Push Docker Images
         if: contains(github.ref, 'dev') || contains(github.ref, 'main')
         run: |
-          docker-compose -f docker-compose.yml build
-          docker-compose -f docker-compose.yml push
+          docker-compose -f docker-compose.yml build common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+          docker-compose -f docker-compose.yml push common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
 
-      # Deploy to dev environment
-      - name: Deploy to dev
-        if: contains(github.ref, 'dev')
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.HOST_PROD }} # EC2 퍼블릭 IPv4 DNS
-          username: ubuntu
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            # SSH를 통해 EC2에서 Docker Compose로 서비스 배포
-            cd /home/ubuntu/flight-booking # 실제 경로로 수정필요
-            docker-compose pull
-            docker-compose up -d
-            sudo docker image prune -f
+#      # 6️⃣ Deploy to dev environment (공통 모듈 포함)
+#      - name: Deploy to dev
+#        if: contains(github.ref, 'dev')
+#        uses: appleboy/ssh-action@v1.1.0
+#        with:
+#          host: ${{ secrets.HOST_PROD }}  # EC2 퍼블릭 IPv4 DNS
+#          username: ubuntu
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          port: ${{ secrets.PORT }}
+#          script: |
+#            # EC2 서버에서 Docker Compose로 서비스 배포
+#            cd /home/ubuntu/flight-booking  # 실제 경로로 수정 필요
+#            docker-compose pull common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+#            docker-compose up -d common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+#            sudo docker image prune -f  # 사용하지 않는 이미지 정리

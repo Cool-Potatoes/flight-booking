@@ -1,59 +1,50 @@
 server:
   port: 8080
 
-service:
-  jwt:
-    access-expiration: 86400000  # 24시간
-    secret-key: ${SECRET_KEY}
-
 spring:
-  main:
-    web-application-type: reactive  # Spring 애플리케이션이 리액티브 웹 애플리케이션으로 설정됨
   application:
-    name: gateway-service  # 애플리케이션 이름을 'gateway-service'로 설정
+    name: gateway-service
   cloud:
     gateway:
-      routes: # Spring Cloud Gateway의 라우팅 설정
-        - id: user-service  # 라우트 식별자
+      routes:
+        - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/v1/users/**, /v1/auth/**
-        - id: payment-service  # 라우트 식별자
+        - id: payment-service
           uri: lb://payment-service
           predicates:
             - Path=/v1/payments/**
-        - id: flight-service  # 라우트 식별자
+        - id: flight-service
           uri: lb://flight-service
           predicates:
             - Path=/v1/flights/**
-        - id: ticket-service  # 라우트 식별자
+        - id: ticket-service
           uri: lb://ticket-service
           predicates:
             - Path=/v1/tickets/**
-        - id: booking-service  # 라우트 식별자
+        - id: booking-service
           uri: lb://booking-service
           predicates:
             - Path=/v1/bookings/**
 
       discovery:
         locator:
-          enabled: true  # 서비스 디스커버리를 통해 동적으로 라우트를 생성하도록 설정
+          enabled: true
 
-management:
-  zipkin:
-    tracing:
-      endpoint: "http://zipkin:9411/api/v2/spans"  # Zipkin 서버의 엔드포인트 지정
-  tracing:
-    sampling:
-      probability: 1.0  # Zipkin 트레이싱 샘플링 비율 (1.0: 100%)
-  endpoints:
-    web:
-      exposure:
-        include: refresh  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신)
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
+
+management:
+  zipkin:
+    tracing:
+      endpoint: "http://zipkin:9411/api/v2/spans"
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: refresh, prometheus
