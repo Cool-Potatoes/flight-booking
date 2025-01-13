@@ -28,9 +28,9 @@ public class SecurityConfig {
   private final String[] permitPaths = {
       "/v1/auth/signup",
       "/v1/auth/signin",
-      "/v1/auth/fins-id",
-      "/v1/users/send-code",
-      "/v1/users/verify-code"
+      "/v1/auth/find-id",
+      "/v1/auth/send-code",
+      "/v1/auth/verify-code"
   };
 
   @Bean

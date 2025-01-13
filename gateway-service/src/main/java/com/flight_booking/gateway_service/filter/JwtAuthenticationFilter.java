@@ -1,6 +1,7 @@
 package com.flight_booking.gateway_service.filter;
 
 import com.flight_booking.gateway_service.util.JwtUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -20,10 +21,19 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-    // 로그인 및 회원가입 경로는 인증 없이 처리
+    // 인증이 필요 없는 경로 리스트 정의
+    List<String> excludedPaths = List.of(
+        "/v1/auth/signup",
+        "/v1/auth/signin",
+        "/v1/auth/find-id",
+        "/v1/auth/send-code",
+        "/v1/auth/verify-code"
+    );
+
+    // 경로가 제외 리스트에 포함되어 있으면 인증 없이 필터 통과
     String path = exchange.getRequest().getURI().getPath();
-    if (path.startsWith("/v1/auth/") && !path.endsWith("pw") && !path.endsWith("logout")) {
-      return chain.filter(exchange); // 인증 없이 다음 필터로 넘김
+    if (excludedPaths.contains(path)) {
+      return chain.filter(exchange);
     }
 
     // Authorization 헤더에서 JWT 토큰 추출
