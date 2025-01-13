@@ -3,6 +3,7 @@ package com.flight_booking.user_service.application.service;
 import com.flight_booking.common.application.dto.NotificationRequestDto;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
+import com.flight_booking.user_service.infrastructure.messaging.UserKafkaSender;
 import com.flight_booking.user_service.infrastructure.security.jwt.JwtUtil;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
@@ -12,7 +13,6 @@ import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ public class VerificationCodeService {
 
   private final UserRepository userRepository;
   private final RedisCacheManager redisCacheManager;
-  private final KafkaTemplate<String, NotificationRequestDto> kafkaTemplate;
+  private final UserKafkaSender userKafkaSender;
   private final JwtUtil jwtUtil;
 
   // 비밀번호 찾기: 인증번호 발급 (비밀번호 찾기)
@@ -57,7 +57,7 @@ public class VerificationCodeService {
     cache.put(email, code);
 
     // 이메일 전송 위한 카프카 이벤트 발행
-    kafkaTemplate.send(
+    userKafkaSender.sendMessage(
         "password-reset-topic", email,
         new NotificationRequestDto(userId, email, code));
 
