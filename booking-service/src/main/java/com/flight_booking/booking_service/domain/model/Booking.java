@@ -32,7 +32,7 @@ public class Booking extends BaseEntity {
   private UUID bookingId;
 
   @Column
-  private Long userId;
+  private String email;
 
   @Column
   @Enumerated(value = EnumType.STRING)

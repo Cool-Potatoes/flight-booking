@@ -5,6 +5,7 @@ public enum TicketStateEnum {
   BOOKED("예약됨"),
   CANCEL_PENDING("취소 대기 중"),
   CANCELLED("취소됨"),
+  REFUND("환불됨"),
   CANNOT_CANCEL("취소 불가"),
   CHECKED_IN("체크인 완료됨"),
   BOARDED("탑승 완료됨"),

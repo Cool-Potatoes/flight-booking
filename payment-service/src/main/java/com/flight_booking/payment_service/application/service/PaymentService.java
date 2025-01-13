@@ -1,10 +1,14 @@
 package com.flight_booking.payment_service.application.service;
 
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
+import com.flight_booking.common.application.dto.BookingRefundRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
-import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
+import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
+import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.payment_service.domain.model.Payment;
@@ -132,22 +136,22 @@ public class PaymentService {
   }
 
   @Transactional
-  public void processPaymentSuccess(ProcessPaymentRequestDto processPaymentRequestDto) {
+  public void processPaymentSuccess(PaymentRefundProcessRequestDto paymentRefundProcessRequestDto) {
 
-    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+    Payment payment = getPaymentById(paymentRefundProcessRequestDto.paymentId());
 
     Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED);
 
     paymentKafkaSender.sendMessage(
         "booking-complete-topic",
         updatedPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(payment.getBookingId(), null)
+        new BookingProcessRequestDto(null, payment.getBookingId(), null, null)
     );
 
   }
 
   @Transactional
-  public void processPaymentFail(ProcessPaymentRequestDto requestDto) {
+  public void processPaymentFail(PaymentRefundProcessRequestDto requestDto) {
 
     Payment payment = getPaymentById(requestDto.paymentId());
 
@@ -156,13 +160,13 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-fail-topic",
         updatedPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(updatedPayment.getBookingId(), null)
+        new BookingProcessRequestDto(null, updatedPayment.getBookingId(), null, null)
     );
 
   }
 
   @Transactional
-  public void refundPayment(PaymentRefundRequestDto paymentRefundRequestDto) {
+  public void sendPaymentRefundFair(PaymentRefundRequestDto paymentRefundRequestDto) {
 
     Payment payment = paymentRepository.findPaymentByBookingId(paymentRefundRequestDto.bookingId())
         .orElseThrow();
@@ -172,46 +176,89 @@ public class PaymentService {
     payment.updateStatus(PaymentStatusEnum.REFUND_IN_PROGRESS);
 
     paymentKafkaSender.sendMessage(
-        "user-refund-topic",
+        "user-refund-processing-topic",
         paymentRefundRequestDto.bookingId().toString(),
         new UserRefundRequestDto(
+            paymentRefundRequestDto.ticketId(),
             paymentRefundRequestDto.email(),
             payment.getPaymentId(),
             refundFare, paymentRefundRequestDto.newSeatTotalPrice(),
             paymentRefundRequestDto.passengerRequestDtos())
     );
-
   }
 
   @Transactional
-  public void processPaymentRefundSuccess(ProcessPaymentRequestDto processPaymentRequestDto) {
+  public void refundPaymentFromTicket(
+      PaymentRefundFromTicketRequestDto paymentRefundFromTicketRequestDto) {
 
-    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+    Payment payment = paymentRepository.findPaymentByBookingId(
+            paymentRefundFromTicketRequestDto.bookingId())
+        .orElseThrow();
+
+    Long refundFare = payment.getFare();
+
+    payment.updateStatus(PaymentStatusEnum.REFUND_IN_PROGRESS);
+
+    paymentKafkaSender.sendMessage(
+        "user-refund-ticket-topic",
+        paymentRefundFromTicketRequestDto.bookingId().toString(),
+        new UserRefundTicketRequestDto(
+            paymentRefundFromTicketRequestDto.email(),
+            payment.getPaymentId(),
+            refundFare,
+            paymentRefundFromTicketRequestDto.bookingId(),
+            paymentRefundFromTicketRequestDto.passengerId(),
+            paymentRefundFromTicketRequestDto.seatId())
+    );
+  }
+
+  @Transactional
+  public void processPaymentRefundSuccess(
+      PaymentRefundProcessRequestDto paymentRefundProcessRequestDto) {
+
+    Payment payment = getPaymentById(paymentRefundProcessRequestDto.paymentId());
 
     Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_COMPLETE);
 
     paymentKafkaSender.sendMessage(
         "booking-refund-success-topic",
         refundPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(payment.getBookingId(),
-            processPaymentRequestDto.passengerRequestDtos())
+        new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(), payment.getBookingId(),
+            paymentRefundProcessRequestDto.passengerRequestDtos(), paymentRefundProcessRequestDto.email())
     );
-
   }
 
   @Transactional
-  public void processPaymentRefundFail(ProcessPaymentRequestDto processPaymentRequestDto) {
+  public void processPaymentRefundFail(
+      PaymentRefundProcessRequestDto paymentRefundProcessRequestDto) {
 
-    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+    Payment payment = getPaymentById(paymentRefundProcessRequestDto.paymentId());
 
     Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_FAIL);
 
     paymentKafkaSender.sendMessage(
         "booking-refund-fail-topic",
         refundPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(refundPayment.getBookingId(), null)
+        new BookingProcessRequestDto(null, refundPayment.getBookingId(), null, null)
     );
+  }
 
+  @Transactional
+  public void processTicketPaymentRefundSuccess(
+      ProcessTicketPaymentRequestDto processPaymentRequestDto) {
+
+    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+
+    Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_COMPLETE);
+
+    paymentKafkaSender.sendMessage(
+        "booking-refund-ticket-success-topic",
+        refundPayment.getBookingId().toString(),
+        new BookingRefundRequestDto(
+            payment.getBookingId(),
+            processPaymentRequestDto.seatId(),
+            processPaymentRequestDto.passengerId())
+    );
   }
 
 }
