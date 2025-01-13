@@ -25,9 +25,6 @@ public class PassengerService {
   public List<PassengerResponseDto> createPassenger(List<PassengerRequestDto> passengerRequestDtos,
       Booking savedBooking) {
 
-    // TODO : 좌석 이미 예약되어있는지 가져와서 체크
-    //  승객 중복 예약? 가능? - 같은 승객이 자리 여러개
-
     if (passengerRequestDtos == null || passengerRequestDtos.isEmpty()) {
       throw new InvalidPassengerListException();
     }
@@ -68,6 +65,7 @@ public class PassengerService {
     // TODO : updatePassenger
     // deletedby 추가하거나 다른걸로 변경
     // 지금은 그냥 seatid만 null 로 변경 -> 제약조건 위반
+    // passenger 이름 cancelled 로 바꿈
     passenger.updateOnePassenger();
 
   }

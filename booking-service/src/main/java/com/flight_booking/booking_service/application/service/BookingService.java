@@ -13,9 +13,9 @@ import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
-import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
@@ -43,12 +43,9 @@ public class BookingService {
       String username) {
 
     Booking booking = Booking.builder()
-        // TODO: 유저아이디는 로그인한 유저 아이디 가져올 것
         .email(username)
         .bookingStatus(BookingStatusEnum.BOOKING_WAITING)
         .build();
-
-    // 임시 이메일, 로그인한 유저한테 가져올것 - 게이트웨이 헤더
 
     Booking savedBooking = bookingRepository.save(booking);
 
@@ -63,7 +60,7 @@ public class BookingService {
     bookingKafkaSender.sendMessage(
         "seat-availability-check-and-update-topic",
         savedBooking.getBookingId().toString(),
-        new SeatBookingRequestDto(
+        new SeatAvailabilityCheckRequestDto(
             username, savedBooking.getBookingId(), seatIdList)
     );
 
@@ -95,13 +92,6 @@ public class BookingService {
     String email = "test@test.com";
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_CHANGE_PENDING);
-
-    bookingKafkaSender.sendMessage(
-        "seat-availability-change-topic",
-        bookingId.toString(),
-        new SeatAvailabilityChangeRequestDto(
-            null, email, bookingId, bookingRequestDto.passengerRequestDtos())
-    );
 
     return BookingResponseDto.from(booking);
   }
@@ -189,6 +179,7 @@ public class BookingService {
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_CANCELLED);
 
+    // TODO : 물어볼거 1 = 토픽에 들어가는 id는 해당 도메인 기준?
     bookingKafkaSender.sendMessage(
         "seat-availability-refund-topic",
         booking.getBookingId().toString(),
@@ -198,22 +189,21 @@ public class BookingService {
   }
 
   @Transactional(readOnly = false)
-  public void updateBookingFromKafka(BookingUpdateRequestDto bookingRequestDto) {
+  public void updateBookingStatus(BookingUpdateRequestDto bookingRequestDto) {
 
     Booking booking = bookingRepository.findByBookingIdAndIsDeletedFalse(
             bookingRequestDto.bookingId())
         .orElseThrow(NotFoundBookingException::new);
 
-    // TODO : 임시
-    String email = bookingRequestDto.email();
+    String userEmail = bookingRequestDto.email();
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_CHANGE_PENDING);
 
     bookingKafkaSender.sendMessage(
-        "seat-availability-change-topic",
+        "seat-availability-check-and-return-topic",
         booking.getBookingId().toString(),
-        new SeatAvailabilityChangeRequestDto(bookingRequestDto.ticketId(),
-            email, booking.getBookingId(), bookingRequestDto.passengerRequestDtos())
+        new SeatAvailabilityCheckAndReturnRequestDto(bookingRequestDto.ticketId(),
+            userEmail, booking.getBookingId(), bookingRequestDto.passengerRequestDtos())
     );
   }
 }

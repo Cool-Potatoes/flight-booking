@@ -34,7 +34,8 @@ public class BookingController {
   public ApiResponse<?> createBooking(@RequestBody BookingRequestDto bookingRequestDto,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto, userDetails.getUsername()),
+    return ApiResponse.ok(
+        bookingService.createBooking(bookingRequestDto, userDetails.getUsername()),
         "예매 생성 성공, 결제 대기중");
   }
 

@@ -86,7 +86,7 @@ public class TicketController {
 
     TicketResponseDto ticketResponseDto = ticketService.updateTicket(ticketId, ticketRequestDto, userDetails);
 
-    return ApiResponse.ok(ticketResponseDto, "항공권 수정 성공");
+    return ApiResponse.ok(ticketResponseDto, "항공권 수정 대기중");
   }
 
   @PatchMapping("/{ticketId}")

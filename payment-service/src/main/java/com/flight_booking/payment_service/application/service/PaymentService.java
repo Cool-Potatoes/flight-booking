@@ -5,7 +5,7 @@ import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
-import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
@@ -136,9 +136,9 @@ public class PaymentService {
   }
 
   @Transactional
-  public void processPaymentSuccess(ProcessPaymentRequestDto processPaymentRequestDto) {
+  public void processPaymentSuccess(PaymentRefundProcessRequestDto paymentRefundProcessRequestDto) {
 
-    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+    Payment payment = getPaymentById(paymentRefundProcessRequestDto.paymentId());
 
     Payment updatedPayment = payment.updateStatus(PaymentStatusEnum.PAYED);
 
@@ -151,7 +151,7 @@ public class PaymentService {
   }
 
   @Transactional
-  public void processPaymentFail(ProcessPaymentRequestDto requestDto) {
+  public void processPaymentFail(PaymentRefundProcessRequestDto requestDto) {
 
     Payment payment = getPaymentById(requestDto.paymentId());
 
@@ -166,7 +166,7 @@ public class PaymentService {
   }
 
   @Transactional
-  public void refundPayment(PaymentRefundRequestDto paymentRefundRequestDto) {
+  public void sendPaymentRefundFair(PaymentRefundRequestDto paymentRefundRequestDto) {
 
     Payment payment = paymentRepository.findPaymentByBookingId(paymentRefundRequestDto.bookingId())
         .orElseThrow();
@@ -176,7 +176,7 @@ public class PaymentService {
     payment.updateStatus(PaymentStatusEnum.REFUND_IN_PROGRESS);
 
     paymentKafkaSender.sendMessage(
-        "user-refund-topic",
+        "user-refund-processing-topic",
         paymentRefundRequestDto.bookingId().toString(),
         new UserRefundRequestDto(
             paymentRefundRequestDto.ticketId(),
@@ -213,24 +213,26 @@ public class PaymentService {
   }
 
   @Transactional
-  public void processPaymentRefundSuccess(ProcessPaymentRequestDto processPaymentRequestDto) {
+  public void processPaymentRefundSuccess(
+      PaymentRefundProcessRequestDto paymentRefundProcessRequestDto) {
 
-    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+    Payment payment = getPaymentById(paymentRefundProcessRequestDto.paymentId());
 
     Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_COMPLETE);
 
     paymentKafkaSender.sendMessage(
         "booking-refund-success-topic",
         refundPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(processPaymentRequestDto.ticketId(), payment.getBookingId(),
-            processPaymentRequestDto.passengerRequestDtos(), processPaymentRequestDto.email())
+        new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(), payment.getBookingId(),
+            paymentRefundProcessRequestDto.passengerRequestDtos(), paymentRefundProcessRequestDto.email())
     );
   }
 
   @Transactional
-  public void processPaymentRefundFail(ProcessPaymentRequestDto processPaymentRequestDto) {
+  public void processPaymentRefundFail(
+      PaymentRefundProcessRequestDto paymentRefundProcessRequestDto) {
 
-    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
+    Payment payment = getPaymentById(paymentRefundProcessRequestDto.paymentId());
 
     Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_FAIL);
 

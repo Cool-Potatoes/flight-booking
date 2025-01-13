@@ -1,6 +1,6 @@
 package com.flight_booking.user_service.application.service;
 
-import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
@@ -109,7 +109,7 @@ public class UserService {
       userKafkaSender.sendMessage(
           "payment-fail-process-topic",
           userRequestDto.paymentId().toString(),
-          new ProcessPaymentRequestDto(null, userRequestDto.paymentId(), null, null)
+          new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null)
       );
 
       return;
@@ -122,14 +122,14 @@ public class UserService {
     userKafkaSender.sendMessage(
         "payment-success-process-topic",
         user.getId().toString(),
-        new ProcessPaymentRequestDto(null, userRequestDto.paymentId(), null, null)
+        new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null)
     );
 
   }
 
   // 환불
   @Transactional
-  public void refundPayment(UserRefundRequestDto userRefundRequestDto) {
+  public void refundProcessing(UserRefundRequestDto userRefundRequestDto) {
 
     User user = userRepository.findByEmail(userRefundRequestDto.email())
         .orElseThrow();
@@ -141,9 +141,9 @@ public class UserService {
 
       // payment fallback 로직
       userKafkaSender.sendMessage(
-          "payment-refund-fail-process-topic",
+          "payment-refund-fail-topic",
           userRefundRequestDto.paymentId().toString(),
-          new ProcessPaymentRequestDto(
+          new PaymentRefundProcessRequestDto(
               null,
               userRefundRequestDto.paymentId(), null, null)
       );
@@ -156,14 +156,13 @@ public class UserService {
 
     // 결제 상태 업데이트
     userKafkaSender.sendMessage(
-        "payment-refund-success-process-topic",
+        "payment-refund-success-topic",
         user.getId().toString(),
-        new ProcessPaymentRequestDto(
+        new PaymentRefundProcessRequestDto(
             userRefundRequestDto.ticketId(), userRefundRequestDto.paymentId(),
             userRefundRequestDto.passengerRequestDtos(),
             userRefundRequestDto.email())
     );
-
   }
 
   // 티켓 환불

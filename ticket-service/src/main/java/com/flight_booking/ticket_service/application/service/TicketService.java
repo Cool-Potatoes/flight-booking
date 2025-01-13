@@ -72,6 +72,8 @@ public class TicketService {
   public TicketResponseDto updateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto,
       CustomUserDetails userDetails) {
 
+    String userEmail = userDetails.email();
+
     Ticket ticket = getTicketById(ticketId);
 
     if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
@@ -92,7 +94,7 @@ public class TicketService {
         new BookingUpdateRequestDto(
             ticketId,
             ticket.getBookingId(), ticketRequestDto.passengerRequestDtos(),
-            userDetails.getUsername())
+            userEmail)
     );
 
     // TODO updatedBy
@@ -130,11 +132,9 @@ public class TicketService {
     ticket.updateState(TicketStateEnum.CANNOT_CANCEL);
   }
 
-
   private Ticket getTicketById(UUID ticketId) {
-    Ticket ticket = ticketRepository.findByTicketIdAndIsDeletedFalse(ticketId)
+    return ticketRepository.findByTicketIdAndIsDeletedFalse(ticketId)
         .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
-    return ticket;
   }
 
   @Transactional

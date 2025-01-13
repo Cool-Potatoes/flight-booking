@@ -4,9 +4,9 @@ import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
-import com.flight_booking.common.application.dto.SeatBookingRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
 import com.flight_booking.flight_service.domain.model.SeatClassEnum;
@@ -124,10 +124,11 @@ public class SeatService {
   }
 
   @Transactional
-  public void consumeSeatAvailabilityCheckAndUpdate(SeatBookingRequestDto seatBookingRequestDto) {
+  public void consumeSeatAvailabilityCheckAndUpdate(
+      SeatAvailabilityCheckRequestDto seatAvailabilityCheckRequestDto) {
 
     // TODO 조회 할 때 lock?
-    List<UUID> seatIdList = seatBookingRequestDto.seatIdList();
+    List<UUID> seatIdList = seatAvailabilityCheckRequestDto.seatIdList();
 
     List<Seat> seatList = seatRepository.findAllById(seatIdList).stream()
         .filter(seat -> seat.getIsAvailable() && !seat.getIsDeleted()).collect(Collectors.toList());
@@ -143,17 +144,17 @@ public class SeatService {
 
       seatKafkaSender.sendMessage(
           "payment-creation-topic",
-          seatBookingRequestDto.bookingId().toString(),
+          seatAvailabilityCheckRequestDto.bookingId().toString(),
           new PaymentRequestDto(
-              seatBookingRequestDto.email(), seatBookingRequestDto.bookingId(), totalPrice)
+              seatAvailabilityCheckRequestDto.email(), seatAvailabilityCheckRequestDto.bookingId(), totalPrice)
       );
 
     } else {
 
       seatKafkaSender.sendMessage(
           "booking-fail-topic",
-          seatBookingRequestDto.bookingId().toString(),
-          new BookingProcessRequestDto(null, seatBookingRequestDto.bookingId(), null, null)
+          seatAvailabilityCheckRequestDto.bookingId().toString(),
+          new BookingProcessRequestDto(null, seatAvailabilityCheckRequestDto.bookingId(), null, null)
       );
 
     }
@@ -169,12 +170,12 @@ public class SeatService {
   }
 
   @Transactional(readOnly = false)
-  public void changeSeatAvailability(
-      SeatAvailabilityChangeRequestDto seatAvailabilityChangeRequestDto) {
+  public void seatAvailabilityCheckAndReturn(
+      SeatAvailabilityCheckAndReturnRequestDto seatAvailabilityCheckAndReturnRequestDto) {
 
     Long newSeatTotalPrice = 0L;
 
-    for (PassengerRequestDto dto : seatAvailabilityChangeRequestDto.passengerRequestDtos()) {
+    for (PassengerRequestDto dto : seatAvailabilityCheckAndReturnRequestDto.passengerRequestDtos()) {
       Seat seat = seatRepository.findById(dto.seatId()).orElseThrow(IllegalArgumentException::new);
       if (!seat.getIsAvailable()) {
         throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seat.getSeatId());
@@ -182,22 +183,19 @@ public class SeatService {
       if (seat.getIsDeleted()) {
         throw new RuntimeException("삭제된 좌석입니다.");
       }
-      // TODO : 여기서 미리 좌석을 false로 바꿔놓는다면
-      //  -> 새로운 로직을 만들어서 좌석 예매 구현
-      //  만약 false로 바꾸지 않고 Lock 을 통해서 이 좌석을 건들지 못하게 한다면?
-      //  -> 기존 로직 재활용 가능?
-      //seat.updateAvailable(false);
+      // TODO : 여기서 미리 좌석을 false로 바꿔놓는 방식 말고, lock으로 할 것
+      // seat.updateAvailable(false);
       newSeatTotalPrice += seat.getPrice();
     }
 
     seatKafkaSender.sendMessage(
         "payment-refund-topic",
-        seatAvailabilityChangeRequestDto.bookingId().toString(),
+        seatAvailabilityCheckAndReturnRequestDto.bookingId().toString(),
         new PaymentRefundRequestDto(
-            seatAvailabilityChangeRequestDto.ticketId(),
-            seatAvailabilityChangeRequestDto.email(),
-            seatAvailabilityChangeRequestDto.bookingId(),
-            seatAvailabilityChangeRequestDto.passengerRequestDtos(),
+            seatAvailabilityCheckAndReturnRequestDto.ticketId(),
+            seatAvailabilityCheckAndReturnRequestDto.email(),
+            seatAvailabilityCheckAndReturnRequestDto.bookingId(),
+            seatAvailabilityCheckAndReturnRequestDto.passengerRequestDtos(),
             newSeatTotalPrice)
     );
 

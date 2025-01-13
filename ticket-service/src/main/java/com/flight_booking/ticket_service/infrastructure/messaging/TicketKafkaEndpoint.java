@@ -38,7 +38,7 @@ public class TicketKafkaEndpoint {
   }
 
   @KafkaListener(groupId = "ticket-update-group", topics = "ticket-update-topic")
-  public void consumeUpdateTicket(@Payload ApiResponse<TicketUpdateStatusRequestDto> message) {
+  public void consumeUpdateTicketStatus(@Payload ApiResponse<TicketUpdateStatusRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     TicketUpdateStatusRequestDto ticketUpdateStatusRequestDto

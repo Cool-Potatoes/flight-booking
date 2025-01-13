@@ -27,15 +27,15 @@ public class UserKafkaEndpoint {
     userService.updateUserMileage(userRequestDto);
   }
 
-  @KafkaListener(groupId = "user-refund-group", topics = "user-refund-topic")
-  public void consumeUserRefund(
+  @KafkaListener(groupId = "user-refund-processing-group", topics = "user-refund-processing-topic")
+  public void consumeUserRefundProcessing(
       @Payload ApiResponse<UserRefundRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     UserRefundRequestDto userRefundRequestDto = mapper.convertValue(message.getData(),
         UserRefundRequestDto.class);
 
-    userService.refundPayment(userRefundRequestDto);
+    userService.refundProcessing(userRefundRequestDto);
   }
 
   @KafkaListener(groupId = "user-refund-group", topics = "user-refund-ticket-topic")

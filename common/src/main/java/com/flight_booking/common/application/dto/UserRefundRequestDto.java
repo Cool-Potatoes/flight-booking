@@ -13,7 +13,6 @@ public record UserRefundRequestDto(
     @NotNull(message = "Refund Fair cannot be null") Long refundFair,
     @NotNull(message = "newSeatTotalPrice cannot be null") Long newSeatTotalPrice,
     @NotNull(message = "Passengers cannot be null") List<PassengerRequestDto> passengerRequestDtos
-
 ) {
 
 }

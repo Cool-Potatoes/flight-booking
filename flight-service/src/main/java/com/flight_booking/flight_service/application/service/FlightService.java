@@ -119,12 +119,8 @@ public class FlightService {
       );
     }
 
-//    // 취소 진행 1.환불결제생성(기존 예약 변경) 2.마일리지반환 3.환불결제완료 4.좌석상태변경 + 예약상태변경,탑승객상태변경
-//
-//    List<PassengerRequestDto> passengerRequestDtoList = new ArrayList<>();
-//    PassengerRequestDto passengerRequestDto =
-//
-//    // TODO email
+    // 취소 진행 1.환불결제생성(기존 예약 변경) 2.마일리지반환 3.환불결제완료 4.좌석상태변경 + 예약상태변경,탑승객상태변경
+
     flightKafkaSender.sendMessage(
         "payment-refund-ticket-topic",
         flightCancelRequestDto.ticketId().toString(),

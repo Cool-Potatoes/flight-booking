@@ -5,15 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
-public record TicketUpdateRequestDto (
-  @NotNull(message = "Booking ID cannot be null")
-  UUID bookingId,
-  @NotNull(message = "Passenger ID cannot be null")
-  UUID passengerId,
-  @NotNull(message = "Seat ID cannot be null")
-  UUID seatId,
-  @NotNull(message = "PassengerRequestDtos cannot be null")
-  List<PassengerRequestDto>passengerRequestDtos
-){
+public record TicketUpdateRequestDto(
+    @NotNull(message = "Booking ID cannot be null") UUID bookingId,
+    @NotNull(message = "Passenger ID cannot be null") UUID passengerId,
+    @NotNull(message = "Seat ID cannot be null") UUID seatId,
+    @NotNull(message = "PassengerRequestDtos cannot be null") List<PassengerRequestDto> passengerRequestDtos
+) {
 
 }

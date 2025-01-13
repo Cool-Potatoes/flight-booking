@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ProcessPaymentRequestDto(
+public record PaymentRefundProcessRequestDto(
     UUID ticketId,
     @NotNull(message = "Payment ID cannot be null") UUID paymentId,
     List<PassengerRequestDto> passengerRequestDtos,
