@@ -2,7 +2,7 @@ package com.flight_booking.common.application.dto;
 
 import java.util.UUID;
 
-public record FlightCancelRequestDto(
+public record PaymentRefundFromTicketRequestDto(
     String email,
     UUID ticketId,
     UUID bookingId,

@@ -58,4 +58,8 @@ public class Passenger extends BaseEntity {
     this.baggage = baggage;
     this.meal = meal;
   }
+
+  public void updateOnePassenger(){
+    this.passengerName = "cancelled";
+  }
 }

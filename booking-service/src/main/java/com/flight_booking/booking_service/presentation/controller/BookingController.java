@@ -3,8 +3,9 @@ package com.flight_booking.booking_service.presentation.controller;
 import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.booking_service.domain.model.Booking;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
-import com.flight_booking.booking_service.presentation.request.BookingUpdateRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
+import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
+import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedModel;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,9 +31,11 @@ public class BookingController {
   private final BookingService bookingService;
 
   @PostMapping
-  public ApiResponse<?> createBooking(@RequestBody BookingRequestDto bookingRequestDto) {
+  public ApiResponse<?> createBooking(@RequestBody BookingRequestDto bookingRequestDto,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto), "예매 생성 성공, 결제 대기중");
+    return ApiResponse.ok(bookingService.createBooking(bookingRequestDto, userDetails.getUsername()),
+        "예매 생성 성공, 결제 대기중");
   }
 
   @GetMapping

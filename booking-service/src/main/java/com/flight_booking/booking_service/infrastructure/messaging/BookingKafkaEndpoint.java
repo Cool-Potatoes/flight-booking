@@ -3,7 +3,8 @@ package com.flight_booking.booking_service.infrastructure.messaging;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
-import com.flight_booking.common.application.dto.BookingSeatCheckRequestDto;
+import com.flight_booking.common.application.dto.BookingRefundRequestDto;
+import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -38,26 +39,15 @@ public class BookingKafkaEndpoint {
     bookingService.processBooking(bookingProcessRequestDto);
   }
 
-  @KafkaListener(groupId = "seat-availability-check-topic", topics = "seat-availability-check-success-topic")
-  public void consumeSeatAvailabilityCheckSuccess(
-      @Payload ApiResponse<BookingSeatCheckRequestDto> message) {
+  @KafkaListener(groupId = "booking-update-group", topics = "booking-update-topic")
+  public void consumeBookingUpdate(
+      @Payload ApiResponse<BookingUpdateRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
-    BookingSeatCheckRequestDto bookingSeatCheckRequestDto = mapper.convertValue(message.getData(),
-        BookingSeatCheckRequestDto.class);
+    BookingUpdateRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingUpdateRequestDto.class);
 
-    bookingService.updateBookingFromKafka(bookingSeatCheckRequestDto);
-  }
-
-  @KafkaListener(groupId = "seat-availability-check-topic", topics = "seat-availability-check-fail-topic")
-  public void consumeSeatAvailabilityCheckFail(
-      @Payload ApiResponse<BookingSeatCheckRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    BookingSeatCheckRequestDto bookingSeatCheckRequestDto = mapper.convertValue(message.getData(),
-        BookingSeatCheckRequestDto.class);
-
-    bookingService.updateBookingFromKafka(bookingSeatCheckRequestDto);
+    bookingService.updateBookingFromKafka(bookingProcessRequestDto);
   }
 
   @KafkaListener(groupId = "booking-complete-group", topics = "booking-complete-topic")
@@ -98,5 +88,15 @@ public class BookingKafkaEndpoint {
         BookingProcessRequestDto.class);
 
     bookingService.failRefundBooking(bookingProcessRequestDto);
+  }
+
+  @KafkaListener(groupId = "booking-refund-success-group", topics = "booking-refund-ticket-success-topic")
+  public void consumeBookingRefundTicketComplete(@Payload ApiResponse<BookingRefundRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingRefundRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
+        BookingRefundRequestDto.class);
+
+    bookingService.processRefundTicketBooking(bookingProcessRequestDto);
   }
 }

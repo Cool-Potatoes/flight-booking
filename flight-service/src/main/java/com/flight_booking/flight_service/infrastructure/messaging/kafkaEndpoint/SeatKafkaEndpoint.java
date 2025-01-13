@@ -1,6 +1,7 @@
 package com.flight_booking.flight_service.infrastructure.messaging.kafkaEndpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
@@ -35,5 +36,15 @@ public class SeatKafkaEndpoint {
         SeatAvailabilityChangeRequestDto.class);
 
     seatService.changeSeatAvailability(seatBookingRequestDto);
+  }
+
+  @KafkaListener(groupId = "seat-availability-change-group", topics = "seat-availability-refund-topic")
+  public void consumeSeatAvailabilityRefund(@Payload ApiResponse<SeatAvailabilityRefundRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    SeatAvailabilityRefundRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
+        SeatAvailabilityRefundRequestDto.class);
+
+    seatService.refundSeatAvailability(seatBookingRequestDto);
   }
 }

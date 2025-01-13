@@ -1,7 +1,9 @@
 package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
+import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
@@ -107,7 +109,7 @@ public class UserService {
       userKafkaSender.sendMessage(
           "payment-fail-process-topic",
           userRequestDto.paymentId().toString(),
-          new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+          new ProcessPaymentRequestDto(null, userRequestDto.paymentId(), null, null)
       );
 
       return;
@@ -120,7 +122,7 @@ public class UserService {
     userKafkaSender.sendMessage(
         "payment-success-process-topic",
         user.getId().toString(),
-        new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+        new ProcessPaymentRequestDto(null, userRequestDto.paymentId(), null, null)
     );
 
   }
@@ -141,7 +143,9 @@ public class UserService {
       userKafkaSender.sendMessage(
           "payment-refund-fail-process-topic",
           userRefundRequestDto.paymentId().toString(),
-          new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(), null)
+          new ProcessPaymentRequestDto(
+              null,
+              userRefundRequestDto.paymentId(), null, null)
       );
 
       return;
@@ -155,11 +159,34 @@ public class UserService {
         "payment-refund-success-process-topic",
         user.getId().toString(),
         new ProcessPaymentRequestDto(
-            userRefundRequestDto.paymentId(), userRefundRequestDto.passengerRequestDtos())
+            userRefundRequestDto.ticketId(), userRefundRequestDto.paymentId(),
+            userRefundRequestDto.passengerRequestDtos(),
+            userRefundRequestDto.email())
     );
 
   }
 
+  // 티켓 환불
+  @Transactional
+  public void refundTicketPayment(UserRefundTicketRequestDto userRefundRequestDto) {
+
+    User user = userRepository.findByEmail(userRefundRequestDto.email())
+        .orElseThrow();
+
+    user.refundMile(userRefundRequestDto.refundFair());
+
+    // 결제 상태 업데이트
+    userKafkaSender.sendMessage(
+        "payment-refund-ticket-success-process-topic",
+        user.getId().toString(),
+        new ProcessTicketPaymentRequestDto(
+            userRefundRequestDto.paymentId(),
+            userRefundRequestDto.seatId(),
+            userRefundRequestDto.bookingId(),
+            userRefundRequestDto.passengerId())
+    );
+
+  }
 
   /**
    * private methods

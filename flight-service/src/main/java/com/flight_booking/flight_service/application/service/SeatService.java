@@ -5,6 +5,7 @@ import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.SeatBookingRequestDto;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
@@ -152,7 +153,7 @@ public class SeatService {
       seatKafkaSender.sendMessage(
           "booking-fail-topic",
           seatBookingRequestDto.bookingId().toString(),
-          new BookingProcessRequestDto(seatBookingRequestDto.bookingId(), null)
+          new BookingProcessRequestDto(null, seatBookingRequestDto.bookingId(), null, null)
       );
 
     }
@@ -185,7 +186,7 @@ public class SeatService {
       //  -> 새로운 로직을 만들어서 좌석 예매 구현
       //  만약 false로 바꾸지 않고 Lock 을 통해서 이 좌석을 건들지 못하게 한다면?
       //  -> 기존 로직 재활용 가능?
-//      seat.updateAvailable(false);
+      //seat.updateAvailable(false);
       newSeatTotalPrice += seat.getPrice();
     }
 
@@ -193,6 +194,7 @@ public class SeatService {
         "payment-refund-topic",
         seatAvailabilityChangeRequestDto.bookingId().toString(),
         new PaymentRefundRequestDto(
+            seatAvailabilityChangeRequestDto.ticketId(),
             seatAvailabilityChangeRequestDto.email(),
             seatAvailabilityChangeRequestDto.bookingId(),
             seatAvailabilityChangeRequestDto.passengerRequestDtos(),
@@ -201,5 +203,12 @@ public class SeatService {
 
   }
 
+  @Transactional(readOnly = false)
+  public void refundSeatAvailability(SeatAvailabilityRefundRequestDto seatBookingRequestDto) {
 
+    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId())
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
+
+    seat.updateAvailable(true);
+  }
 }

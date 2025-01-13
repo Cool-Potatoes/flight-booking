@@ -1,9 +1,11 @@
 package com.flight_booking.payment_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.ProcessPaymentRequestDto;
+import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.application.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +60,17 @@ public class PaymentKafkaEndpoint {
     paymentService.refundPayment(paymentRefundRequestDto);
   }
 
+  @KafkaListener(groupId = "payment-refund-group", topics = "payment-refund-ticket-topic")
+  public void consumePaymentRefundFromTicket(
+      @Payload ApiResponse<PaymentRefundFromTicketRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    PaymentRefundFromTicketRequestDto paymentRefundRequestDto = mapper.convertValue(message.getData(),
+        PaymentRefundFromTicketRequestDto.class);
+
+    paymentService.refundPaymentFromTicket(paymentRefundRequestDto);
+  }
+
   @KafkaListener(groupId = "payment-refund-success-group", topics = "payment-refund-success-process-topic")
   public void consumePaymentRefundFailProcess(
       @Payload ApiResponse<ProcessPaymentRequestDto> message) {
@@ -78,6 +91,17 @@ public class PaymentKafkaEndpoint {
         ProcessPaymentRequestDto.class);
 
     paymentService.processPaymentRefundFail(paymentRequestDto);
+  }
+
+  @KafkaListener(groupId = "payment-refund-ticket-group", topics = "payment-refund-ticket-success-process-topic")
+  public void consumePaymentRefundTicketProcess(
+      @Payload ApiResponse<ProcessTicketPaymentRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    ProcessTicketPaymentRequestDto paymentRequestDto = mapper.convertValue(message.getData(),
+        ProcessTicketPaymentRequestDto.class);
+
+    paymentService.processTicketPaymentRefundSuccess(paymentRequestDto);
   }
 
 
