@@ -1,10 +1,10 @@
 package com.flight_booking.ticket_service.presentation.controller;
 
+import com.flight_booking.common.application.dto.TicketRequestDto;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.application.service.TicketService;
 import com.flight_booking.ticket_service.domain.model.Ticket;
-import com.flight_booking.ticket_service.presentation.dto.TicketRequestDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
-import com.flight_booking.ticket_service.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import jakarta.validation.Valid;
 import java.util.List;

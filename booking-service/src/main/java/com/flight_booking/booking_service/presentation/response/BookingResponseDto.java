@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 public record BookingResponseDto(
     UUID bookingId,
     String bookingStatus,
-    UUID seatId,
     List<PassengerResponseDto> passengers
 ) {
 
@@ -31,7 +30,6 @@ public record BookingResponseDto(
     return new BookingResponseDto(
         booking.getBookingId(),
         booking.getBookingStatus().toString(),
-        booking.getSeatId(),
         passengerDtos
     );
   }
@@ -54,7 +52,6 @@ public record BookingResponseDto(
     return new BookingResponseDto(
         savedBooking.getBookingId(),
         savedBooking.getBookingStatus().toString(),
-        savedBooking.getSeatId(),
         passengerDtos
     );
   }

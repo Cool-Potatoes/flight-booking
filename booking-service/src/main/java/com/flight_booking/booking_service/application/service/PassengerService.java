@@ -5,8 +5,8 @@ import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.PassengerRepository;
 import com.flight_booking.booking_service.presentation.global.exception.passenger.InvalidPassengerListException;
 import com.flight_booking.booking_service.presentation.global.exception.passenger.MissingRequiredFieldsException;
-import com.flight_booking.booking_service.presentation.request.PassengerRequestDto;
 import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
+import com.flight_booking.common.application.dto.PassengerRequestDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ public class PassengerService {
   }
 
   @Transactional(readOnly = false)
-  public void updatePassenger(Booking booking, List<PassengerRequestDto> passengerRequestDtos) {
+  public void updatePassenger(Booking booking, PassengerRequestDto passengerRequestDtos) {
 
     List<Passenger> passengers = passengerRepository.findAllByBooking_BookingId(
         booking.getBookingId());
@@ -64,15 +64,14 @@ public class PassengerService {
 
     for (int i = 0; i < passengers.size(); i++) {
       Passenger passenger = passengers.get(i);
-      PassengerRequestDto passengerRequestDto = passengerRequestDtos.get(i);
 
       passenger.updatePassenger(
           booking,
-          passengerRequestDto.seatId(),
-          passengerRequestDto.passengerType(),
-          passengerRequestDto.passengerName(),
-          passengerRequestDto.baggage(),
-          passengerRequestDto.meal()
+          passengerRequestDtos.seatId(),
+          passengerRequestDtos.passengerType(),
+          passengerRequestDtos.passengerName(),
+          passengerRequestDtos.baggage(),
+          passengerRequestDtos.meal()
       );
     }
   }

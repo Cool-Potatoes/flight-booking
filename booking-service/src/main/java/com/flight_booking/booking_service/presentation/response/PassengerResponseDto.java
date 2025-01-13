@@ -1,7 +1,7 @@
 package com.flight_booking.booking_service.presentation.response;
 
 import com.flight_booking.booking_service.domain.model.Passenger;
-import com.flight_booking.booking_service.domain.model.PassengerTypeEnum;
+import com.flight_booking.common.domain.model.PassengerTypeEnum;
 import java.util.UUID;
 
 public record PassengerResponseDto(

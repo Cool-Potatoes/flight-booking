@@ -12,7 +12,8 @@ public record SeatResponseDto(
     String seatCode,
     SeatClassEnum seatClass,
     Long price,
-    Boolean isAvailable
+    Boolean isAvailable,
+    UUID flightId
 ) {
 
   @QueryProjection
@@ -22,7 +23,8 @@ public record SeatResponseDto(
         seat.getSeatCode(),
         seat.getSeatClass(),
         seat.getPrice(),
-        seat.getIsAvailable()
+        seat.getIsAvailable(),
+        seat.getFlight().getFlightId()
     );
   }
 

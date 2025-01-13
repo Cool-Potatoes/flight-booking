@@ -51,5 +51,5 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID>,
   @QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value = "5000")}) // 5초 대기
   Optional<Payment> findByPaymentIdWithLock(UUID paymentId);
 
-  Optional<Payment> findByBookingId(UUID bookingId);
+  Optional<Payment> findPaymentByBookingId(UUID bookingId);
 }

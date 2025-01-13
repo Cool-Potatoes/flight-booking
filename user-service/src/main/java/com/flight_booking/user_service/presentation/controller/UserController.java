@@ -1,20 +1,15 @@
 package com.flight_booking.user_service.presentation.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.UserService;
 import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
 import com.flight_booking.user_service.presentation.response.PageResponse;
-import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -81,17 +76,6 @@ public class UserController {
     return ApiResponse.ok("회원 탈퇴 성공");
   }
 
-  @KafkaListener(groupId = "payment-mile-group", topics = "payment-mile-topic")
-  public ApiResponse<?> consumeMileageUpdate(@Payload ApiResponse<UserRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    UserRequestDto userRequestDto = mapper.convertValue(message.getData(),
-        UserRequestDto.class);
-
-    UserDetailResponse userResponse = userService.updateUserMileage(userRequestDto);
-
-    return ApiResponse.ok(userResponse, "유저 마일리지 변경 성공");
-  }
 }
 
 

@@ -34,7 +34,7 @@ public class BookingRepositoryImpl implements
   @Override
   public Page<BookingResponseCustomDto> findAllBookings(Predicate predicate, Pageable pageable) {
 
-    QBooking qBooking = QBooking.booking;
+    QBooking booking = QBooking.booking;
 
     BooleanBuilder builder = new BooleanBuilder(predicate); // predicate 적용 - 키워드 검색
     builder.and(booking.isDeleted.eq(false)); // isDeleted=false 만 조회
