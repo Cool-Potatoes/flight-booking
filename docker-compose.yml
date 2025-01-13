@@ -38,16 +38,15 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    env_file:
+      - .env
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1" ]
       interval: 10s
       timeout: 5s
-      retries: 3
-    env_file:
-      - .env
+      retries: 5
+      start_period: 30s
+
 
   # 4️⃣ Gateway Service
   gateway-service:
