@@ -107,7 +107,8 @@ public class UserService {
       userKafkaSender.sendMessage(
           "payment-fail-process-topic",
           userRequestDto.paymentId().toString(),
-          new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+          new ProcessPaymentRequestDto(userRequestDto.paymentId(), null),
+          "from updateUserMileage [TicketService]"
       );
 
       return;
@@ -120,7 +121,8 @@ public class UserService {
     userKafkaSender.sendMessage(
         "payment-success-process-topic",
         user.getId().toString(),
-        new ProcessPaymentRequestDto(userRequestDto.paymentId(), null)
+        new ProcessPaymentRequestDto(userRequestDto.paymentId(), null),
+        "from updateUserMileage [TicketService]"
     );
 
   }
@@ -141,7 +143,8 @@ public class UserService {
       userKafkaSender.sendMessage(
           "payment-refund-fail-process-topic",
           userRefundRequestDto.paymentId().toString(),
-          new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(), null)
+          new ProcessPaymentRequestDto(userRefundRequestDto.paymentId(), null),
+          "from refundPayment [TicketService]"
       );
 
       return;
@@ -155,7 +158,8 @@ public class UserService {
         "payment-refund-success-process-topic",
         user.getId().toString(),
         new ProcessPaymentRequestDto(
-            userRefundRequestDto.paymentId(), userRefundRequestDto.passengerRequestDtos())
+            userRefundRequestDto.paymentId(), userRefundRequestDto.passengerRequestDtos()),
+        "from refundPayment [TicketService]"
     );
 
   }

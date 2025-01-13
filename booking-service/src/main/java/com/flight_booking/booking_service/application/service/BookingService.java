@@ -62,7 +62,8 @@ public class BookingService {
         "seat-availability-check-and-update-topic",
         savedBooking.getBookingId().toString(),
         new SeatBookingRequestDto(
-            email, savedBooking.getBookingId(), seatIdList)
+            email, savedBooking.getBookingId(), seatIdList),
+        "from createBooking [BookingService]"
     );
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
@@ -97,7 +98,8 @@ public class BookingService {
         "seat-availability-change-topic",
         bookingId.toString(),
         new SeatAvailabilityChangeRequestDto(
-            email, bookingId, bookingRequestDto.passengerRequestDtos())
+            email, bookingId, bookingRequestDto.passengerRequestDtos()),
+        "from updateBooking [BookingService]"
     );
 
     return BookingResponseDto.from(booking);
@@ -128,7 +130,8 @@ public class BookingService {
           "ticket-creation-topic",
           booking.getBookingId().toString(),
           new TicketRequestDto(
-              booking.getBookingId(), passenger.getPassengerId(), passenger.getSeatId())
+              booking.getBookingId(), passenger.getPassengerId(), passenger.getSeatId()),
+          "from processBooking [BookingService]"
       );
 
     }

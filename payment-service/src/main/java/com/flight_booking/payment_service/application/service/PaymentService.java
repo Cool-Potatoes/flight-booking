@@ -58,7 +58,8 @@ public class PaymentService {
         new UserRequestDto(
             paymentRequestDto.email(), // user email
             savedPayment.getFare(),
-            savedPayment.getPaymentId())
+            savedPayment.getPaymentId()),
+        "from createPayment [PaymentService]"
     );
 
     return PaymentResponseDto.from(payment);
@@ -141,7 +142,8 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-complete-topic",
         updatedPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(payment.getBookingId(), null)
+        new BookingProcessRequestDto(payment.getBookingId(), null),
+        "from processPaymentSuccess [PaymentService]"
     );
 
   }
@@ -156,7 +158,8 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-fail-topic",
         updatedPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(updatedPayment.getBookingId(), null)
+        new BookingProcessRequestDto(updatedPayment.getBookingId(), null),
+        "from processPaymentFail [PaymentService]"
     );
 
   }
@@ -178,7 +181,8 @@ public class PaymentService {
             paymentRefundRequestDto.email(),
             payment.getPaymentId(),
             refundFare, paymentRefundRequestDto.newSeatTotalPrice(),
-            paymentRefundRequestDto.passengerRequestDtos())
+            paymentRefundRequestDto.passengerRequestDtos()),
+        "from refundPayment [PaymentService]"
     );
 
   }
@@ -194,7 +198,8 @@ public class PaymentService {
         "booking-refund-success-topic",
         refundPayment.getBookingId().toString(),
         new BookingProcessRequestDto(payment.getBookingId(),
-            processPaymentRequestDto.passengerRequestDtos())
+            processPaymentRequestDto.passengerRequestDtos()),
+        "from processPaymentRefundSuccess [PaymentService]"
     );
 
   }
@@ -209,7 +214,8 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-refund-fail-topic",
         refundPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(refundPayment.getBookingId(), null)
+        new BookingProcessRequestDto(refundPayment.getBookingId(), null),
+        "from processPaymentRefundFail [PaymentService]"
     );
 
   }

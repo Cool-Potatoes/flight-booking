@@ -106,7 +106,8 @@ public class TicketService {
         ticket.getTicketId().toString(),
         new FlightCancelRequestDto(
             ticket.getTicketId(), ticket.getBookingId(),
-            ticket.getPassengerId(), ticket.getSeatId())
+            ticket.getPassengerId(), ticket.getSeatId()),
+        "from cancelTicket [TicketService]"
     );
 
     ticket.updateState(TicketStateEnum.CANCEL_PENDING);
