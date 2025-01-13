@@ -1,5 +1,5 @@
 server:
-  port: 8160  # Temporary port, will be overwritten by Config server settings later.
+  port: 0  # Temporary port, will be overwritten by Config server settings later.
 
 spring:
   application:
@@ -9,7 +9,7 @@ spring:
   cloud:
     config:
       discovery:
-        enabled: true  # Discover Config Server through Eureka
+        enabled: true
         service-id: config-server
 
 eureka:

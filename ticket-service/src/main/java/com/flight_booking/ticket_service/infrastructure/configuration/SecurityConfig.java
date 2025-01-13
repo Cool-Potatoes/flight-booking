@@ -33,6 +33,7 @@ public class SecurityConfig {
         .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 비활성화
         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))// 세션을 Stateless로 설정
         .authorizeHttpRequests(auth -> {
+          auth.requestMatchers("/actuator/prometheus").permitAll();
           auth.anyRequest().authenticated(); // 모든 요청은 인증 필요
         })
         .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);

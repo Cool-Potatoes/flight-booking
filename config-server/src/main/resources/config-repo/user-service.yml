@@ -69,8 +69,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh, prometheus  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신)
-    prometheus:
-      metrics:
-        export:
-          enabled: true
+        include: refresh, prometheus  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신) + prometheus
