@@ -144,7 +144,8 @@ public class SeatService {
           "payment-creation-topic",
           seatBookingRequestDto.bookingId().toString(),
           new PaymentRequestDto(
-              seatBookingRequestDto.email(), seatBookingRequestDto.bookingId(), totalPrice)
+              seatBookingRequestDto.email(), seatBookingRequestDto.bookingId(), totalPrice),
+          "from consumeSeatAvailabilityCheckAndUpdate [SeatService]"
       );
 
     } else {
@@ -152,7 +153,8 @@ public class SeatService {
       seatKafkaSender.sendMessage(
           "booking-fail-topic",
           seatBookingRequestDto.bookingId().toString(),
-          new BookingProcessRequestDto(seatBookingRequestDto.bookingId(), null)
+          new BookingProcessRequestDto(seatBookingRequestDto.bookingId(), null),
+          "from consumeSeatAvailabilityCheckAndUpdate [SeatService]"
       );
 
     }
@@ -196,7 +198,8 @@ public class SeatService {
             seatAvailabilityChangeRequestDto.email(),
             seatAvailabilityChangeRequestDto.bookingId(),
             seatAvailabilityChangeRequestDto.passengerRequestDtos(),
-            newSeatTotalPrice)
+            newSeatTotalPrice),
+        "from changeSeatAvailability [SeatService]"
     );
 
   }

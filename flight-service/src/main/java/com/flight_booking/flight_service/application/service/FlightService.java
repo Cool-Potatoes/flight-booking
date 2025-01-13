@@ -112,7 +112,8 @@ public class FlightService {
       flightKafkaSender.sendMessage(
           "ticket-cancel-unavailable-topic",
           seatResponseDto.seatId().toString(),
-          flightCancelRequestDto
+          flightCancelRequestDto,
+          "from checkAndCancelFlight [FlightService]"
       );
 
       return;
