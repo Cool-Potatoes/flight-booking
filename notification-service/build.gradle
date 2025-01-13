@@ -20,6 +20,11 @@ dependencies {
 
 	// Redis
 	implementation 'org.springframework.session:spring-session-data-redis'
+
+	// Redis Session Clustering
+	implementation 'org.springframework.session:spring-session-data-redis'
+
+	// Jedis
 	implementation 'redis.clients:jedis:5.2.0'
 
 	// Security & JWT
@@ -29,6 +34,8 @@ dependencies {
 
 	// Feign Client
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+	// Eureka Client
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
 	// config client
@@ -37,6 +44,7 @@ dependencies {
 	// Tracing & Metrics
 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+	implementation 'io.github.openfeign:feign-micrometer'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
 	// Resilience4j
