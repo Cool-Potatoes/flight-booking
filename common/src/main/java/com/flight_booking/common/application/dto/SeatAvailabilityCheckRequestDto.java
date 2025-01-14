@@ -4,9 +4,10 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
-public record SeatBookingRequestDto(
+public record SeatAvailabilityCheckRequestDto(
     @NotNull(message = "Email cannot be null") String email,
     @NotNull(message = "Booking Id cannot be null") UUID bookingId,
-    @NotNull(message = "Seat Id cannot be null") List<UUID> seatIdList) {
+    @NotNull(message = "Seat Id cannot be null") List<UUID> seatIdList
+) {
 
 }

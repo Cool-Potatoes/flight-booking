@@ -8,11 +8,11 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record BookingResponseCustomDto(
     UUID bookingId,
-    Long userId
+    String email
 ) {
 
   @QueryProjection
   public BookingResponseCustomDto(Booking booking){
-    this(booking.getBookingId(), booking.getUserId());
+    this(booking.getBookingId(), booking.getEmail());
   }
 }

@@ -2,6 +2,7 @@ package com.flight_booking.user_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
+import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.UserService;
@@ -26,14 +27,25 @@ public class UserKafkaEndpoint {
     userService.updateUserMileage(userRequestDto);
   }
 
-  @KafkaListener(groupId = "user-refund-group", topics = "user-refund-topic")
-  public void consumeUserRefund(
+  @KafkaListener(groupId = "user-refund-processing-group", topics = "user-refund-processing-topic")
+  public void consumeUserRefundProcessing(
       @Payload ApiResponse<UserRefundRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     UserRefundRequestDto userRefundRequestDto = mapper.convertValue(message.getData(),
         UserRefundRequestDto.class);
 
-    userService.refundPayment(userRefundRequestDto);
+    userService.refundProcessing(userRefundRequestDto);
+  }
+
+  @KafkaListener(groupId = "user-refund-group", topics = "user-refund-ticket-topic")
+  public void consumeUserRefundTicket(
+      @Payload ApiResponse<UserRefundTicketRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    UserRefundTicketRequestDto userRefundRequestDto = mapper.convertValue(message.getData(),
+        UserRefundTicketRequestDto.class);
+
+    userService.refundTicketPayment(userRefundRequestDto);
   }
 }

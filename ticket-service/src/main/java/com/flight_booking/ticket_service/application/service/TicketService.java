@@ -1,12 +1,16 @@
 package com.flight_booking.ticket_service.application.service;
 
+import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
+import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
+import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
 import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
+import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +29,6 @@ public class TicketService {
 
   private final TicketRepository ticketRepository;
   private final TicketKafkaSender ticketKafkaSender;
-
 
   @Transactional
   public TicketResponseDto createTicket(TicketRequestDto ticketRequestDto) {
@@ -66,7 +69,10 @@ public class TicketService {
   }
 
   @Transactional
-  public TicketResponseDto updateTicket(UUID ticketId, TicketRequestDto ticketRequestDto) {
+  public TicketResponseDto updateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto,
+      CustomUserDetails userDetails) {
+
+    String userEmail = userDetails.email();
 
     Ticket ticket = getTicketById(ticketId);
 
@@ -78,21 +84,27 @@ public class TicketService {
     }
 
     // TODO 변경하려는 seatID에 해당하는 seat의 isAvailable을 조회하며 Lock
-
     // TODO 변경된 좌석의 금액이 원래 좌석과 다르면 그 차이만큼 마일리지 증감
-
     // TODO 기내식, 위탁수화물 등 변경
-
     // TODO 수정 성공시 이전 예약 좌석은 다시 Available로 변경
+    //  -> 해결!
+    ticketKafkaSender.sendMessage(
+        "booking-update-topic",
+        ticket.getTicketId().toString(),
+        new BookingUpdateRequestDto(
+            ticketId,
+            ticket.getBookingId(), ticketRequestDto.passengerRequestDtos(),
+            userEmail)
+    );
 
     // TODO updatedBy
-    ticket.update(ticketRequestDto.seatId());
+    // ticket.update(ticketRequestDto.seatId());
 
     return TicketResponseDto.from(ticket);
   }
 
   @Transactional
-  public void cancelTicket(UUID ticketId) {
+  public void cancelTicket(UUID ticketId, String username) {
 
     Ticket ticket = getTicketById(ticketId);
 
@@ -102,9 +114,10 @@ public class TicketService {
 
     // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
     ticketKafkaSender.sendMessage(
-        "flight-cancel-availability",
+        "flight-cancel-availability-topic",
         ticket.getTicketId().toString(),
         new FlightCancelRequestDto(
+            username,
             ticket.getTicketId(), ticket.getBookingId(),
             ticket.getPassengerId(), ticket.getSeatId())
     );
@@ -119,10 +132,17 @@ public class TicketService {
     ticket.updateState(TicketStateEnum.CANNOT_CANCEL);
   }
 
-
   private Ticket getTicketById(UUID ticketId) {
-    Ticket ticket = ticketRepository.findByTicketIdAndIsDeletedFalse(ticketId)
+    return ticketRepository.findByTicketIdAndIsDeletedFalse(ticketId)
         .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
-    return ticket;
+  }
+
+  @Transactional
+  public void updateTicketStatus(TicketUpdateStatusRequestDto ticketUpdateRequestDto) {
+    Ticket ticket = ticketRepository.findByTicketIdAndIsDeletedFalse(
+            ticketUpdateRequestDto.ticketId())
+        .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
+
+    ticket.updateState(TicketStateEnum.REFUND);
   }
 }
