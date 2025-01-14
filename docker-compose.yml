@@ -113,25 +113,20 @@ services:
     networks:
       - app-network
 
-  # 7️⃣ Zookeeper + JMX Exporter
+  # 7️⃣ Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
     ports:
       - "2181:2181"
-      - "7072:7072"  # JMX Exporter 포트
-      - "8090:8090"  # Admin Server 포트 (변경)
+      - "8090:8090"  # Admin Server 포트
     networks:
       - app-network
     volumes:
       - zookeeper_data:/var/lib/zookeeper/data
-      - ./zookeeper.cfg:/etc/kafka/zookeeper.properties
-      - ./jmx_prometheus_javaagent-0.18.0.jar:/opt/jmx_prometheus_javaagent.jar
-      - ./jmx-exporter-config.yml:/opt/jmx-exporter-config.yml
+      - ./zookeeper.properties:/etc/kafka/zookeeper.properties
     environment:
       ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT:-2181}
-      KAFKA_JMX_PORT: 7072
-      SERVER_JVMFLAGS: "-javaagent:/opt/jmx_prometheus_javaagent.jar=7072:/opt/jmx-exporter-config.yml"
       ZOOKEEPER_TICK_TIME: ${ZOOKEEPER_TICK_TIME:-2000}
       ZOOKEEPER_SYNC_LIMIT: ${ZOOKEEPER_SYNC_LIMIT:-2}
       ZOOKEEPER_INIT_LIMIT: ${ZOOKEEPER_INIT_LIMIT:-5}
@@ -145,38 +140,44 @@ services:
       timeout: 5s
       retries: 5
 
-  # 8️⃣ Kafka + JMX Exporter
+  # 8️⃣ Kafka
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
     ports:
       - "9092:9092"
-      - "7071:7071"  # Kafka JMX Exporter 포트
     depends_on:
       zookeeper:
         condition: service_healthy
+    restart: always
     networks:
       - app-network
     volumes:
       - kafka_data:/var/lib/kafka/data
-      - ./kafka-jmx-config.yml:/opt/kafka-jmx-config.yml
-      - ./jmx_prometheus_javaagent-0.18.0.jar:/opt/jmx_prometheus_javaagent.jar
     env_file:
       - .env
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID:-1}
+      KAFKA_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT:-zookeeper:2181}
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_JMX_PORT: 7071
-      KAFKA_OPTS: "-javaagent:/opt/jmx_prometheus_javaagent.jar=7071:/opt/kafka-jmx-config.yml"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:-1}
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      # 메시지 크기 조정
+      KAFKA_MESSAGE_MAX_BYTES: 2000000000  # 2GB (최대 허용값)
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 2000000000
+      KAFKA_FETCH_MESSAGE_MAX_BYTES: 2000000000
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 2000000000
+      KAFKA_HEAP_OPTS: "-Xms1g -Xmx1300m"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:7071/metrics || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
 
   # 9️⃣ Zipkin (분산 추적)
   zipkin:
@@ -189,7 +190,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9411/health || exit 1" ]
+      test: ["CMD", "wget", "-qO-", "http://localhost:9411/health"]
       interval: 10s
       timeout: 5s
       retries: 5

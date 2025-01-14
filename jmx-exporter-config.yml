@@ -1,9 +1,9 @@
-startDelaySeconds: 0
-lowercaseOutputName: true
-lowercaseOutputLabelNames: true
-rules:
-  - pattern: "org.apache.ZooKeeperService<name0=ReplicatedServer_id(\\d+)><>(\\w+)"
-    name: "zookeeper_$2"
-    type: GAUGE
-    labels:
-      instance: "$1"
+#startDelaySeconds: 0
+#lowercaseOutputName: true
+#lowercaseOutputLabelNames: true
+#rules:
+#  - pattern: "org.apache.ZooKeeperService<name0=ReplicatedServer_id(\\d+)><>(\\w+)"
+#    name: "zookeeper_$2"
+#    type: GAUGE
+#    labels:
+#      instance: "$1"

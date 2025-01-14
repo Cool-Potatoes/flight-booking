@@ -48,12 +48,12 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # 9️⃣ Zookeeper 모니터링 (JMX Exporter)
+  # Zookeeper 모니터링
   - job_name: 'zookeeper'
     static_configs:
-      - targets: ['zookeeper:7072']  # JMX Exporter 포트
+      - targets: ['zookeeper:2181']
 
-  # 🔟 Kafka 모니터링 (JMX Exporter)
+  # Kafka 모니터링
   - job_name: 'kafka'
     static_configs:
-      - targets: ['kafka:7071']  # JMX Exporter 포트
+      - targets: ['kafka:9092']
