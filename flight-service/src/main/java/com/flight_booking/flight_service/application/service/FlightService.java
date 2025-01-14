@@ -1,6 +1,9 @@
 package com.flight_booking.flight_service.application.service;
 
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.domain.model.Airport;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.FlightStatusEnum;
@@ -114,19 +117,20 @@ public class FlightService {
           seatResponseDto.seatId().toString(),
           flightCancelRequestDto
       );
-
-      return;
     }
 
-//    // 취소 진행 1.환불결제생성(기존 예약 변경) 2.마일리지반환 3.환불결제완료 4.좌석상태변경 + 예약상태변경,탑승객상태변경
-//
-//    List<PassengerRequestDto> passengerRequestDtoList = new ArrayList<>();
-//    PassengerRequestDto passengerRequestDto =
-//
-//    // TODO email
-//    kafkaTemplate.send("payment-refund-topic",
-//        ApiResponse.ok(new PaymentRefundRequestDto("email", flightCancelRequestDto.bookingId(), )));
+    // 취소 진행 1.환불결제생성(기존 예약 변경) 2.마일리지반환 3.환불결제완료 4.좌석상태변경 + 예약상태변경,탑승객상태변경
 
+    flightKafkaSender.sendMessage(
+        "payment-refund-ticket-topic",
+        flightCancelRequestDto.ticketId().toString(),
+        new PaymentRefundFromTicketRequestDto(
+            flightCancelRequestDto.email(),
+            flightCancelRequestDto.ticketId(),
+            flightCancelRequestDto.bookingId(),
+            flightCancelRequestDto.passengerId(),
+            flightCancelRequestDto.seatId())
+    );
   }
 
   /**

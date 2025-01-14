@@ -3,6 +3,7 @@ package com.flight_booking.ticket_service.infrastructure.messaging;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
+import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.application.service.TicketService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,16 @@ public class TicketKafkaEndpoint {
         = mapper.convertValue(message.getData(), FlightCancelRequestDto.class);
 
     ticketService.cancelFail(flightCancelRequestDto);
+  }
+
+  @KafkaListener(groupId = "ticket-update-group", topics = "ticket-update-topic")
+  public void consumeUpdateTicketStatus(@Payload ApiResponse<TicketUpdateStatusRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    TicketUpdateStatusRequestDto ticketUpdateStatusRequestDto
+        = mapper.convertValue(message.getData(), TicketUpdateStatusRequestDto.class);
+
+    ticketService.updateTicketStatus(ticketUpdateStatusRequestDto);
   }
 
 }

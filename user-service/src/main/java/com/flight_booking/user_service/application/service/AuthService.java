@@ -66,7 +66,7 @@ public class AuthService {
       CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
       String validatedEmail = userDetails.getUsername();
-      String role = userDetails.getAuthorities().toString();
+      String role = userDetails.getUser().getRole().toString();
 
       // 사용자 상태 확인 (블락/ 탈퇴)
       checkUserStatus(validatedEmail);
