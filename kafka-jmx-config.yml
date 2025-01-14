@@ -1,0 +1,7 @@
+startDelaySeconds: 0
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+rules:
+  - pattern: "kafka.server<type=(.+), name=(.+)><>Value"
+    name: "kafka_$1_$2"
+    type: GAUGE
