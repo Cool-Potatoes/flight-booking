@@ -5,6 +5,7 @@ import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
+import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
@@ -109,7 +110,9 @@ public class UserService {
       userKafkaSender.sendMessage(
           "payment-fail-process-topic",
           userRequestDto.paymentId().toString(),
-          new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null)
+          new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null),
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName()
       );
 
       return;
@@ -122,7 +125,9 @@ public class UserService {
     userKafkaSender.sendMessage(
         "payment-success-process-topic",
         user.getId().toString(),
-        new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null)
+        new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
   }
@@ -145,7 +150,11 @@ public class UserService {
           userRefundRequestDto.paymentId().toString(),
           new PaymentRefundProcessRequestDto(
               null,
-              userRefundRequestDto.paymentId(), null, null)
+              userRefundRequestDto.paymentId(),
+              null,
+              null),
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName()
       );
 
       return;
@@ -161,7 +170,9 @@ public class UserService {
         new PaymentRefundProcessRequestDto(
             userRefundRequestDto.ticketId(), userRefundRequestDto.paymentId(),
             userRefundRequestDto.passengerRequestDtos(),
-            userRefundRequestDto.email())
+            userRefundRequestDto.email()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 
@@ -182,7 +193,9 @@ public class UserService {
             userRefundRequestDto.paymentId(),
             userRefundRequestDto.seatId(),
             userRefundRequestDto.bookingId(),
-            userRefundRequestDto.passengerId())
+            userRefundRequestDto.passengerId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
   }

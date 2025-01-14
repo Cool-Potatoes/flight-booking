@@ -14,11 +14,12 @@ import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
+import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.querydsl.core.types.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,9 @@ public class BookingService {
         "seat-availability-check-and-update-topic",
         savedBooking.getBookingId().toString(),
         new SeatAvailabilityCheckRequestDto(
-            username, savedBooking.getBookingId(), seatIdList)
+            username, savedBooking.getBookingId(), seatIdList),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
     return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
@@ -121,7 +124,9 @@ public class BookingService {
           "ticket-creation-topic",
           booking.getBookingId().toString(),
           new TicketRequestDto(
-              booking.getBookingId(), passenger.getPassengerId(), passenger.getSeatId())
+              booking.getBookingId(), passenger.getPassengerId(), passenger.getSeatId()),
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName()
       );
 
     }
@@ -154,7 +159,9 @@ public class BookingService {
         "ticket-update-topic",
         booking.getBookingId().toString(),
         new TicketUpdateStatusRequestDto(
-            bookingProcessRequestDto.ticketId())
+            bookingProcessRequestDto.ticketId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
   }
@@ -184,7 +191,9 @@ public class BookingService {
         "seat-availability-refund-topic",
         booking.getBookingId().toString(),
         new SeatAvailabilityRefundRequestDto(
-            bookingProcessRequestDto.seatId())
+            bookingProcessRequestDto.seatId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 
@@ -203,7 +212,9 @@ public class BookingService {
         "seat-availability-check-and-return-topic",
         booking.getBookingId().toString(),
         new SeatAvailabilityCheckAndReturnRequestDto(bookingRequestDto.ticketId(),
-            userEmail, booking.getBookingId(), bookingRequestDto.passengerRequestDtos())
+            userEmail, booking.getBookingId(), bookingRequestDto.passengerRequestDtos()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 }

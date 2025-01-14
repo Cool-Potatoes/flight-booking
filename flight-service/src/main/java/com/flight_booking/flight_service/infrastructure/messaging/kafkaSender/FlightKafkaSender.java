@@ -10,8 +10,9 @@ public class FlightKafkaSender {
 
   private final KafkaSender kafkaSender;
 
-  public void sendMessage(String topic, String key, Object data) {
-    kafkaSender.sendApiResponseData(topic, key, data);
+  public void sendMessage(
+      String topic, String key, Object data, String methodName, String className) {
+    kafkaSender.sendApiResponseDataWithFrom(topic, key, data, methodName, className);
   }
 
 }

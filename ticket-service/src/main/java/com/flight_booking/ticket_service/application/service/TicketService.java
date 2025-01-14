@@ -5,6 +5,7 @@ import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
+import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
@@ -89,7 +90,9 @@ public class TicketService {
         new BookingUpdateRequestDto(
             ticketId,
             ticket.getBookingId(), ticketRequestDto.passengerRequestDtos(),
-            userEmail)
+            userEmail),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
     // TODO updatedBy
@@ -114,7 +117,9 @@ public class TicketService {
         new FlightCancelRequestDto(
             username,
             ticket.getTicketId(), ticket.getBookingId(),
-            ticket.getPassengerId(), ticket.getSeatId())
+            ticket.getPassengerId(), ticket.getSeatId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
     ticket.updateState(TicketStateEnum.CANCEL_PENDING);
