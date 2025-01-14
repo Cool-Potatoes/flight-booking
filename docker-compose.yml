@@ -113,43 +113,67 @@ services:
     networks:
       - app-network
 
-  # 7️⃣ Zookeeper
+  # 7️⃣ Zookeeper + JMX Exporter
   zookeeper:
-    image: zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
     ports:
       - "2181:2181"
+      - "7072:7072"  # JMX Exporter 포트
+      - "8090:8090"  # Admin Server 포트 (변경)
     networks:
       - app-network
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - ./zookeeper.cfg:/etc/kafka/zookeeper.properties
+      - ./jmx_prometheus_javaagent-0.18.0.jar:/opt/jmx_prometheus_javaagent.jar
+      - ./jmx-exporter-config.yml:/opt/jmx-exporter-config.yml
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT:-2181}
+      KAFKA_JMX_PORT: 7072
+      SERVER_JVMFLAGS: "-javaagent:/opt/jmx_prometheus_javaagent.jar=7072:/opt/jmx-exporter-config.yml"
+      ZOOKEEPER_TICK_TIME: ${ZOOKEEPER_TICK_TIME:-2000}
+      ZOOKEEPER_SYNC_LIMIT: ${ZOOKEEPER_SYNC_LIMIT:-2}
+      ZOOKEEPER_INIT_LIMIT: ${ZOOKEEPER_INIT_LIMIT:-5}
+      ZOOKEEPER_ADMIN_SERVER_ENABLED: "true"
+      ZOOKEEPER_ADMIN_SERVER_PORT: 8090  # Admin Server 포트 변경
+      ZOOKEEPER_4LW_COMMANDS_WHITELIST: "ruok,srvr,stat,conf,mntr"
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=ruok,srvr,stat,conf,mntr"
     healthcheck:
-      test: [ "CMD-SHELL", "nc -z localhost 2181" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8090/commands || exit 1" ]
       interval: 10s
       timeout: 5s
-      retries: 3
-    volumes:
-      - zookeeper_data:/data
+      retries: 5
 
-  # 8️⃣ Kafka
+  # 8️⃣ Kafka + JMX Exporter
   kafka:
-    image: bitnami/kafka:latest
+    image: confluentinc/cp-kafka:latest
     container_name: kafka
     ports:
       - "9092:9092"
+      - "7071:7071"  # Kafka JMX Exporter 포트
     depends_on:
       zookeeper:
         condition: service_healthy
     networks:
       - app-network
     volumes:
-      - kafka_data:/bitnami/kafka
+      - kafka_data:/var/lib/kafka/data
+      - ./kafka-jmx-config.yml:/opt/kafka-jmx-config.yml
+      - ./jmx_prometheus_javaagent-0.18.0.jar:/opt/jmx_prometheus_javaagent.jar
+    env_file:
+      - .env
     environment:
-      KAFKA_CLUSTER_ID: kafka-cluster-01
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_JMX_PORT: 7071
+      KAFKA_OPTS: "-javaagent:/opt/jmx_prometheus_javaagent.jar=7071:/opt/kafka-jmx-config.yml"
     healthcheck:
-      test: ["CMD-SHELL", "nc -z kafka 9092"]
+      test: ["CMD-SHELL", "curl -f http://localhost:7071/metrics || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -162,6 +186,13 @@ services:
       - "9411:9411"
     networks:
       - app-network
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9411/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # 🔟 Prometheus (모니터링)
   prometheus:
@@ -204,6 +235,8 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    env_file:
+      - .env
 
   # 🔑 User Service
   user-service:
@@ -219,6 +252,8 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    env_file:
+      - .env
 
   # 📦 Booking Service
   booking-service:
@@ -234,6 +269,8 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    env_file:
+      - .env
 
   # 💳 Payment Service
   payment-service:
@@ -249,6 +286,8 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    env_file:
+      - .env
 
   # ✈️ Flight Service
   flight-service:
@@ -264,6 +303,8 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    env_file:
+      - .env
 
   # 🎟️ Ticket Service
   ticket-service:
@@ -279,3 +320,5 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    env_file:
+      - .env
