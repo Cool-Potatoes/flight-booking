@@ -13,13 +13,21 @@ spring:
     config:
       server:
         git:
-          uri: git@github.com:Cool-Potatoes/flight-booking.git
+          uri: ${SPRING_CLOUD_CONFIG_SERVER_GIT_URI}
+          username: ${SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME}
+          password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
           default-label: dev
           search-paths: '{application}'
           clone-on-start: true
-          ignore-local-ssh-settings: false  # SSH 설정 사용
           basedir: /tmp/config-repo
           skip-ssl-validation: true
+
+  zipkin:
+    base-url: http://zipkin:9411  # Zipkin 서버 URL (Docker에서는 컨테이너 이름 사용)
+
+  sleuth:
+    sampler:
+      probability: 1.0  # 모든 요청 추적
 
 eureka:
   client:
