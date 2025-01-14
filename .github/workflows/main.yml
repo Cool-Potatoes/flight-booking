@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository code
+      # 1️⃣ Checkout repository code (GitHub 레포지토리의 코드를 체크아웃)
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2️⃣ Set up JDK 17
+      # 2️⃣ Set up JDK 17 (Java 17 설치 및 설정)
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'zulu'
 
-      # 3️⃣ Cache Gradle dependencies
+      # 3️⃣ Cache Gradle dependencies (Gradle 의존성 캐시)
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
@@ -33,29 +33,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 4️⃣ Build the project using Gradle
+      # 4️⃣ Gradle Wrapper 실행 권한 부여 (gradlew 실행 권한 추가)
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 5️⃣ Build the project using Gradle (Gradle로 프로젝트 빌드)
       - name: Build with Gradle
         run: ./gradlew build -x test
 
-      # 5️⃣ Docker Compose Build and Push (공통 모듈 포함)
+      # 6️⃣ Docker Compose Build and Push (Docker 이미지 빌드 및 푸시)
       - name: Build and Push Docker Images
         if: contains(github.ref, 'dev') || contains(github.ref, 'main')
         run: |
           docker-compose -f docker-compose.yml build common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
           docker-compose -f docker-compose.yml push common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
 
-#      # 6️⃣ Deploy to dev environment (공통 모듈 포함)
-#      - name: Deploy to dev
-#        if: contains(github.ref, 'dev')
-#        uses: appleboy/ssh-action@v1.1.0
-#        with:
-#          host: ${{ secrets.HOST_PROD }}  # EC2 퍼블릭 IPv4 DNS
-#          username: ubuntu
-#          key: ${{ secrets.PRIVATE_KEY }}
-#          port: ${{ secrets.PORT }}
-#          script: |
-#            # EC2 서버에서 Docker Compose로 서비스 배포
-#            cd /home/ubuntu/flight-booking  # 실제 경로로 수정 필요
-#            docker-compose pull common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-#            docker-compose up -d common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-#            sudo docker image prune -f  # 사용하지 않는 이미지 정리
+      # 7️⃣ Deploy to dev environment (개발 서버에 배포 - 주석 처리됨)
+      # - name: Deploy to dev
+      #   if: contains(github.ref, 'dev')
+      #   uses: appleboy/ssh-action@v1.1.0
+      #   with:
+      #     host: ${{ secrets.HOST_PROD }}  # EC2 퍼블릭 IPv4 DNS
+      #     username: ubuntu
+      #     key: ${{ secrets.PRIVATE_KEY }}
+      #     port: ${{ secrets.PORT }}
+      #     script: |
+      #       # EC2 서버에서 Docker Compose로 서비스 배포
+      #       cd /home/ubuntu/flight-booking  # 실제 경로로 수정 필요
+      #       docker-compose pull common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+      #       docker-compose up -d common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+      #       sudo docker image prune -f  # 사용하지 않는 이미지 정리
