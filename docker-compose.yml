@@ -168,11 +168,11 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
       # 메시지 크기 조정
-      KAFKA_MESSAGE_MAX_BYTES: 2000000000  # 2GB (최대 허용값)
-      KAFKA_REPLICA_FETCH_MAX_BYTES: 2000000000
-      KAFKA_FETCH_MESSAGE_MAX_BYTES: 2000000000
-      KAFKA_SOCKET_REQUEST_MAX_BYTES: 2000000000
-      KAFKA_HEAP_OPTS: "-Xms1g -Xmx1300m"
+      KAFKA_MESSAGE_MAX_BYTES: 10485760       # 10MB
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 10485760 # 10MB
+      KAFKA_FETCH_MESSAGE_MAX_BYTES: 10485760 # 10MB
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 10485760 # 10MB
+      KAFKA_HEAP_OPTS: "-Xms2g -Xmx2g"
     healthcheck:
       test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
       interval: 20s
