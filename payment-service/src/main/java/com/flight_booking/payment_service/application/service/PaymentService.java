@@ -3,14 +3,15 @@ package com.flight_booking.payment_service.application.service;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestDto;
+import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
-import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.domain.model.PaymentStatusEnum;
+import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.payment_service.domain.model.Payment;
 import com.flight_booking.payment_service.domain.repository.PaymentRepository;
 import com.flight_booking.payment_service.infrastructure.messaging.PaymentKafkaSender;
@@ -62,7 +63,9 @@ public class PaymentService {
         new UserRequestDto(
             paymentRequestDto.email(), // user email
             savedPayment.getFare(),
-            savedPayment.getPaymentId())
+            savedPayment.getPaymentId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
     return PaymentResponseDto.from(payment);
@@ -145,7 +148,9 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-complete-topic",
         updatedPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(null, payment.getBookingId(), null, null)
+        new BookingProcessRequestDto(null, payment.getBookingId(), null, null),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
   }
@@ -160,7 +165,9 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-fail-topic",
         updatedPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(null, updatedPayment.getBookingId(), null, null)
+        new BookingProcessRequestDto(null, updatedPayment.getBookingId(), null, null),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
   }
@@ -183,7 +190,9 @@ public class PaymentService {
             paymentRefundRequestDto.email(),
             payment.getPaymentId(),
             refundFare, paymentRefundRequestDto.newSeatTotalPrice(),
-            paymentRefundRequestDto.passengerRequestDtos())
+            paymentRefundRequestDto.passengerRequestDtos()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 
@@ -208,7 +217,9 @@ public class PaymentService {
             refundFare,
             paymentRefundFromTicketRequestDto.bookingId(),
             paymentRefundFromTicketRequestDto.passengerId(),
-            paymentRefundFromTicketRequestDto.seatId())
+            paymentRefundFromTicketRequestDto.seatId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 
@@ -223,8 +234,12 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-refund-success-topic",
         refundPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(), payment.getBookingId(),
-            paymentRefundProcessRequestDto.passengerRequestDtos(), paymentRefundProcessRequestDto.email())
+        new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(),
+            payment.getBookingId(),
+            paymentRefundProcessRequestDto.passengerRequestDtos(),
+            paymentRefundProcessRequestDto.email()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 
@@ -239,7 +254,9 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-refund-fail-topic",
         refundPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(null, refundPayment.getBookingId(), null, null)
+        new BookingProcessRequestDto(null, refundPayment.getBookingId(), null, null),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 
@@ -257,7 +274,9 @@ public class PaymentService {
         new BookingRefundRequestDto(
             payment.getBookingId(),
             processPaymentRequestDto.seatId(),
-            processPaymentRequestDto.passengerId())
+            processPaymentRequestDto.passengerId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 

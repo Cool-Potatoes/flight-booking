@@ -5,8 +5,9 @@ import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
+import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
 import com.flight_booking.flight_service.domain.model.SeatClassEnum;
@@ -146,7 +147,11 @@ public class SeatService {
           "payment-creation-topic",
           seatAvailabilityCheckRequestDto.bookingId().toString(),
           new PaymentRequestDto(
-              seatAvailabilityCheckRequestDto.email(), seatAvailabilityCheckRequestDto.bookingId(), totalPrice)
+              seatAvailabilityCheckRequestDto.email(),
+              seatAvailabilityCheckRequestDto.bookingId(),
+              totalPrice),
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName()
       );
 
     } else {
@@ -154,7 +159,13 @@ public class SeatService {
       seatKafkaSender.sendMessage(
           "booking-fail-topic",
           seatAvailabilityCheckRequestDto.bookingId().toString(),
-          new BookingProcessRequestDto(null, seatAvailabilityCheckRequestDto.bookingId(), null, null)
+          new BookingProcessRequestDto(
+              null,
+              seatAvailabilityCheckRequestDto.bookingId(),
+              null,
+              null),
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName()
       );
 
     }
@@ -196,7 +207,9 @@ public class SeatService {
             seatAvailabilityCheckAndReturnRequestDto.email(),
             seatAvailabilityCheckAndReturnRequestDto.bookingId(),
             seatAvailabilityCheckAndReturnRequestDto.passengerRequestDtos(),
-            newSeatTotalPrice)
+            newSeatTotalPrice),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
 
   }
