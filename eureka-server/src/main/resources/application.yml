@@ -5,6 +5,21 @@ spring:
   application:
     name: eureka-server
 
+  # Prometheus 메트릭 활성화
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["health", "info", "prometheus"]
+  endpoint:
+    health:
+      show-details: always  # 헬스 체크 상세 정보 제공
+
 eureka:
   client:
     register-with-eureka: false
