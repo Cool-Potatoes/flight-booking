@@ -1,11 +1,9 @@
 package com.flight_booking.common.infrastructure.security;
 
-import com.flight_booking.common.domain.model.UserRoleEnum;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,18 +21,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     // 헤더에서 사용자 정보 추출
     String email = request.getHeader("X-USER-EMAIL");
-    String header = request.getHeader("X-USER-ROLE");
+    String role = request.getHeader("X-USER-ROLE");
 
-    log.info("header: {}, {}", email, header);
+    log.info("header: email: {}, role: {}", email, role);
 
-    if (email != null && header != null) {
+    if (email != null && role != null) {
       try {
-        // "ROLE_" 접두어 제거
-        String roleName = header.replace("ROLE_", "");
-
-        // UserRoleEnum에 맞게 변환
-        UserRoleEnum role = UserRoleEnum.valueOf(roleName);
-
         // 이메일로 사용자 정보 로드
         UserDetails userDetails = new CustomUserDetails(email, role);
 
