@@ -9,9 +9,9 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY build/libs/common-*.jar common.jar
+# common.jar 복사를 제거
 COPY build/libs/gateway-service-*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-cp", "common.jar:app.jar", "com.example.gateway.GatewayServiceApplication"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
