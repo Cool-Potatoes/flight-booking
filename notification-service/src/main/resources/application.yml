@@ -1,11 +1,11 @@
 server:
-  port: 8160
+  port: 0  # Temporary port, will be overwritten by Config server settings later.
 
 spring:
   application:
     name: notification-service
   config:
-    import: "optional:configserver:"
+    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
   cloud:
     config:
       discovery:
@@ -16,4 +16,3 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
-    fetch-registry: true  # Eureka 서버로부터 registry 정보를 가져오도록 설정
