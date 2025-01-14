@@ -2,13 +2,18 @@ package com.flight_booking.ticket_service.application.service;
 
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
+import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
+import com.flight_booking.ticket_service.infrastructure.feign.FlightClient;
+import com.flight_booking.ticket_service.infrastructure.feign.PaymentClient;
+import com.flight_booking.ticket_service.infrastructure.feign.UserClient;
 import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
@@ -30,6 +35,9 @@ public class TicketService {
 
   private final TicketRepository ticketRepository;
   private final TicketKafkaSender ticketKafkaSender;
+  private final FlightClient flightClient;
+  private final PaymentClient paymentClient;
+  private final UserClient userClient;
 
   @Transactional
   public TicketResponseDto createTicket(TicketRequestDto ticketRequestDto) {
@@ -79,11 +87,16 @@ public class TicketService {
       throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");
     }
 
-    // TODO 변경하려는 seatID에 해당하는 seat의 isAvailable을 조회하며 Lock
-    // TODO 변경된 좌석의 금액이 원래 좌석과 다르면 그 차이만큼 마일리지 증감
-    // TODO 기내식, 위탁수화물 등 변경
-    // TODO 수정 성공시 이전 예약 좌석은 다시 Available로 변경
-    //  -> 해결!
+    for(PassengerRequestDto passengerRequestDto : ticketRequestDto.passengerRequestDtos()){
+      if (checkUserMileageAndProcessRefund(ticket, passengerRequestDto.seatId(), userDetails)) {
+
+        log.info("asldkfjasldkfjasdlkfjasdlkjf");
+        // 다시 재 예매를 해야함
+        //bookingClient.createBooking();
+      }
+    }
+
+
     ticketKafkaSender.sendMessage(
         "booking-update-topic",
         ticket.getTicketId().toString(),
@@ -99,6 +112,38 @@ public class TicketService {
     // ticket.update(ticketRequestDto.seatId());
 
     return TicketResponseDto.from(ticket);
+  }
+
+  private Boolean checkUserMileageAndProcessRefund(Ticket ticket, UUID newSeatId, CustomUserDetails userDetails) {
+
+    Long seatPrice = getSeatPrice(newSeatId, userDetails);
+    Long paymentFair = getPaymentFair(ticket, userDetails);
+
+    // 예약할 좌석의 가격과 환블해줄 가격의 차이 계산
+    Long difference = Math.abs(seatPrice - paymentFair);
+
+    // 마일리지 체크
+    ApiResponse<Boolean> userResponse = userClient.checkAndRefundMileage(userDetails.email(),
+        userDetails.role(), userDetails.email(), difference,
+        paymentFair);
+
+    return userResponse.getData();
+  }
+
+  private Long getSeatPrice(UUID newSeatId, CustomUserDetails userDetails) {
+
+    // 예약할 좌석의 available을 false로 바꾸고 해당 좌석의 요금 리턴
+    ApiResponse<Long> bookingResponse = flightClient.updateSeatAvailableFalseAndGetSeatPrice(
+        userDetails.email(), userDetails.role(), newSeatId);
+    return bookingResponse.getData();
+  }
+
+  private Long getPaymentFair(Ticket ticket, CustomUserDetails userDetails) {
+
+    // 환불을 해주기 위해 bookingId로 찾은 결제되어있는 금액 리턴
+    ApiResponse<Long> paymentResponse = paymentClient.getPaymentFairByBookingId(
+        userDetails.email(), userDetails.role(), ticket.getBookingId());
+    return paymentResponse.getData();
   }
 
   @Transactional

@@ -280,4 +280,15 @@ public class PaymentService {
     );
   }
 
+  public Long getPaymentFairByBookingId(UUID bookingId) {
+
+    Payment payment = getPaymentByBookingIdAndIsDeletedFalse(bookingId);
+
+    return payment.getFare();
+  }
+
+  private Payment getPaymentByBookingIdAndIsDeletedFalse(UUID bookingId) {
+
+    return paymentRepository.findPaymentByBookingIdAndIsDeletedFalse(bookingId);
+  }
 }

@@ -20,6 +20,7 @@ import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
   private final UserRepository userRepository;
@@ -174,6 +176,53 @@ public class UserService {
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );
+  }
+
+  // 동기, 환불
+  @Transactional
+  public Boolean checkAndRefundMileage(String email, Long difference, Long paymentFair) {
+
+    User user = getUserByEmailAndIsDeletedFalse(email);
+
+    if (user.getMileage() < difference) {
+
+      // payment fallback 로직
+//      userKafkaSender.sendMessage(
+//          "payment-refund-fail-topic",
+//          userRefundRequestDto.paymentId().toString(),
+//          new PaymentRefundProcessRequestDto(
+//              null,
+//              userRefundRequestDto.paymentId(),
+//              null,
+//              null),
+//          StackTraceUtils.getCurrentMethodName(),
+//          StackTraceUtils.getCurrentClassName()
+//      );
+
+      return false;
+    }
+
+    // 환불해줌 ( 마일리지가 여유가 있으니 재 결제 )
+    user.refundMile(paymentFair);
+    log.info("hihihaihishiadi");
+    // 결제 상태 업데이트
+//    userKafkaSender.sendMessage(
+//        "payment-refund-success-topic",
+//        user.getId().toString(),
+//        new PaymentRefundProcessRequestDto(
+//            userRefundRequestDto.ticketId(), userRefundRequestDto.paymentId(),
+//            userRefundRequestDto.passengerRequestDtos(),
+//            userRefundRequestDto.email()),
+//        StackTraceUtils.getCurrentMethodName(),
+//        StackTraceUtils.getCurrentClassName()
+//    );
+    return true;
+  }
+
+  private User getUserByEmailAndIsDeletedFalse(String email) {
+
+    return userRepository.findByEmailAndIsDeletedFalse(email)
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
   }
 
   // 티켓 환불

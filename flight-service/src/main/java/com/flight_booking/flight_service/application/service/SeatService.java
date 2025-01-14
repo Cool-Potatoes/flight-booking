@@ -180,6 +180,7 @@ public class SeatService {
     return true;
   }
 
+  // 비동기
   @Transactional(readOnly = false)
   public void seatAvailabilityCheckAndReturn(
       SeatAvailabilityCheckAndReturnRequestDto seatAvailabilityCheckAndReturnRequestDto) {
@@ -212,6 +213,28 @@ public class SeatService {
         StackTraceUtils.getCurrentClassName()
     );
 
+  }
+
+  // 동기
+  @Transactional(readOnly = false)
+  public Long updateSeatAvailableFalseAndGetSeatPrice(UUID seatId) {
+
+    Seat seat = getSeatIsDeletedFalse(seatId);
+
+    if (!seat.getIsAvailable()) {
+      // TODO
+      // 실패 로직.. 동기화? 비동기화?
+      throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seat.getSeatId());
+    } else {
+      seat.updateAvailable(false);
+      return seat.getPrice();
+    }
+  }
+
+  private Seat getSeatIsDeletedFalse(UUID seatId) {
+
+    return seatRepository.findBySeatIdAndIsDeletedFalse(seatId)
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
   }
 
   @Transactional(readOnly = false)
