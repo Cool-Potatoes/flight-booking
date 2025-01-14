@@ -8,39 +8,52 @@ alerting:
         - targets: ['alertmanager:9093']  # Alertmanager와 연동
 
 scrape_configs:
+  # 1️⃣ Gateway Service 모니터링
   - job_name: 'gateway'
     static_configs:
       - targets: ['gateway-service:8080']
 
+  # 2️⃣ User Service 모니터링
   - job_name: 'user-service'
     static_configs:
       - targets: ['user-service:8100']
 
-  - job_name: 'auth-service'
-    static_configs:
-      - targets: ['auth-service:8110']
-
+  # 3️⃣ Booking Service 모니터링
   - job_name: 'booking-service'
     static_configs:
       - targets: ['booking-service:8120']
 
+  # 4️⃣ Payment Service 모니터링
   - job_name: 'payment-service'
     static_configs:
       - targets: ['payment-service:8130']
 
+  # 5️⃣ Ticket Service 모니터링
   - job_name: 'ticket-service'
     static_configs:
       - targets: ['ticket-service:8140']
 
+  # 6️⃣ Flight Service 모니터링
   - job_name: 'flight-service'
     static_configs:
       - targets: ['flight-service:8150']
 
+  # 7️⃣ Notification Service 모니터링
   - job_name: 'notification-service'
     static_configs:
       - targets: ['notification-service:8160']
 
-  # 🔍 Prometheus 자체 모니터링 추가
+  # 8️⃣ Prometheus 자체 모니터링
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+
+  # 9️⃣ Zookeeper 모니터링 (JMX Exporter)
+  - job_name: 'zookeeper'
+    static_configs:
+      - targets: ['zookeeper:7072']  # JMX Exporter 포트
+
+  # 🔟 Kafka 모니터링 (JMX Exporter)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:7071']  # JMX Exporter 포트
