@@ -33,11 +33,6 @@ public class TicketService {
   @Transactional
   public TicketResponseDto createTicket(TicketRequestDto ticketRequestDto) {
 
-    // 예약에 해당하는 항공권이 이미 있는지 확인
-    if (ticketRepository.existsByBookingId(ticketRequestDto.bookingId())) {
-      throw new RuntimeException("해당 예약에 대한 항공권이 이미 존재합니다.");
-    }
-
     Ticket ticket = Ticket.builder()
         .bookingId(ticketRequestDto.bookingId())
         .passengerId(ticketRequestDto.passengerId())
