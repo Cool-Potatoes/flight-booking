@@ -1,8 +1,9 @@
 package com.flight_booking.flight_service.infrastructure.messaging.kafkaEndpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flight_booking.common.application.dto.SeatBookingRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityChangeRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.application.service.SeatService;
 import lombok.RequiredArgsConstructor;
@@ -16,24 +17,36 @@ public class SeatKafkaEndpoint {
 
   private final SeatService seatService;
 
-  @KafkaListener(groupId = "seat-availability-update-group", topics = "seat-availability-check-and-update-topic")
+  @KafkaListener(groupId = "seat-availability-check-and-update-group", topics = "seat-availability-check-and-update-topic")
   public void consumeSeatAvailabilityCheckAndUpdate(
-      @Payload ApiResponse<SeatBookingRequestDto> message) {
+      @Payload ApiResponse<SeatAvailabilityCheckRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
-    SeatBookingRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
-        SeatBookingRequestDto.class);
+    SeatAvailabilityCheckRequestDto seatAvailabilityCheckRequestDto = mapper.convertValue(message.getData(),
+        SeatAvailabilityCheckRequestDto.class);
 
-    seatService.consumeSeatAvailabilityCheckAndUpdate(seatBookingRequestDto);
+    seatService.consumeSeatAvailabilityCheckAndUpdate(seatAvailabilityCheckRequestDto);
   }
 
-  @KafkaListener(groupId = "seat-availability-change-group", topics = "seat-availability-change-topic")
-  public void consumeSeatAvailabilityCheck(@Payload ApiResponse<SeatAvailabilityChangeRequestDto> message) {
+  @KafkaListener(groupId = "seat-availability-check-and-return-group", topics = "seat-availability-check-and-return-topic")
+  public void consumeSeatAvailabilityCheckAndReturn(
+      @Payload ApiResponse<SeatAvailabilityCheckAndReturnRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
-    SeatAvailabilityChangeRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
-        SeatAvailabilityChangeRequestDto.class);
+    SeatAvailabilityCheckAndReturnRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
+        SeatAvailabilityCheckAndReturnRequestDto.class);
 
-    seatService.changeSeatAvailability(seatBookingRequestDto);
+    seatService.seatAvailabilityCheckAndReturn(seatBookingRequestDto);
+  }
+
+  @KafkaListener(groupId = "seat-availability-refund-group", topics = "seat-availability-refund-topic")
+  public void consumeSeatAvailabilityRefund(
+      @Payload ApiResponse<SeatAvailabilityRefundRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    SeatAvailabilityRefundRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
+        SeatAvailabilityRefundRequestDto.class);
+
+    seatService.refundSeatAvailability(seatBookingRequestDto);
   }
 }

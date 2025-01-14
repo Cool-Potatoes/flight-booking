@@ -1,10 +1,12 @@
 package com.flight_booking.ticket_service.presentation.controller;
 
 import com.flight_booking.common.application.dto.TicketRequestDto;
+import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.application.service.TicketService;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
+import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
 import com.querydsl.core.types.Predicate;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.web.PagedModel;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,22 +78,23 @@ public class TicketController {
   @PutMapping("/{ticketId}")
   public ApiResponse<?> updateTicket(
       @PathVariable UUID ticketId,
-      @Valid @RequestBody TicketRequestDto ticketRequestDto
+      @Valid @RequestBody TicketUpdateRequestDto ticketRequestDto,
+      @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
 
     // TODO 본인 것인지 권한 확인
 
-    TicketResponseDto ticketResponseDto = ticketService.updateTicket(ticketId, ticketRequestDto);
+    TicketResponseDto ticketResponseDto = ticketService.updateTicket(ticketId, ticketRequestDto, userDetails);
 
-    return ApiResponse.ok(ticketResponseDto, "항공권 수정 성공");
+    return ApiResponse.ok(ticketResponseDto, "항공권 수정 대기중");
   }
 
   @PatchMapping("/{ticketId}")
-  public ApiResponse<?> cancelTicket(@PathVariable UUID ticketId) {
+  public ApiResponse<?> cancelTicket(@PathVariable UUID ticketId, @AuthenticationPrincipal CustomUserDetails userDetails) {
 
     // TODO 권한 확인
 
-    ticketService.cancelTicket(ticketId);
+    ticketService.cancelTicket(ticketId, userDetails.getUsername());
 
     return ApiResponse.ok("항공권 취소 요청됨");
   }

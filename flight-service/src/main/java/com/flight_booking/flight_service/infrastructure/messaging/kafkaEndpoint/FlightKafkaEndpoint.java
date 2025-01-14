@@ -15,7 +15,7 @@ public class FlightKafkaEndpoint {
 
   private final FlightService flightService;
 
-  @KafkaListener(groupId = "flight-cancel-availability", topics = "flight-cancel-availability")
+  @KafkaListener(groupId = "flight-cancel-availability-group", topics = "flight-cancel-availability-topic")
   public void consumeFlightCancelAvailability(
       @Payload ApiResponse<FlightCancelRequestDto> message) {
 

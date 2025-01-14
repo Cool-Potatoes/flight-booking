@@ -49,7 +49,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신)
+        include: refresh, prometheus  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신) + prometheus
 
 logging:
   level:
