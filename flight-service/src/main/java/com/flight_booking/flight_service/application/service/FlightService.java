@@ -2,8 +2,7 @@ package com.flight_booking.flight_service.application.service;
 
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestDto;
-import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
-import com.flight_booking.common.presentation.global.ApiResponse;
+import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.flight_service.domain.model.Airport;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.FlightStatusEnum;
@@ -115,7 +114,9 @@ public class FlightService {
       flightKafkaSender.sendMessage(
           "ticket-cancel-unavailable-topic",
           seatResponseDto.seatId().toString(),
-          flightCancelRequestDto
+          flightCancelRequestDto,
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName()
       );
     }
 
@@ -129,7 +130,9 @@ public class FlightService {
             flightCancelRequestDto.ticketId(),
             flightCancelRequestDto.bookingId(),
             flightCancelRequestDto.passengerId(),
-            flightCancelRequestDto.seatId())
+            flightCancelRequestDto.seatId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
     );
   }
 

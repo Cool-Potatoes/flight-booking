@@ -12,11 +12,12 @@ public class KafkaSenderImpl implements KafkaSender {
   private final KafkaTemplate<String, ApiResponse<?>> apiKafkaTemplate;
 
   @Override
-  public void sendApiResponseData(String topic, String key, Object data) {
+  public void sendApiResponseDataWithFrom(String topic, String key, Object data, String methodName,
+      String className) {
     apiKafkaTemplate.send(
         topic,
         key,
-        ApiResponse.ok(data)
+        ApiResponse.ok(data, "from " + methodName + " [" + className + "]")
     );
   }
 }

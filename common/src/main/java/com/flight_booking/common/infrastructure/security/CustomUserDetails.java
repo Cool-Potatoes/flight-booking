@@ -1,6 +1,5 @@
 package com.flight_booking.common.infrastructure.security;
 
-import com.flight_booking.common.domain.model.UserRoleEnum;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -8,12 +7,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public record CustomUserDetails(
     String email,
-    UserRoleEnum role
+    String role
 ) implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return AuthorityUtils.createAuthorityList(this.role.getAuthority());
+    return AuthorityUtils.createAuthorityList(this.role);
   }
 
   @Override
