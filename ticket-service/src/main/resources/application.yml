@@ -1,18 +1,27 @@
 server:
-  port: 0  # Temporary port, will be overwritten by Config server settings later.
+  port: 0  # Ticket 서비스 고정 포트
 
 spring:
   application:
     name: ticket-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: "optional:configserver:"  # Config Server에서 설정 불러오기 (Config Server가 없어도 실행 가능)
   cloud:
     config:
       discovery:
         enabled: true
         service-id: config-server
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus  # Actuator 헬스 체크 및 모니터링
+
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: true  # IP 기반 서비스 등록

@@ -1,24 +1,25 @@
 server:
-  port: 0  # 임시 포트, Config Server에서 덮어씌워짐
+  port: 0  # Payment 서비스 고정 포트
 
 spring:
   application:
     name: payment-service
   config:
-    import: "configserver:"  # Config Server에서 설정 가져오기
+    import: "optional:configserver:"  # Config Server에서 설정 불러오기 (서버가 꺼져도 실행 가능)
   cloud:
     config:
       discovery:
         enabled: true
         service-id: config-server
+
   datasource:
-    url: jdbc:h2:mem:test;  # H2: test용 인메모리 DB
+    url: jdbc:h2:mem:test  # H2 인메모리 DB (테스트용)
     driver-class-name: org.h2.Driver
     username: sa
     password:
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create-drop  # 서버 시작 시 테이블 생성 후 종료 시 삭제
     defer-datasource-initialization: true
     show-sql: true
     properties:
@@ -36,7 +37,16 @@ logging:
           jdbc:
             bind: TRACE
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus  # Actuator 헬스 체크 및 모니터링
+
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: true  # IP 기반 서비스 등록

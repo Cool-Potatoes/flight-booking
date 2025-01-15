@@ -4,11 +4,7 @@ server:
 spring:
   application:
     name: config-server
-  http:
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
+
   cloud:
     config:
       server:
@@ -22,12 +18,16 @@ spring:
           basedir: /tmp/config-repo
           skip-ssl-validation: true
 
-  zipkin:
-    base-url: http://zipkin:9411  # Zipkin 서버 URL (Docker에서는 컨테이너 이름 사용)
-
-  sleuth:
-    sampler:
+management:
+  tracing:
+    sampling:
       probability: 1.0  # 모든 요청 추적
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans  # ✅ 최신 Zipkin 엔드포인트 적용
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
 
 eureka:
   client:
@@ -35,9 +35,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICE_URL}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: true

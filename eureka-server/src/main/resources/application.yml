@@ -5,11 +5,6 @@ spring:
   application:
     name: eureka-server
 
-  # Prometheus 메트릭 활성화
-  metrics:
-    export:
-      prometheus:
-        enabled: true
 
 management:
   endpoints:
@@ -26,8 +21,8 @@ eureka:
     fetch-registry: false
 
   server:
-    enableSelfPreservation: false
+    enableSelfPreservation: false #배포시 TRUE로
 
 logging:
   level:
-    com.netflix.discovery: DEBUG
+    com.netflix.discovery: DEBUG # 배포시 INFO로

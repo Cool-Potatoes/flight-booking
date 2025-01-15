@@ -1,5 +1,5 @@
 server:
-  port: 0  # Temporary port, will be overwritten by Config server settings later.
+  port: 0  # flight-service는 8150 포트 사용
 
 spring:
   application:
@@ -12,7 +12,19 @@ spring:
         enabled: true
         service-id: config-server
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: true
