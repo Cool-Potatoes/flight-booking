@@ -3,7 +3,8 @@ server:
 
 service:
   jwt:
-    access-expiration: 86400000  # 24시간
+    access-token-expiration: 1800000  # 30분
+    refresh-token-expiration: 86400000  # 1일
     secret-key: ${SECRET_KEY}
 
 
