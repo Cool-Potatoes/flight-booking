@@ -55,8 +55,8 @@ jobs:
       - name: Build and Push Docker Images
         if: contains(github.ref, 'dev') || contains(github.ref, 'main')
         run: |
-          docker-compose -f docker-compose.yml build common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-          docker-compose -f docker-compose.yml push common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+          docker-compose -f docker-compose.yml build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+          docker-compose -f docker-compose.yml push eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
 
       # 9️⃣ Deploy to dev environment (개발 서버에 배포 - 주석 처리됨)
       # - name: Deploy to dev
