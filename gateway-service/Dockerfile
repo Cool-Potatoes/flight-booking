@@ -9,7 +9,6 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# common.jar 복사를 제거
 COPY build/libs/gateway-service-*.jar app.jar
 
 EXPOSE 8080

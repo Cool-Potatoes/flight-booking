@@ -9,7 +9,6 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY build/libs/common-*.jar common.jar
 COPY build/libs/payment-service-*.jar app.jar
 
 EXPOSE 8130

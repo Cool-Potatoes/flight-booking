@@ -9,9 +9,8 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY build/libs/common-*.jar common.jar
 COPY build/libs/user-service-*.jar app.jar
 
 EXPOSE 8100
 
-ENTRYPOINT ["java", "-cp", "common.jar:app.jar", "com.example.user.UserServiceApplication"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

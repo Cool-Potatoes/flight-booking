@@ -1,4 +1,3 @@
-
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -14,4 +13,4 @@ COPY build/libs/booking-service-*.jar app.jar
 
 EXPOSE 8120
 
-ENTRYPOINT ["java", "-cp", "common.jar:app.jar", "com.example.booking.BookingApplication"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
