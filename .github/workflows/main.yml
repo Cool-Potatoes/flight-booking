@@ -3,7 +3,7 @@ name: CI/CD using GitHub Actions & Docker
 on:
   push:
     branches:
-      - "feat/cicd/docker"
+      - "dev"  # dev 브랜치에서만 동작
 
 permissions:
   contents: write
@@ -53,22 +53,22 @@ jobs:
 
       # 8️⃣ Docker 이미지 빌드 및 푸시
       - name: Build and Push Docker Images
-        if: contains(github.ref, 'dev') || contains(github.ref, 'main')
         run: |
           docker-compose -f docker-compose.yml build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
           docker-compose -f docker-compose.yml push eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+        timeout-minutes: 10  # 빌드 제한 시간 10분
+        continue-on-error: false  # 실패 시 중단
 
-      # 9️⃣ Deploy to dev environment (개발 서버에 배포 - 주석 처리됨)
-      # - name: Deploy to dev
-      #   if: contains(github.ref, 'dev')
+      # 9️⃣ Deploy to dev environment (개발 서버 배포 - 필요 시 주석 해제)
+      # - name: Deploy to Dev Server
       #   uses: appleboy/ssh-action@v1.1.0
       #   with:
-      #     host: ${{ secrets.HOST_PROD }}
+      #     host: ${{ secrets.HOST_DEV }}  # 개발 서버 호스트
       #     username: ubuntu
-      #     key: ${{ secrets.PRIVATE_KEY }}
-      #     port: ${{ secrets.PORT }}
+      #     key: ${{ secrets.PRIVATE_KEY_DEV }}  # 개발 서버 SSH 키
+      #     port: ${{ secrets.PORT_DEV }}
       #     script: |
       #       cd /home/ubuntu/flight-booking
       #       docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
       #       docker-compose up -d eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-      #       sudo docker image prune -f
+      #       sudo docker image prune -f  # 사용하지 않는 이미지 삭제
