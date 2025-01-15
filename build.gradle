@@ -43,14 +43,6 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-        // Micrometer Tracing (OpenTelemetry 기반)
-        implementation 'io.micrometer:micrometer-tracing-bridge-otel'
-        implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
-
-        // OpenTelemetry SDK
-        implementation 'io.opentelemetry:opentelemetry-sdk'
-        implementation 'io.opentelemetry:opentelemetry-sdk-extension-autoconfigure'
-
         // 공통으로 사용할 의존성 추가
     }
 
