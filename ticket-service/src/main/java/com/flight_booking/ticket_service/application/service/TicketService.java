@@ -83,49 +83,18 @@ public class TicketService {
   public TicketResponseDto updateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto,
       CustomUserDetails userDetails) {
 
-    String userEmail = userDetails.email();
+    Ticket ticket = validateAndFetchTicket(ticketId, ticketRequestDto);
 
-    Ticket ticket = getTicketById(ticketId);
-
-    if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
-      throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
-    }
-    if (!ticketRequestDto.passengerId().equals(ticket.getPassengerId())) {
-      throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");
-    }
-
-    ticket.updateState(TicketStateEnum.PROCESS_REFUND);
+    // 티켓 상태 변경, 환불 진행중
+    updateTicketStateToProcessingRefund(ticket);
 
     // 승객들의 정보를 먼저 모두 체크한 후에 처리
-    List<PassengerRequestDto> checkedPassengerRequestDtos = new ArrayList<>();
-
-    // 승객 정보 체크
-    for (PassengerRequestDto passengerRequestDto : ticketRequestDto.passengerRequestDtos()) {
-      boolean isChecked = checkUserMileageAndProcessRefund(ticket, passengerRequestDto.seatId(),
-          userDetails);
-
-      // 체크가 끝난 승객만 리스트에 추가
-      if (isChecked) {
-        checkedPassengerRequestDtos.add(passengerRequestDto);
-      }
-    }
+    List<PassengerRequestDto> checkedPassengerRequestDtos = processPassengersForRefund(ticket,
+        ticketRequestDto, userDetails);
 
     // 승객 모두 체크가 끝난 후, 새로운 예매를 한 번만 호출
     if (!checkedPassengerRequestDtos.isEmpty()) {
-
-      // 기존 booking의 상태와 payment의 상태, seat 상태를 어떻게 변경 해 주어야 하나?
-      // 여기서에서 다 보내보자
-      updateStatesToRefund(ticket);
-
-      // 새로운 booking 생성
-      bookingClient.createBooking(
-          userDetails.email(),
-          userDetails.role(),
-          new BookingRequestDto(checkedPassengerRequestDtos)
-      );
-
-      // 새로운 Booking이 생성되고, 기존 티켓은 환불완료 상태로 변경
-      ticket.updateState(TicketStateEnum.REFUND);
+      handleRefundAndCreateBooking(ticket, checkedPassengerRequestDtos, userDetails);
     }
 
     // TODO updatedBy
@@ -134,7 +103,55 @@ public class TicketService {
     return TicketResponseDto.from(ticket);
   }
 
-  private void updateStatesToRefund(Ticket ticket) {
+  private Ticket validateAndFetchTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
+    Ticket ticket = getTicketById(ticketId);
+
+    if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
+      throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
+    }
+    if (!ticketRequestDto.passengerId().equals(ticket.getPassengerId())) {
+      throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");
+    }
+    return ticket;
+  }
+
+  private void updateTicketStateToProcessingRefund(Ticket ticket) {
+    ticket.updateState(TicketStateEnum.PROCESS_REFUND);
+  }
+
+  private List<PassengerRequestDto> processPassengersForRefund(Ticket ticket,
+      TicketUpdateRequestDto ticketRequestDto, CustomUserDetails userDetails) {
+    List<PassengerRequestDto> checkedPassengerRequestDtos = new ArrayList<>();
+
+    for (PassengerRequestDto passengerRequestDto : ticketRequestDto.passengerRequestDtos()) {
+      boolean isChecked = checkUserMileageAndProcessRefund(ticket, passengerRequestDto.seatId(),
+          userDetails);
+
+      if (isChecked) {
+        checkedPassengerRequestDtos.add(passengerRequestDto);
+      }
+    }
+    return checkedPassengerRequestDtos;
+  }
+
+  private void handleRefundAndCreateBooking(Ticket ticket,
+      List<PassengerRequestDto> checkedPassengerRequestDtos, CustomUserDetails userDetails) {
+
+    // Kafka 메시지 전송
+    sendKafkaMessagesForRefund(ticket);
+
+    // 새로운 예약 생성
+    bookingClient.createBooking(
+        userDetails.email(),
+        userDetails.role(),
+        new BookingRequestDto(checkedPassengerRequestDtos)
+    );
+
+    // 티켓 상태를 환불 완료로 변경
+    ticket.updateState(TicketStateEnum.REFUND);
+  }
+
+  private void sendKafkaMessagesForRefund(Ticket ticket) {
 
     ticketKafkaSender.sendMessage(
         "booking-status-update-refund-topic",
