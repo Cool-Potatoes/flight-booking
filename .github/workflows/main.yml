@@ -69,6 +69,6 @@ jobs:
       #     port: ${{ secrets.PORT }}
       #     script: |
       #       cd /home/ubuntu/flight-booking
-      #       docker-compose pull common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-      #       docker-compose up -d common eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+      #       docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+      #       docker-compose up -d eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
       #       sudo docker image prune -f
