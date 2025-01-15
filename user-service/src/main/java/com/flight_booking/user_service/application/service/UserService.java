@@ -204,7 +204,7 @@ public class UserService {
 
     // 환불해줌 ( 마일리지가 여유가 있으니 재 결제 )
     user.refundMile(paymentFair);
-    log.info("hihihaihishiadi");
+
     // 결제 상태 업데이트
 //    userKafkaSender.sendMessage(
 //        "payment-refund-success-topic",

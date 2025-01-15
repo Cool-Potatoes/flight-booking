@@ -7,10 +7,12 @@ import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.presentation.dto.BookingRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
+import com.flight_booking.ticket_service.infrastructure.feign.BookingClient;
 import com.flight_booking.ticket_service.infrastructure.feign.FlightClient;
 import com.flight_booking.ticket_service.infrastructure.feign.PaymentClient;
 import com.flight_booking.ticket_service.infrastructure.feign.UserClient;
@@ -18,6 +20,7 @@ import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSen
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
 import com.querydsl.core.types.Predicate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class TicketService {
 
   private final TicketRepository ticketRepository;
   private final TicketKafkaSender ticketKafkaSender;
+  private final BookingClient bookingClient;
   private final FlightClient flightClient;
   private final PaymentClient paymentClient;
   private final UserClient userClient;
@@ -72,7 +76,7 @@ public class TicketService {
     return new PagedModel<>(ticketResponseDtoPage);
   }
 
-  @Transactional
+  @Transactional(readOnly = false)
   public TicketResponseDto updateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto,
       CustomUserDetails userDetails) {
 
@@ -87,15 +91,33 @@ public class TicketService {
       throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");
     }
 
-    for(PassengerRequestDto passengerRequestDto : ticketRequestDto.passengerRequestDtos()){
-      if (checkUserMileageAndProcessRefund(ticket, passengerRequestDto.seatId(), userDetails)) {
+    ticket.updateState(TicketStateEnum.PROCESS_REFUND);
 
-        log.info("asldkfjasldkfjasdlkfjasdlkjf");
-        // 다시 재 예매를 해야함
-        //bookingClient.createBooking();
+    // 승객들의 정보를 먼저 모두 체크한 후에 처리
+    List<PassengerRequestDto> checkedPassengerRequestDtos = new ArrayList<>();
+
+    // 승객 정보 체크
+    for (PassengerRequestDto passengerRequestDto : ticketRequestDto.passengerRequestDtos()) {
+      boolean isChecked = checkUserMileageAndProcessRefund(ticket, passengerRequestDto.seatId(),
+          userDetails);
+
+      // 체크가 끝난 승객만 리스트에 추가
+      if (isChecked) {
+        checkedPassengerRequestDtos.add(passengerRequestDto);
       }
     }
 
+    // 승객 모두 체크가 끝난 후, 재예매를 한 번만 호출
+    if (!checkedPassengerRequestDtos.isEmpty()) {
+
+      ticket.updateState(TicketStateEnum.REFUND);
+
+      bookingClient.createBooking(
+          userDetails.email(),
+          userDetails.role(),
+          new BookingRequestDto(checkedPassengerRequestDtos)
+      );
+    }
 
     ticketKafkaSender.sendMessage(
         "booking-update-topic",
@@ -114,7 +136,8 @@ public class TicketService {
     return TicketResponseDto.from(ticket);
   }
 
-  private Boolean checkUserMileageAndProcessRefund(Ticket ticket, UUID newSeatId, CustomUserDetails userDetails) {
+  private Boolean checkUserMileageAndProcessRefund(Ticket ticket, UUID newSeatId,
+      CustomUserDetails userDetails) {
 
     Long seatPrice = getSeatPrice(newSeatId, userDetails);
     Long paymentFair = getPaymentFair(ticket, userDetails);

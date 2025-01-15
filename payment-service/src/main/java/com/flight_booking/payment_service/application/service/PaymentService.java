@@ -211,6 +211,8 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "user-refund-ticket-topic",
         paymentRefundFromTicketRequestDto.bookingId().toString(),
+// TODO : 너무 기니까 static으로 정리
+//        new UserRefundTicketRequestDto.from(
         new UserRefundTicketRequestDto(
             paymentRefundFromTicketRequestDto.email(),
             payment.getPaymentId(),
