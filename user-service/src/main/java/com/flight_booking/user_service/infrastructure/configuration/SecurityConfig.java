@@ -30,7 +30,8 @@ public class SecurityConfig {
       "/v1/auth/signin",
       "/v1/auth/find-id",
       "/v1/auth/send-code",
-      "/v1/auth/verify-code"
+      "/v1/auth/verify-code",
+      "/v1/auth/token"
   };
 
   @Bean
