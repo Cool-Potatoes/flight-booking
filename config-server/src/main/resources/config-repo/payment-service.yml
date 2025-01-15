@@ -4,13 +4,11 @@ server:
 spring:
   application:
     name: payment-service
-
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
+    url: ${PAYMENT_DB_URL}
+    username: ${PAYMENT_DB_USERNAME}
+    password: ${PAYMENT_DB_PASSWORD}
   kafka:
     bootstrap-servers: kafka:9092
     producer:
@@ -32,18 +30,17 @@ resilience4j:
         waitDurationInOpenState: 10s
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://zipkin:9411/api/v2/spans"
   tracing:
     sampling:
       probability: 1.0
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans
   endpoints:
     web:
       exposure:
-        include: refresh, prometheus
+        include: health, info, prometheus
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}

@@ -1,31 +1,14 @@
 server:
   port: 8120
 
-service:
-  jwt:
-    access-expiration: 86400000  # 24시간
-    secret-key: ${SECRET_KEY}
-
 spring:
+  application:
+    name: booking-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      username: ${REDIS_USERNAME}
-      password: ${REDIS_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        use_sql_comments: true
+    url: ${BOOKING_DB_URL}
+    username: ${BOOKING_DB_USERNAME}
+    password: ${BOOKING_DB_PASSWORD}
   kafka:
     bootstrap-servers: kafka:9092
     producer:
@@ -34,6 +17,7 @@ spring:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: latest
 
 resilience4j:
   circuitbreaker:
@@ -41,31 +25,26 @@ resilience4j:
       default:
         registerHealthIndicator: true
         slidingWindowType: COUNT_BASED
-        slidingWindowSize: 5
+        slidingWindowSize: 10
         minimumNumberOfCalls: 5
-        slowCallRateThreshold: 100
-        slowCallDurationThreshold: 60000
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 5000
         failureRateThreshold: 50
-        permittedNumberOfCallsInHalfOpenState: 3
-        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 2
+        waitDurationInOpenState: 10s
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://zipkin:9411/api/v2/spans"
   tracing:
     sampling:
       probability: 1.0
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans
   endpoints:
     web:
       exposure:
-        include: refresh, prometheus
-  prometheus:
-    metrics:
-      export:
-        enabled: true
+        include: health, info, prometheus
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}

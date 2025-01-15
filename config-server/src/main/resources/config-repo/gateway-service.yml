@@ -4,47 +4,62 @@ server:
 spring:
   application:
     name: gateway-service
+
   cloud:
     gateway:
       routes:
+        # ✅ User Service
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/v1/users/**, /v1/auth/**
-        - id: payment-service
-          uri: lb://payment-service
-          predicates:
-            - Path=/v1/payments/**
-        - id: flight-service
-          uri: lb://flight-service
-          predicates:
-            - Path=/v1/flights/**
-        - id: ticket-service
-          uri: lb://ticket-service
-          predicates:
-            - Path=/v1/tickets/**
+
+        # ✅ Booking Service
         - id: booking-service
           uri: lb://booking-service
           predicates:
             - Path=/v1/bookings/**
 
+        # ✅ Notification Service
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/v1/notifications/**
+
+        # ✅ Payment Service
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/v1/payments/**
+
+        # ✅ Flight Service
+        - id: flight-service
+          uri: lb://flight-service
+          predicates:
+            - Path=/v1/flights/**
+
+        # ✅ Ticket Service
+        - id: ticket-service
+          uri: lb://ticket-service
+          predicates:
+            - Path=/v1/tickets/**
+
       discovery:
         locator:
-          enabled: true
+          enabled: true  # ✅ 서비스 자동 탐색 활성화
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # ✅ 모든 요청 추적
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans  # ✅ Zipkin 연결
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus  # ✅ 헬스체크 및 메트릭 노출
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-
-management:
-  zipkin:
-    tracing:
-      endpoint: "http://zipkin:9411/api/v2/spans"
-  tracing:
-    sampling:
-      probability: 1.0
-  endpoints:
-    web:
-      exposure:
-        include: refresh, prometheus
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}  # ✅ Eureka 서비스 등록

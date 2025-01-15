@@ -1,74 +1,29 @@
 server:
   port: 8150
 
-service:
-  jwt:
-    access-expiration: 86400000  # 24시간
-    secret-key: ${SECRET_KEY}
-
 spring:
+  application:
+    name: flight-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}  # .env 파일에서 DB_URL 확인
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  data:
-    redis:
-      host: ${REDIS_HOST}  # Redis 환경변수 적용
-      port: ${REDIS_PORT}
-      username: ${REDIS_USERNAME}
-      password: ${REDIS_PASSWORD}
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        use_sql_comments: true
-
-  kafka:
-    bootstrap-servers: kafka:9092  # Kafka 서버 이름으로 변경
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        registerHealthIndicator: true
-        slidingWindowType: COUNT_BASED
-        slidingWindowSize: 5
-        minimumNumberOfCalls: 5
-        slowCallRateThreshold: 100
-        slowCallDurationThreshold: 60000
-        failureRateThreshold: 50
-        permittedNumberOfCallsInHalfOpenState: 3
-        waitDurationInOpenState: 20s
+    url: ${FLIGHT_DB_URL}
+    username: ${FLIGHT_DB_USERNAME}
+    password: ${FLIGHT_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://zipkin:9411/api/v2/spans"
   tracing:
     sampling:
       probability: 1.0
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans
   endpoints:
     web:
       exposure:
-        include: refresh, prometheus
-  prometheus:
-    metrics:
-      export:
-        enabled: true
+        include: health, info, prometheus
 
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}
