@@ -6,13 +6,20 @@ networks:
 
 volumes:
   postgres_notification_data:
+    driver: local
   postgres_payment_data:
+    driver: local
   postgres_flight_data:
+    driver: local
   postgres_booking_data:
+    driver: local
   postgres_user_data:
+    driver: local
   postgres_ticket_data:
+    driver: local
   redis_data:
   zookeeper_data:
+  zookeeper_log:
   kafka_data:
   prometheus_data:
   grafana_data:
@@ -60,6 +67,8 @@ services:
       - "8080:8080"
     networks:
       - app-network
+    environment:
+      SECRET_KEY: "${SECRET_KEY}"
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -72,42 +81,49 @@ services:
       retries: 5
 
   # 4️⃣ Zookeeper
+  # 1️⃣ Zookeeper 서버 1
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
+    image: wurstmeister/zookeeper:latest
+    platform: linux/amd64
     container_name: zookeeper
     ports:
       - "2181:2181"
     networks:
       - app-network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     volumes:
-      - zookeeper_data:/var/lib/zookeeper/data
+        - zookeeper_data:/var/lib/zookeeper/data
+        - zookeeper_log:/var/lib/zookeeper/log
     healthcheck:
-      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+        test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok || exit 1"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
   # 5️⃣ Kafka
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: wurstmeister/kafka:latest
+    platform: linux/amd64
     container_name: kafka
     ports:
       - "9092:9092"
     networks:
       - app-network
     volumes:
-      - kafka_data:/var/lib/kafka/data
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       zookeeper:
         condition: service_healthy
     environment:
-      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     healthcheck:
-      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
+      test: [ "CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -115,16 +131,22 @@ services:
   # 6️⃣ Kafka UI
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
+    platform: linux/amd64
     container_name: kafka-ui
     ports:
-      - "9095:9095"
+      - "9095:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_READONLY: "false"
     networks:
       - app-network
     depends_on:
-      kafka:
-        condition: service_healthy
-      zookeeper:
-        condition: service_healthy
+      - kafka
+      - zookeeper
+
+
 
   # 7️⃣ Redis
   redis:
@@ -147,8 +169,8 @@ services:
     image: postgres:latest
     container_name: postgres-notification
     environment:
-      POSTGRES_USER: notification_user
-      POSTGRES_PASSWORD: notification_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: systempass
       POSTGRES_DB: notification_db
     ports:
       - "5433:5432"
@@ -161,8 +183,8 @@ services:
     image: postgres:latest
     container_name: postgres-payment
     environment:
-      POSTGRES_USER: payment_user
-      POSTGRES_PASSWORD: payment_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: systempass
       POSTGRES_DB: payment_db
     ports:
       - "5434:5432"
@@ -175,8 +197,8 @@ services:
     image: postgres:latest
     container_name: postgres-user
     environment:
-      POSTGRES_USER: user_service
-      POSTGRES_PASSWORD: user_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: systempass
       POSTGRES_DB: user_db
     ports:
       - "5435:5432"
@@ -189,8 +211,8 @@ services:
     image: postgres:latest
     container_name: postgres-ticket
     environment:
-      POSTGRES_USER: ticket_service
-      POSTGRES_PASSWORD: ticket_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: systempass
       POSTGRES_DB: ticket_db
     ports:
       - "5436:5432"
@@ -203,8 +225,8 @@ services:
     image: postgres:latest
     container_name: postgres-flight
     environment:
-      POSTGRES_USER: flight_user
-      POSTGRES_PASSWORD: flight_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: systempass
       POSTGRES_DB: flight_db
     ports:
       - "5437:5432"
@@ -217,8 +239,8 @@ services:
     image: postgres:latest
     container_name: postgres-booking
     environment:
-      POSTGRES_USER: booking_user
-      POSTGRES_PASSWORD: booking_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: systempass
       POSTGRES_DB: booking_db
     ports:
       - "5438:5432"
@@ -235,11 +257,7 @@ services:
       - "9411:9411"
     networks:
       - app-network
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9411/health || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
+
 
   # 🔟 Prometheus
   prometheus:
