@@ -1,66 +1,83 @@
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s  # 경고 조건 평가 주기
-
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets: ['alertmanager:9093']  # Alertmanager와 연동
+  scrape_interval: 15s  # 메트릭 수집 주기
+  evaluation_interval: 15s  # 규칙 평가 주기
 
 scrape_configs:
+  # 1️⃣ Eureka Server 모니터링
   - job_name: 'eureka-server'
+    metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['eureka-server:8761']
-  # config server 모니터링
+
+  # 2️⃣ Config Server 모니터링
   - job_name: 'config-server'
+    metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['config-service:8888']
-  # 1️⃣ Gateway Service 모니터링
-  - job_name: 'gateway'
+      - targets: ['config-server:8888']
+
+  # 3️⃣ Gateway Service 모니터링
+  - job_name: 'gateway-service'
+    metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['gateway-service:8080']
 
-  # 2️⃣ User Service 모니터링
-  - job_name: 'user-service'
+  # 4️⃣ Kafka 상태 모니터링 (상태만 확인)
+  - job_name: 'kafka'
     static_configs:
-      - targets: ['user-service:8100']
+      - targets: ['kafka:9092']
 
-  # 3️⃣ Booking Service 모니터링
-  - job_name: 'booking-service'
-    static_configs:
-      - targets: ['booking-service:8120']
-
-  # 4️⃣ Payment Service 모니터링
-  - job_name: 'payment-service'
-    static_configs:
-      - targets: ['payment-service:8130']
-
-  # 5️⃣ Ticket Service 모니터링
-  - job_name: 'ticket-service'
-    static_configs:
-      - targets: ['ticket-service:8140']
-
-  # 6️⃣ Flight Service 모니터링
-  - job_name: 'flight-service'
-    static_configs:
-      - targets: ['flight-service:8150']
-
-  # 7️⃣ Notification Service 모니터링
-  - job_name: 'notification-service'
-    static_configs:
-      - targets: ['notification-service:8160']
-
-  # 8️⃣ Prometheus 자체 모니터링
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
-
-  # Zookeeper 모니터링
+  # 5️⃣ Zookeeper 상태 모니터링 (상태만 확인)
   - job_name: 'zookeeper'
     static_configs:
       - targets: ['zookeeper:2181']
 
-#  # Kafka 모니터링
-#  - job_name: 'kafka'
-#    static_configs:
-#      - targets: ['kafka:9092']
+  # 6️⃣ Redis 상태 모니터링 (상태만 확인)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # 7️⃣ Notification Service 모니터링
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['notification-service:8160']
+
+  # 8️⃣ Payment Service 모니터링
+  - job_name: 'payment-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['payment-service:8130']
+
+  # 9️⃣ Flight Service 모니터링
+  - job_name: 'flight-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['flight-service:8150']
+
+  # 🔟 Booking Service 모니터링
+  - job_name: 'booking-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['booking-service:8120']
+
+  # 11️⃣ User Service 모니터링
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service:8100']
+
+  # 12️⃣ Ticket Service 모니터링 (추가)
+  - job_name: 'ticket-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['ticket-service:8170']
+
+  # 13️⃣ Zipkin 상태 모니터링
+  - job_name: 'zipkin'
+    static_configs:
+      - targets: ['zipkin:9411']
+
+  # 14️⃣ Kafka UI 상태 모니터링 (상태만 확인)
+  - job_name: 'kafka-ui'
+    static_configs:
+      - targets: ['kafka-ui:9095']
