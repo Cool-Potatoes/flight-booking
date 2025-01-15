@@ -9,11 +9,11 @@ spring:
     config:
       server:
         git:
-          uri: ${SPRING_CLOUD_CONFIG_SERVER_GIT_URI}
-          username: ${SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME}
+          uri: https://github.com/Cool-Potatoes/flight-booking
+          username: Hanbeom98
           password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
           default-label: dev
-          search-paths: '{application}'
+          search-paths: 'config-server/src/main/resources/config-repo'  # 이곳에 설정할 리포지토리 내 경로 입력
           clone-on-start: true
           basedir: /tmp/config-repo
           skip-ssl-validation: true
@@ -34,7 +34,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}
+      defaultZone: http://eureka-server:8761/eureka/
   instance:
-    hostname: ${HOSTNAME}
+    hostname: ${HOSTNAME:localhost}
     prefer-ip-address: true
