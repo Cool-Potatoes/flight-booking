@@ -6,6 +6,7 @@ import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestD
 import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.application.dto.PaymentStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
@@ -291,6 +292,20 @@ public class PaymentService {
 
   private Payment getPaymentByBookingIdAndIsDeletedFalse(UUID bookingId) {
 
-    return paymentRepository.findPaymentByBookingIdAndIsDeletedFalse(bookingId);
+    return paymentRepository.findPaymentByBookingIdAndIsDeletedFalse(bookingId)
+        .orElseThrow(() -> new ApiException("존재하지 않는 bookingId"));
+  }
+
+  @Transactional(readOnly = false)
+  public void paymentStatusUpdateRefund(PaymentStatusUpdateRefundRequestDto requestDto) {
+
+    Payment payment = getPaymentEntityByBookingId(requestDto.bookingId());
+
+    payment.updateStatus(PaymentStatusEnum.REFUND_COMPLETE);
+  }
+
+  private Payment getPaymentEntityByBookingId(UUID bookingId) {
+    return paymentRepository.findPaymentByBookingIdAndIsDeletedFalse(bookingId)
+        .orElseThrow(() -> new ApiException("존재하지 않는 bookingId"));
   }
 }

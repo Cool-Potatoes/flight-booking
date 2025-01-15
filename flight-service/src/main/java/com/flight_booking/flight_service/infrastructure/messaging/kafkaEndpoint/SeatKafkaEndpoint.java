@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityUpdateTrueRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.flight_service.application.service.SeatService;
 import lombok.RequiredArgsConstructor;
@@ -41,12 +42,23 @@ public class SeatKafkaEndpoint {
 
   @KafkaListener(groupId = "seat-availability-refund-group", topics = "seat-availability-refund-topic")
   public void consumeSeatAvailabilityRefund(
-      @Payload ApiResponse<SeatAvailabilityRefundRequestDto> message) {
+      @Payload ApiResponse<SeatAvailabilityUpdateTrueRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
-    SeatAvailabilityRefundRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
-        SeatAvailabilityRefundRequestDto.class);
+    SeatAvailabilityUpdateTrueRequestDto seatBookingRequestDto = mapper.convertValue(message.getData(),
+        SeatAvailabilityUpdateTrueRequestDto.class);
 
-    seatService.refundSeatAvailability(seatBookingRequestDto);
+    seatService.seatAvailabilityUpdateTrue(seatBookingRequestDto);
+  }
+
+  @KafkaListener(groupId = "seat-availability-update-true-group", topics = "seat-availability-update-true-topic")
+  public void consumeSeatAvailabilityUpdateTrue(
+      @Payload ApiResponse<SeatAvailabilityUpdateTrueRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    SeatAvailabilityUpdateTrueRequestDto requestDto = mapper.convertValue(message.getData(),
+        SeatAvailabilityUpdateTrueRequestDto.class);
+
+    seatService.seatAvailabilityUpdateTrue(requestDto);
   }
 }

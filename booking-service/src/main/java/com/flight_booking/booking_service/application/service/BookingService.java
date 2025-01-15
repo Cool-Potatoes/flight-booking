@@ -9,7 +9,9 @@ import com.flight_booking.booking_service.presentation.request.BookingRequestDto
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
+import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
+import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
@@ -225,5 +227,23 @@ public class BookingService {
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );
+  }
+
+  @Transactional(readOnly = false)
+  public void updateBookingStatusRefund(BookingStatusUpdateRefundRequestDto requestDto) {
+    Booking booking = getBookingEntity(requestDto.bookingId());
+
+    booking.updateBookingStatus(BookingStatusEnum.BOOKING_REFUND_COMPLETE);
+  }
+
+  private Booking getBookingEntity(UUID bookingId) {
+
+    return bookingRepository.findByBookingIdAndIsDeletedFalse(bookingId)
+        .orElseThrow(NotFoundBookingException::new);
+  }
+
+  public void updatePassengerIsDeletedTrue(PassengerIsdeletedUpdateTrueRequestDto requestDto) {
+
+    passengerService.updatePassengerIsDeletedTrue(requestDto.passengerId());
   }
 }

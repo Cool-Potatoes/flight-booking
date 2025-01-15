@@ -1,8 +1,11 @@
 package com.flight_booking.ticket_service.application.service;
 
-import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
+import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
+import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
+import com.flight_booking.common.application.dto.PaymentStatusUpdateRefundRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
@@ -107,28 +110,23 @@ public class TicketService {
       }
     }
 
-    // 승객 모두 체크가 끝난 후, 재예매를 한 번만 호출
+    // 승객 모두 체크가 끝난 후, 새로운 예매를 한 번만 호출
     if (!checkedPassengerRequestDtos.isEmpty()) {
 
-      ticket.updateState(TicketStateEnum.REFUND);
+      // 기존 booking의 상태와 payment의 상태, seat 상태를 어떻게 변경 해 주어야 하나?
+      // 여기서에서 다 보내보자
+      updateStatesToRefund(ticket);
 
+      // 새로운 booking 생성
       bookingClient.createBooking(
           userDetails.email(),
           userDetails.role(),
           new BookingRequestDto(checkedPassengerRequestDtos)
       );
-    }
 
-    ticketKafkaSender.sendMessage(
-        "booking-update-topic",
-        ticket.getTicketId().toString(),
-        new BookingUpdateRequestDto(
-            ticketId,
-            ticket.getBookingId(), ticketRequestDto.passengerRequestDtos(),
-            userEmail),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
+      // 새로운 Booking이 생성되고, 기존 티켓은 환불완료 상태로 변경
+      ticket.updateState(TicketStateEnum.REFUND);
+    }
 
     // TODO updatedBy
     // ticket.update(ticketRequestDto.seatId());
@@ -136,16 +134,53 @@ public class TicketService {
     return TicketResponseDto.from(ticket);
   }
 
+  private void updateStatesToRefund(Ticket ticket) {
+
+    ticketKafkaSender.sendMessage(
+        "booking-status-update-refund-topic",
+        ticket.getTicketId().toString(),
+        new BookingStatusUpdateRefundRequestDto(ticket.getBookingId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
+    );
+
+    ticketKafkaSender.sendMessage(
+        "seat-availability-update-true-topic",
+        ticket.getTicketId().toString(),
+        new SeatAvailabilityUpdateTrueRequestDto(ticket.getSeatId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
+    );
+
+    ticketKafkaSender.sendMessage(
+        "passenger-isdeleted-update-true-topic",
+        ticket.getTicketId().toString(),
+        new PassengerIsdeletedUpdateTrueRequestDto(ticket.getPassengerId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
+    );
+
+    // payment는 bookingId 전송해서 찾아서 처리
+    ticketKafkaSender.sendMessage(
+        "payment-status-update-refund-topic",
+        ticket.getTicketId().toString(),
+        new PaymentStatusUpdateRefundRequestDto(ticket.getBookingId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
+    );
+
+  }
+
   private Boolean checkUserMileageAndProcessRefund(Ticket ticket, UUID newSeatId,
       CustomUserDetails userDetails) {
 
-    Long seatPrice = getSeatPrice(newSeatId, userDetails);
+    Long seatPrice = updateSeatAvailableFalseAndGetSeatPrice(newSeatId, userDetails);
     Long paymentFair = getPaymentFair(ticket, userDetails);
 
     // 예약할 좌석의 가격과 환블해줄 가격의 차이 계산
     Long difference = Math.abs(seatPrice - paymentFair);
 
-    // 마일리지 체크
+    // 마일리지 체크 후 환불 진행
     ApiResponse<Boolean> userResponse = userClient.checkAndRefundMileage(userDetails.email(),
         userDetails.role(), userDetails.email(), difference,
         paymentFair);
@@ -153,7 +188,8 @@ public class TicketService {
     return userResponse.getData();
   }
 
-  private Long getSeatPrice(UUID newSeatId, CustomUserDetails userDetails) {
+  private Long updateSeatAvailableFalseAndGetSeatPrice(UUID newSeatId,
+      CustomUserDetails userDetails) {
 
     // 예약할 좌석의 available을 false로 바꾸고 해당 좌석의 요금 리턴
     ApiResponse<Long> bookingResponse = flightClient.updateSeatAvailableFalseAndGetSeatPrice(

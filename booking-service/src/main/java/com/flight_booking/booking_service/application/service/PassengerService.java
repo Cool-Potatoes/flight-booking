@@ -132,4 +132,17 @@ public class PassengerService {
       );
     }
   }
+
+  @Transactional(readOnly = false)
+  public void updatePassengerIsDeletedTrue(UUID passengerId) {
+    Passenger passenger = getPassengerEntity(passengerId);
+
+    passenger.updateIsDeletedTrue();
+  }
+
+  private Passenger getPassengerEntity(UUID passengerId) {
+
+    return passengerRepository.findByPassengerIdAndIsDeletedFalse(passengerId).orElseThrow(
+        () -> new NoSuchElementException("Passenger not found for ID: " + passengerId));
+  }
 }

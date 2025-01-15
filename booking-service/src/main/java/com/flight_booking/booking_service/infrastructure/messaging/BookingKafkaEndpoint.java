@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
+import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
+import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -98,5 +100,25 @@ public class BookingKafkaEndpoint {
         BookingRefundRequestDto.class);
 
     bookingService.processRefundTicketBooking(bookingProcessRequestDto);
+  }
+
+  @KafkaListener(groupId = "booking-status-update-refund-group", topics = "booking-status-update-refund-topic")
+  public void consumeBookingStatusUpdate(@Payload ApiResponse<BookingStatusUpdateRefundRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    BookingStatusUpdateRefundRequestDto requestDto = mapper.convertValue(message.getData(),
+        BookingStatusUpdateRefundRequestDto.class);
+
+    bookingService.updateBookingStatusRefund(requestDto);
+  }
+
+  @KafkaListener(groupId = "passenger-isdeleted-update-true-group", topics = "passenger-isdeleted-update-true-topic")
+  public void consumePassengerIsdeletedUpdateTrue(@Payload ApiResponse<PassengerIsdeletedUpdateTrueRequestDto> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    PassengerIsdeletedUpdateTrueRequestDto requestDto = mapper.convertValue(message.getData(),
+        PassengerIsdeletedUpdateTrueRequestDto.class);
+
+    bookingService.updatePassengerIsDeletedTrue(requestDto);
   }
 }

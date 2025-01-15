@@ -5,6 +5,7 @@ import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestD
 import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
+import com.flight_booking.common.application.dto.PaymentStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.application.service.PaymentService;
@@ -104,5 +105,14 @@ public class PaymentKafkaEndpoint {
     paymentService.processTicketPaymentRefundSuccess(paymentRequestDto);
   }
 
+  @KafkaListener(groupId = "payment-status-update-refund-group", topics = "payment-status-update-refund-topic")
+  public void consumePaymentStatusUpdateRefund(
+      @Payload ApiResponse<PaymentStatusUpdateRefundRequestDto> message) {
 
+    ObjectMapper mapper = new ObjectMapper();
+    PaymentStatusUpdateRefundRequestDto requestDto = mapper.convertValue(message.getData(),
+        PaymentStatusUpdateRefundRequestDto.class);
+
+    paymentService.paymentStatusUpdateRefund(requestDto);
+  }
 }

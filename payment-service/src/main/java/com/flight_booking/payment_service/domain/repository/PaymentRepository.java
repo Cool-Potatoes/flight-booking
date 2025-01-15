@@ -53,5 +53,5 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID>,
 
   Optional<Payment> findPaymentByBookingId(UUID bookingId);
 
-  Payment findPaymentByBookingIdAndIsDeletedFalse(UUID bookingId);
+  Optional<Payment> findPaymentByBookingIdAndIsDeletedFalse(UUID bookingId);
 }
