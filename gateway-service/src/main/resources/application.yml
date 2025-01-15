@@ -9,7 +9,7 @@ spring:
   cloud:
     config:
       discovery:
-        enabled: true
+        enabled: false
         service-id: config-server
 
 management:
@@ -23,5 +23,5 @@ eureka:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
   instance:
-    hostname: ${HOSTNAME}
+    hostname: ${HOSTNAME:localhost}
     prefer-ip-address: true  # IP 기반 서비스 등록
