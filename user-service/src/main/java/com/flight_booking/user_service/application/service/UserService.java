@@ -185,37 +185,24 @@ public class UserService {
     User user = getUserByEmailAndIsDeletedFalse(email);
 
     if (user.getMileage() < difference) {
-
-      // payment fallback 로직
-//      userKafkaSender.sendMessage(
-//          "payment-refund-fail-topic",
-//          userRefundRequestDto.paymentId().toString(),
-//          new PaymentRefundProcessRequestDto(
-//              null,
-//              userRefundRequestDto.paymentId(),
-//              null,
-//              null),
-//          StackTraceUtils.getCurrentMethodName(),
-//          StackTraceUtils.getCurrentClassName()
-//      );
-
       return false;
     }
 
     // 환불해줌 ( 마일리지가 여유가 있으니 재 결제 )
     user.refundMile(paymentFair);
 
-    // 결제 상태 업데이트
-//    userKafkaSender.sendMessage(
-//        "payment-refund-success-topic",
-//        user.getId().toString(),
-//        new PaymentRefundProcessRequestDto(
-//            userRefundRequestDto.ticketId(), userRefundRequestDto.paymentId(),
-//            userRefundRequestDto.passengerRequestDtos(),
-//            userRefundRequestDto.email()),
-//        StackTraceUtils.getCurrentMethodName(),
-//        StackTraceUtils.getCurrentClassName()
-//    );
+    return true;
+  }
+
+  // 동기, 취소 환불
+  @Transactional
+  public Boolean RefundMileage(String email, Long paymentFair) {
+
+    User user = getUserByEmailAndIsDeletedFalse(email);
+
+    // 환불해줌 ( 마일리지가 여유가 있으니 재 결제 )
+    user.refundMile(paymentFair);
+
     return true;
   }
 

@@ -16,6 +16,12 @@ public interface FlightClient {
       @RequestHeader(value = "X-USER-ROLE") String role,
       @PathVariable UUID seatId);
 
+  @GetMapping("/internal/flights/{seatId}")
+  ApiResponse<Boolean> checkFlightStatus(
+      @RequestHeader(value = "X-USER-EMAIL") String email,
+      @RequestHeader(value = "X-USER-ROLE") String role,
+      @PathVariable UUID seatId);
+
 //  @PostMapping
 //  ApiResponse<BookingResponseDto> createBooking(
 //      @RequestBody BookingRequestDto bookingRequestDto,

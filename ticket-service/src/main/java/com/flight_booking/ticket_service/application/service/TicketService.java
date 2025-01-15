@@ -223,27 +223,50 @@ public class TicketService {
   }
 
   @Transactional
-  public void cancelTicket(UUID ticketId, String username) {
+  public void cancelTicket(UUID ticketId, CustomUserDetails userDetails) {
 
+    Ticket ticket = validateTicketForCancellation(ticketId);
+
+    ticket.updateState(TicketStateEnum.CANCEL_PENDING);
+
+    // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
+
+    Boolean flightStatus = checkFlightStatus(userDetails.email(), userDetails.role(),
+        ticket.getSeatId());
+    if (!flightStatus) {
+      throw new RuntimeException("해당 항공편은 상태 확인 중 문제가 발생했습니다.");
+    }
+
+    if (ProcessRefund(ticket, userDetails)) {
+
+      ticket.updateState(TicketStateEnum.CANCELLED);
+      sendKafkaMessagesForRefund(ticket);
+    }
+  }
+
+  private Ticket validateTicketForCancellation(UUID ticketId) {
     Ticket ticket = getTicketById(ticketId);
 
     if (!ticket.getState().equals(TicketStateEnum.BOOKED)) {
       throw new RuntimeException("취소 불가");
     }
 
-    // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
-    ticketKafkaSender.sendMessage(
-        "flight-cancel-availability-topic",
-        ticket.getTicketId().toString(),
-        new FlightCancelRequestDto(
-            username,
-            ticket.getTicketId(), ticket.getBookingId(),
-            ticket.getPassengerId(), ticket.getSeatId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
+    return ticket;
+  }
 
-    ticket.updateState(TicketStateEnum.CANCEL_PENDING);
+  private Boolean checkFlightStatus(String email, String role, UUID seatId) {
+    ApiResponse<Boolean> response = flightClient.checkFlightStatus(email, role, seatId);
+    return response.getData();
+  }
+
+  private Boolean ProcessRefund(Ticket ticket, CustomUserDetails userDetails) {
+
+    Long paymentFair = getPaymentFair(ticket, userDetails);
+
+    ApiResponse<Boolean> userResponse = userClient.RefundMileage(userDetails.email(),
+        userDetails.role(), userDetails.email(), paymentFair);
+
+    return userResponse.getData();
   }
 
   @Transactional
@@ -266,4 +289,6 @@ public class TicketService {
 
     ticket.updateState(TicketStateEnum.REFUND);
   }
+
+
 }

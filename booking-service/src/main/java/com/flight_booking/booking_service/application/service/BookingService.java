@@ -242,6 +242,7 @@ public class BookingService {
         .orElseThrow(NotFoundBookingException::new);
   }
 
+  @Transactional(readOnly = false)
   public void updatePassengerIsDeletedTrue(PassengerIsdeletedUpdateTrueRequestDto requestDto) {
 
     passengerService.updatePassengerIsDeletedTrue(requestDto.passengerId());

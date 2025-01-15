@@ -24,8 +24,16 @@ public class InternalUserController {
       @RequestParam Long difference,
       @RequestParam Long paymentFair
   ) {
-
     Boolean bool = userService.checkAndRefundMileage(email, difference, paymentFair);
     return ApiResponse.ok(bool, "마일리지 체크, 환불 완료");
+  }
+
+  @GetMapping("/cancel/{email}")
+  public ApiResponse<?> RefundMileage(
+      @PathVariable String email,
+      @RequestParam Long paymentFair
+  ) {
+    Boolean bool = userService.RefundMileage(email, paymentFair);
+    return ApiResponse.ok(bool, "환불 완료");
   }
 }

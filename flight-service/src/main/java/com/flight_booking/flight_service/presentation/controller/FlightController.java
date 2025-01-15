@@ -64,4 +64,6 @@ public class FlightController {
     return ApiResponse.ok(flightService.deleteFlight(flightId), "항공편 삭제 성공");
   }
 
+
+
 }

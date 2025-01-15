@@ -148,5 +148,20 @@ public class FlightService {
     );
   }
 
+  public Boolean checkFlightStatusBySeatId(UUID seatId) {
+
+    SeatResponseDto seatResponseDto = seatService.getSeat(seatId);
+
+    Flight flight = flightRepository.findById(seatResponseDto.flightId()).orElse(null);
+
+    if (flight == null
+        || FlightStatusEnum.DEPARTED.equals(flight.getStatusEnum())
+        || FlightStatusEnum.LANDED.equals(flight.getStatusEnum())) {
+      throw new RuntimeException("좌석 상태가 취소 불가능합니다.");
+    }
+
+    return true;
+  }
+
 
 }
