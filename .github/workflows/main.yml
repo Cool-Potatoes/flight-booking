@@ -71,7 +71,7 @@ jobs:
           echo "NOTIFICATION_DB_URL=${{ secrets.NOTIFICATION_DB_URL }}" >> .env
           echo "NOTIFICATION_DB_USERNAME=${{ secrets.NOTIFICATION_DB_USERNAME }}" >> .env
           echo "NOTIFICATION_DB_PASSWORD=${{ secrets.NOTIFICATION_DB_PASSWORD }}" >> .env
-          echo "EUREKA_CLIENT_SERVICE_URL=${{ secrets.EUREKA_CLIENT_SERVICE_URL }}" >> .env
+  
           echo "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" >> .env
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
