@@ -62,4 +62,8 @@ public class Passenger extends BaseEntity {
   public void updateOnePassenger(){
     this.passengerName = "cancelled";
   }
+
+  public void updateIsDeletedTrue(Boolean isDeleted){
+    this.isDeleted = isDeleted;
+  }
 }

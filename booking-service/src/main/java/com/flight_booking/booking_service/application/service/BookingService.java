@@ -7,11 +7,11 @@ import com.flight_booking.booking_service.infrastructure.messaging.BookingKafkaS
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
 import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
-import com.flight_booking.booking_service.presentation.response.BookingResponseDto;
-import com.flight_booking.booking_service.presentation.response.PassengerResponseDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
+import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
+import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
@@ -20,6 +20,8 @@ import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.presentation.dto.BookingResponseDto;
+import com.flight_booking.common.presentation.dto.PassengerResponseDto;
 import com.querydsl.core.types.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +69,8 @@ public class BookingService {
         StackTraceUtils.getCurrentClassName()
     );
 
-    return BookingResponseDto.of(savedBooking, passengerResponseDtoList);
+    return BookingResponseDto.from(savedBooking.getBookingId(),
+        savedBooking.getBookingStatus().toString(), passengerResponseDtoList);
   }
 
   public PagedModel<BookingResponseCustomDto> getBookings(Predicate predicate, Pageable pageable) {
@@ -80,7 +83,11 @@ public class BookingService {
     Booking booking = bookingRepository.findByBookingIdAndIsDeletedFalse(bookingId)
         .orElseThrow(NotFoundBookingException::new);
 
-    return BookingResponseDto.from(booking);
+    List<PassengerResponseDto> passengerResponseDtoList = passengerService.getPassengers(
+        booking.getBookingId());
+
+    return BookingResponseDto.from(bookingId, booking.getBookingStatus().toString(),
+        passengerResponseDtoList);
   }
 
   // 미 사용 메서드
@@ -96,7 +103,11 @@ public class BookingService {
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_CHANGE_PENDING);
 
-    return BookingResponseDto.from(booking);
+    List<PassengerResponseDto> passengerResponseDtoList = passengerService.getPassengers(
+        booking.getBookingId());
+
+    return BookingResponseDto.from(bookingId, booking.getBookingStatus().toString(),
+        passengerResponseDtoList);
   }
 
   // TODO : 예약 취소 메서드
@@ -216,5 +227,24 @@ public class BookingService {
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );
+  }
+
+  @Transactional(readOnly = false)
+  public void updateBookingStatusRefund(BookingStatusUpdateRefundRequestDto requestDto) {
+    Booking booking = getBookingEntity(requestDto.bookingId());
+
+    booking.updateBookingStatus(requestDto.bookingStatusEnum());
+  }
+
+  private Booking getBookingEntity(UUID bookingId) {
+
+    return bookingRepository.findByBookingIdAndIsDeletedFalse(bookingId)
+        .orElseThrow(NotFoundBookingException::new);
+  }
+
+  @Transactional(readOnly = false)
+  public void updatePassengerIsDeletedTrue(PassengerIsdeletedUpdateTrueRequestDto requestDto) {
+
+    passengerService.updatePassengerIsDeletedTrue(requestDto);
   }
 }
