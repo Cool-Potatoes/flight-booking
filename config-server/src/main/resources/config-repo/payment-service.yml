@@ -10,10 +10,13 @@ spring:
     username: ${PAYMENT_DB_USERNAME}
     password: ${PAYMENT_DB_PASSWORD}
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: kafka:9092  # Kafka가 실행중인 포트번호
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
 resilience4j:
   circuitbreaker:
@@ -40,7 +43,7 @@ management:
       exposure:
         include: health, info, prometheus
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}

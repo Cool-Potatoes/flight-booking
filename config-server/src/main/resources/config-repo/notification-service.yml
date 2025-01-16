@@ -16,9 +16,9 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
   mail:
-    host: ${SMTP_HOST}               # ✅ SMTP 호스트 추가
-    port: ${SMTP_PORT}               # ✅ SMTP 포트 추가
-    username: ${SMTP_USERNAME}       # ✅ SMTP 계정 추가
+    host: ${SMTP_HOST}             # ✅ SMTP 호스트 추가
+    port: ${SMTP_PORT}              # ✅ SMTP 포트 추가
+    username: ${SMTP_USERNAME}    # ✅ SMTP 계정 추가
     password: ${SMTP_PASSWORD}       # ✅ SMTP 비밀번호 추가
     properties:
       mail:
@@ -52,7 +52,7 @@ management:
       exposure:
         include: health, info, prometheus
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}

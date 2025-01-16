@@ -2,8 +2,6 @@ server:
   port: 8120
 
 spring:
-#  application:
-#    name: booking-service
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${BOOKING_DB_URL}
@@ -23,7 +21,6 @@ spring:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-#      auto-offset-reset: latest # 치명적일 수 있는...
 
 resilience4j:
   circuitbreaker: # 이것도 롤백?

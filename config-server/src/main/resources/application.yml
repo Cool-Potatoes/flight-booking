@@ -12,8 +12,8 @@ spring:
       server:
         git:
           uri: https://github.com/Cool-Potatoes/config-repo.git # 이렇게보단 config용 레포를 하나 만드시는게
-          username:
-          password:
+          username: HanBeom98
+          password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
           default-label: main
           search-paths: '{application}'  # 애플리케이션 이름에 맞는 설정 파일을 찾음
           clone-on-start: true
