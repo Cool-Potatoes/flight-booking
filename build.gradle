@@ -54,6 +54,8 @@ subprojects {
 
     tasks.named('test') {
         useJUnitPlatform()
+        exclude '**/Kafka*Test.class'
+        exclude '**/*RepositoryTest.class'
     }
 
 }

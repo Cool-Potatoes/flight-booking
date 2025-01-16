@@ -61,8 +61,8 @@ jobs:
           echo "SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=${{ secrets.SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD }}" >> .env
 
       # 5️⃣ Run Tests (테스트 실행)
-      - name: Run Tests
-        run: ./gradlew test --exclude '**/Kafka*Test.class' --exclude '**/*RepositoryTest.class'
+      - name: Run Tests (Exclude Kafka & DB Tests)
+        run: ./gradlew test
 
       # 6️⃣ Build the project using Gradle (테스트 포함 빌드)
       - name: Build with Gradle
