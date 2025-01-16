@@ -94,7 +94,7 @@ public class TicketController {
 
     // TODO 권한 확인
 
-    ticketService.cancelTicket(ticketId, userDetails.getUsername());
+    ticketService.cancelTicket(ticketId, userDetails);
 
     return ApiResponse.ok("항공권 취소 요청됨");
   }

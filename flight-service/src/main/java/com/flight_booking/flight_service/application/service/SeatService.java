@@ -7,6 +7,7 @@ import com.flight_booking.common.application.dto.PaymentRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityUpdateTrueRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
@@ -180,6 +181,7 @@ public class SeatService {
     return true;
   }
 
+  // 비동기
   @Transactional(readOnly = false)
   public void seatAvailabilityCheckAndReturn(
       SeatAvailabilityCheckAndReturnRequestDto seatAvailabilityCheckAndReturnRequestDto) {
@@ -214,12 +216,42 @@ public class SeatService {
 
   }
 
+  // 동기
   @Transactional(readOnly = false)
-  public void refundSeatAvailability(SeatAvailabilityRefundRequestDto seatBookingRequestDto) {
+  public Long updateSeatAvailableFalseAndGetSeatPrice(UUID seatId) {
 
-    Seat seat = seatRepository.findById(seatBookingRequestDto.seatId())
+    Seat seat = getSeatIsDeletedFalse(seatId);
+
+    if (!seat.getIsAvailable()) {
+      // TODO
+      // 실패 로직.. 동기화? 비동기화?
+      throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seat.getSeatId());
+    } else {
+      // TODO : 대체 예약하고싶은 seat의 available은 어디서 false로 바꾸는것이 맞나?
+      //  여기서 바꿈 : 이후 재 예매 시 생성할 때 false라서 예약 안됨 -
+      //  -> 재 예매 로직을 아예 새로 만드는것?
+//      seat.updateAvailable(false);
+      return seat.getPrice();
+    }
+  }
+
+  private Seat getSeatIsDeletedFalse(UUID seatId) {
+
+    return seatRepository.findBySeatIdAndIsDeletedFalse(seatId)
         .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
+  }
 
-    seat.updateAvailable(true);
+  @Transactional(readOnly = false)
+  public void seatAvailabilityUpdateTrue(SeatAvailabilityUpdateTrueRequestDto requestDto) {
+
+    Seat seat = getSeatEntity(requestDto.seatId());
+
+    seat.updateAvailable(requestDto.available());
+  }
+
+  private Seat getSeatEntity(UUID seatId) {
+
+    return seatRepository.findBySeatIdAndIsDeletedFalse(seatId)
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
   }
 }
