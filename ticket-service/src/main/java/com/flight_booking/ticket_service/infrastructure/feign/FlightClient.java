@@ -21,4 +21,11 @@ public interface FlightClient {
       @RequestHeader(value = "X-USER-EMAIL") String email,
       @RequestHeader(value = "X-USER-ROLE") String role,
       @PathVariable UUID seatId);
+
+  @GetMapping("/internal/seats/available/{seatId}")
+  Boolean getSeatIsAvailable(
+      @RequestHeader(value = "X-USER-EMAIL") String email,
+      @RequestHeader(value = "X-USER-ROLE") String role,
+      @PathVariable UUID seatId);
+
 }

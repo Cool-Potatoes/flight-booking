@@ -37,14 +37,5 @@ public class TicketKafkaEndpoint {
     ticketService.cancelFail(flightCancelRequestDto);
   }
 
-  @KafkaListener(groupId = "ticket-update-group", topics = "ticket-update-topic")
-  public void consumeUpdateTicketStatus(@Payload ApiResponse<TicketUpdateStatusRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    TicketUpdateStatusRequestDto ticketUpdateStatusRequestDto
-        = mapper.convertValue(message.getData(), TicketUpdateStatusRequestDto.class);
-
-    ticketService.updateTicketStatus(ticketUpdateStatusRequestDto);
-  }
 
 }

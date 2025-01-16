@@ -9,7 +9,7 @@ public record TicketUpdateRequestDto(
     @NotNull(message = "Booking ID cannot be null") UUID bookingId,
     @NotNull(message = "Passenger ID cannot be null") UUID passengerId,
     @NotNull(message = "Seat ID cannot be null") UUID seatId,
-    @NotNull(message = "PassengerRequestDtos cannot be null") List<PassengerRequestDto> passengerRequestDtos
+    @NotNull(message = "PassengerRequestDto cannot be null") PassengerRequestDto passengerRequestDto
 ) {
 
 }

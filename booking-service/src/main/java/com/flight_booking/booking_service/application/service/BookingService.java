@@ -5,21 +5,20 @@ import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.BookingRepository;
 import com.flight_booking.booking_service.infrastructure.messaging.BookingKafkaSender;
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
-import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
-import com.flight_booking.common.application.dto.PassengerRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
+import com.flight_booking.common.application.dto.ReBookingRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckForRebookRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
-import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.presentation.dto.BookingRequestDto;
 import com.flight_booking.common.presentation.dto.BookingResponseDto;
 import com.flight_booking.common.presentation.dto.PassengerResponseDto;
 import com.querydsl.core.types.Predicate;
@@ -43,10 +42,10 @@ public class BookingService {
 
   @Transactional(readOnly = false)
   public BookingResponseDto createBooking(BookingRequestDto bookingRequestDto,
-      String username) {
+      String email) {
 
     Booking booking = Booking.builder()
-        .email(username)
+        .email(email)
         .bookingStatus(BookingStatusEnum.BOOKING_WAITING)
         .build();
 
@@ -64,13 +63,36 @@ public class BookingService {
         "seat-availability-check-and-update-topic",
         savedBooking.getBookingId().toString(),
         new SeatAvailabilityCheckRequestDto(
-            username, savedBooking.getBookingId(), seatIdList),
+            email, savedBooking.getBookingId(), seatIdList),
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );
 
     return BookingResponseDto.from(savedBooking.getBookingId(),
         savedBooking.getBookingStatus().toString(), passengerResponseDtoList);
+  }
+
+
+  @Transactional(readOnly = false)
+  public void rebookBooking(ReBookingRequestDto bookingRequestDto,
+      String email) {
+
+    Booking booking = Booking.builder()
+        .email(email)
+        .bookingStatus(BookingStatusEnum.BOOKING_CREATE)
+        .build();
+
+    Booking savedBooking = bookingRepository.save(booking);
+
+    bookingKafkaSender.sendMessage(
+        "seat-availability-check-and-update-for-rebook-topic",
+        savedBooking.getBookingId().toString(),
+        new SeatAvailabilityCheckForRebookRequestDto(
+            email, bookingRequestDto.ticketId(), savedBooking.getBookingId(),
+            bookingRequestDto.passengerRequestDto().seatId()),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
+    );
   }
 
   public PagedModel<BookingResponseCustomDto> getBookings(Predicate predicate, Pageable pageable) {
@@ -134,8 +156,9 @@ public class BookingService {
       bookingKafkaSender.sendMessage(
           "ticket-creation-topic",
           booking.getBookingId().toString(),
-          new TicketRequestDto(
-              booking.getBookingId(), passenger.getPassengerId(), passenger.getSeatId()),
+          new TicketRequestDto(bookingProcessRequestDto.ticketId(),
+              bookingProcessRequestDto.email(), booking.getBookingId(), passenger.getPassengerId(),
+              passenger.getSeatId()),
           StackTraceUtils.getCurrentMethodName(),
           StackTraceUtils.getCurrentClassName()
       );
@@ -152,30 +175,6 @@ public class BookingService {
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_FAIL);
   }
 
-  @Transactional(readOnly = false)
-  public void processRefundBooking(BookingProcessRequestDto bookingProcessRequestDto) {
-
-    List<PassengerRequestDto> passengerRequestDtos = bookingProcessRequestDto.passengerRequestDtos();
-
-    BookingRequestDto bookingRequestDto = new BookingRequestDto(passengerRequestDtos);
-
-    Booking booking = bookingRepository.findById(bookingProcessRequestDto.bookingId())
-        .orElseThrow(NotFoundBookingException::new);
-
-    booking.updateBookingStatus(BookingStatusEnum.BOOKING_CHANGE_PENDING);
-
-    createBooking(bookingRequestDto, bookingProcessRequestDto.email());
-
-    bookingKafkaSender.sendMessage(
-        "ticket-update-topic",
-        booking.getBookingId().toString(),
-        new TicketUpdateStatusRequestDto(
-            bookingProcessRequestDto.ticketId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-
-  }
 
   @Transactional
   public void failRefundBooking(BookingProcessRequestDto bookingProcessRequestDto) {
@@ -195,7 +194,7 @@ public class BookingService {
     Booking booking = bookingRepository.findById(bookingProcessRequestDto.bookingId())
         .orElseThrow(NotFoundBookingException::new);
 
-    booking.updateBookingStatus(BookingStatusEnum.BOOKING_CANCELLED);
+    booking.updateBookingStatus(BookingStatusEnum.BOOKING_REFUND_COMPLETE);
 
     // TODO : 물어볼거 1 = 토픽에 들어가는 id는 해당 도메인 기준?
     bookingKafkaSender.sendMessage(
@@ -208,26 +207,6 @@ public class BookingService {
     );
   }
 
-  @Transactional(readOnly = false)
-  public void updateBookingStatus(BookingUpdateRequestDto bookingRequestDto) {
-
-    Booking booking = bookingRepository.findByBookingIdAndIsDeletedFalse(
-            bookingRequestDto.bookingId())
-        .orElseThrow(NotFoundBookingException::new);
-
-    String userEmail = bookingRequestDto.email();
-
-    booking.updateBookingStatus(BookingStatusEnum.BOOKING_CHANGE_PENDING);
-
-    bookingKafkaSender.sendMessage(
-        "seat-availability-check-and-return-topic",
-        booking.getBookingId().toString(),
-        new SeatAvailabilityCheckAndReturnRequestDto(bookingRequestDto.ticketId(),
-            userEmail, booking.getBookingId(), bookingRequestDto.passengerRequestDtos()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-  }
 
   @Transactional(readOnly = false)
   public void updateBookingStatusRefund(BookingStatusUpdateRefundRequestDto requestDto) {

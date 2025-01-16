@@ -2,10 +2,10 @@ package com.flight_booking.booking_service.presentation.controller;
 
 import com.flight_booking.booking_service.application.service.BookingService;
 import com.flight_booking.booking_service.domain.model.Booking;
-import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
+import com.flight_booking.common.presentation.dto.BookingRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.querydsl.core.types.Predicate;
 import java.util.UUID;

@@ -7,4 +7,6 @@ public interface FlightService {
   Long updateSeatAvailableFalseAndGetSeatPrice(String email, String role, UUID seatId);
 
   Boolean checkFlightStatusBySeatId(String email, String role, UUID seatId);
+
+  Boolean getSeatIsAvailable(String email, String role, UUID seatId);
 }

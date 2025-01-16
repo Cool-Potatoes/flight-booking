@@ -1,9 +1,8 @@
 package com.flight_booking.ticket_service.application.service;
 
-import com.flight_booking.common.presentation.dto.BookingRequestDto;
+import java.util.UUID;
 
 public interface BookingService {
 
-  void createBooking(String email, String role,
-      BookingRequestDto bookingRequestDto);
+  void getBooking(String email, String role, UUID bookingId);
 }

@@ -25,4 +25,10 @@ public class FlightServiceImpl implements FlightService {
 
     return flightClient.checkFlightStatusBySeatId(email, role, seatId);
   }
+
+  @Override
+  public Boolean getSeatIsAvailable(String email, String role, UUID seatId) {
+
+    return flightClient.getSeatIsAvailable(email,role,seatId);
+  }
 }

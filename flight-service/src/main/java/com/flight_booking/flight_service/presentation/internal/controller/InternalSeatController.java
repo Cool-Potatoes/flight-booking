@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,5 +23,13 @@ public class InternalSeatController {
   ) {
 
     return seatService.updateSeatAvailableFalseAndGetSeatPrice(seatId);
+  }
+
+  @GetMapping("/available/{seatId}")
+  public Boolean getSeatIsAvailable(
+      @PathVariable UUID seatId
+  ) {
+
+    return seatService.getSeatIsAvailable(seatId);
   }
 }
