@@ -40,8 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TicketServiceImpl implements
-    TicketService {
+public class TicketServiceImpl implements TicketService {
 
   private final TicketRepository ticketRepository;
   private final TicketKafkaSender ticketKafkaSender;
@@ -134,10 +133,6 @@ public class TicketServiceImpl implements
     ticket.updateState(TicketStateEnum.CANNOT_CANCEL);
   }
 
-  private Ticket getTicketById(UUID ticketId) {
-    return ticketRepository.findByTicketIdAndIsDeletedFalse(ticketId)
-        .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
-  }
 
   @Transactional
   public void updateTicketStatus(TicketUpdateStatusRequestDto ticketUpdateRequestDto) {
@@ -148,6 +143,10 @@ public class TicketServiceImpl implements
     ticket.updateState(TicketStateEnum.REFUND);
   }
 
+  private Ticket getTicketById(UUID ticketId) {
+    return ticketRepository.findByTicketIdAndIsDeletedFalse(ticketId)
+        .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
+  }
 
   private Ticket validateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
     Ticket ticket = getTicketById(ticketId);
@@ -232,7 +231,8 @@ public class TicketServiceImpl implements
     return isSuccess;
   }
 
-  private Boolean checkAndRefundMileage(CustomUserDetails userDetails, Long difference, Long paymentFair) {
+  private Boolean checkAndRefundMileage(CustomUserDetails userDetails, Long difference,
+      Long paymentFair) {
 
     return userClient.checkAndRefundMileage(userDetails.email(),
         userDetails.role(), userDetails.email(), difference, paymentFair);
