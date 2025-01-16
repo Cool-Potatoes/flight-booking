@@ -15,7 +15,8 @@ public enum JwtErrorCode {
   EMPTY_CLAIMS(HttpServletResponse.SC_UNAUTHORIZED, "토큰에 필요한 클레임 정보가 비어있습니다."),
   EMAIL_EXTRACTION_FAILED(HttpServletResponse.SC_UNAUTHORIZED, "이메일 추출에 실패했습니다."),
   ROLE_EXTRACTION_FAILED(HttpServletResponse.SC_UNAUTHORIZED, "역할 추출에 실패했습니다."),
-  INVALID_SECRET_KEY(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다.");
+  INVALID_SECRET_KEY(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다."),
+  BLACKLISTED_TOKEN(HttpServletResponse.SC_UNAUTHORIZED, "해당 토큰은 블랙리스트에 포함되어 있습니다.");
 
   private final int statusCode;
   private final String message;
