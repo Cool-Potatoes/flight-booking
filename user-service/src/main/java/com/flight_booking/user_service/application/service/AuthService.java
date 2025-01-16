@@ -147,6 +147,23 @@ public class AuthService {
     return newAccessToken;
   }
 
+  // 로그아웃
+  public void logout(String token, HttpServletResponse response) {
+    if (isTokenBlacklisted(token)) {
+      throw new UserException(ErrorCode.BLACKLISTED_TOKEN);
+    }
+
+    addToBlacklist(token);
+
+    // 쿠키 삭제
+    Cookie cookie = new Cookie("refreshToken", null);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(false);
+    cookie.setPath("/");
+    cookie.setMaxAge(0);  // 쿠키 만료
+    response.addCookie(cookie);
+  }
+
   // ------------------------------------------------------------------------------------
 
   // 사용자 상태 확인 (블락/ 탈퇴)
