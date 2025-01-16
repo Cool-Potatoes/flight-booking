@@ -3,7 +3,7 @@ package com.flight_booking.ticket_service.presentation.controller;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.presentation.global.ApiResponse;
-import com.flight_booking.ticket_service.application.service.TicketService;
+import com.flight_booking.ticket_service.infrastructure.service.TicketServiceImpl;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
@@ -31,13 +31,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/tickets")
 public class TicketController {
 
-  private final TicketService ticketService;
+  private final TicketServiceImpl ticketServiceImpl;
 
 
   @PostMapping
   public ApiResponse<?> createTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
 
-    TicketResponseDto ticketResponseDto = ticketService.createTicket(ticketRequestDto);
+    TicketResponseDto ticketResponseDto = ticketServiceImpl.createTicket(ticketRequestDto);
 
     return ApiResponse.ok(ticketResponseDto, "항공권 생성 성공");
   }
@@ -47,7 +47,7 @@ public class TicketController {
 
     // TODO 사용자 추가 본인 것만 조회
 
-    TicketResponseDto ticketResponseDto = ticketService.getTicket(ticketId);
+    TicketResponseDto ticketResponseDto = ticketServiceImpl.getTicket(ticketId);
 
     return ApiResponse.ok(ticketResponseDto, "항공권 조회 성공");
   }
@@ -70,7 +70,7 @@ public class TicketController {
     String email = "tmpUser"; // TODO 사용자 추가
 
     PagedModel<TicketResponseDto> flightResponseDtoPagedModel
-        = ticketService.getTicketsPage(email, uuidList, predicate, pageable);
+        = ticketServiceImpl.getTicketsPage(email, uuidList, predicate, pageable);
 
     return ApiResponse.ok(flightResponseDtoPagedModel, "항공권 목록 조회 성공");
   }
@@ -84,7 +84,7 @@ public class TicketController {
 
     // TODO 본인 것인지 권한 확인
 
-    TicketResponseDto ticketResponseDto = ticketService.updateTicket(ticketId, ticketRequestDto, userDetails);
+    TicketResponseDto ticketResponseDto = ticketServiceImpl.updateTicket(ticketId, ticketRequestDto, userDetails);
 
     return ApiResponse.ok(ticketResponseDto, "항공권 수정 대기중");
   }
@@ -94,7 +94,7 @@ public class TicketController {
 
     // TODO 권한 확인
 
-    ticketService.cancelTicket(ticketId, userDetails);
+    ticketServiceImpl.cancelTicket(ticketId, userDetails);
 
     return ApiResponse.ok("항공권 취소 요청됨");
   }

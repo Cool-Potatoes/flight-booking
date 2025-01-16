@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface UserClient {
 
   @GetMapping("/internal/users/{userEmail}")
-  ApiResponse<Boolean> checkAndRefundMileage(
+  Boolean checkAndRefundMileage(
       @RequestHeader(value = "X-USER-EMAIL") String email,
       @RequestHeader(value = "X-USER-ROLE") String role,
       @PathVariable String userEmail,
