@@ -9,8 +9,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,5 +45,16 @@ public class AuthController {
   public ApiResponse<?> findId(@Valid @RequestBody FindIdRequest request) {
     String email = authService.findId(request);
     return ApiResponse.ok("아이디 찾기 성공", email);
+  }
+
+  // 토큰 재발급
+  @PostMapping("/token")
+  public ApiResponse<?> refreshToken(
+      @CookieValue(value = "refreshToken", defaultValue = "") String refreshToken,
+      @RequestHeader(value = "Authorization") String accessToken,
+      HttpServletResponse response) {
+
+    String newAccessToken = authService.refreshAccessToken(refreshToken, accessToken, response);
+    return ApiResponse.ok(newAccessToken, "AccessToken 발급 성공");
   }
 }

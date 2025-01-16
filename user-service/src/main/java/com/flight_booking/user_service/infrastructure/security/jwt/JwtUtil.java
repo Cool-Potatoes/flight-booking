@@ -1,6 +1,10 @@
 package com.flight_booking.user_service.infrastructure.security.jwt;
 
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
 import io.jsonwebtoken.security.Keys;
@@ -51,11 +55,11 @@ public class JwtUtil {
     Date expirationDate = new Date(now.getTime() + accessTokenExpiration);
 
     return BEARER_PREFIX + Jwts.builder()
-        .subject(email) // 발행자
-        .claim(JWT_ROLE_KEY, role) // 사용자 권한
+        .subject(email)
+        .claim(JWT_ROLE_KEY, role)
         .issuer(issuer)
-        .issuedAt(now) // 발급 시간
-        .expiration(expirationDate) // 만료 시간
+        .issuedAt(now)
+        .expiration(expirationDate)
         .signWith(key, SIG.HS256)
         .compact();
   }
@@ -66,10 +70,56 @@ public class JwtUtil {
     Date expirationDate = new Date(now.getTime() + refreshTokenExpiration);
 
     return Jwts.builder()
-        .subject(email) // 발행자
-        .issuedAt(now) // 발급 시간
-        .expiration(expirationDate) // 만료 시간
+        .subject(email)
+        .issuedAt(now)
+        .expiration(expirationDate)
         .signWith(key, SIG.HS256)
         .compact();
+  }
+
+  // Claims 추출
+  private Claims getClaims(String token) {
+    Jws<Claims> jws = Jwts.parser()
+        .verifyWith(key)
+        .build().parseSignedClaims(token);
+    return jws.getPayload();
+  }
+
+  // 토큰 검증
+  public boolean validateToken(String token) {
+    try {
+      getClaims(token);
+      return true;
+    } catch (ExpiredJwtException e) {
+      log.error("토큰이 만료되었습니다.");
+    } catch (JwtException | IllegalArgumentException e) {
+      log.error("유효하지 않은 토큰입니다.");
+    }
+    return false;
+  }
+
+  // "Bearer " 및 공백 제거
+  public String removeBearer(String token) {
+    if (token != null && token.startsWith("Bearer ")) {
+      token = token.substring(7);
+    }
+    return token.trim();
+  }
+
+  // 이메일 추출
+  public String getEmail(String token) {
+    return getClaims(token).getSubject();
+  }
+
+  // 만료 시간 추출
+  public Date getExpiration(String token) {
+    return getClaims(token).getExpiration();
+  }
+
+  // 토큰의 남은 시간 계산
+  public long calculateRemainingTime(String token) {
+    Date expiration = getExpiration(token);
+    long remainingTime = expiration.getTime() - System.currentTimeMillis();
+    return Math.max(remainingTime, 0);
   }
 }

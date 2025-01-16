@@ -3,6 +3,7 @@ package com.flight_booking.user_service.application.service;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
 import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.CustomUserDetailsService;
 import com.flight_booking.user_service.infrastructure.security.jwt.JwtUtil;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
@@ -10,13 +11,16 @@ import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +34,8 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
+  private final RedisTemplate<String, Object> redisTemplate;
+  private final CustomUserDetailsService customUserDetailsService;
 
   // 회원가입
   @Transactional
@@ -97,6 +103,50 @@ public class AuthService {
     return user.getEmail();
   }
 
+  // 토큰 재발급
+  public String refreshAccessToken(String refreshToken, String accessToken,
+      HttpServletResponse response) {
+
+    // 리프레시 토큰이 없는 경우
+    if (refreshToken.isEmpty()) {
+      throw new UserException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+    }
+
+    // Refresh Token 검증
+    if (!jwtUtil.validateToken(refreshToken)) {
+      throw new UserException(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+
+    // 블랙리스트에 있는 리프레시 토큰인지 확인
+    if (isTokenBlacklisted(refreshToken)) {
+      throw new UserException(ErrorCode.BLACKLISTED_TOKEN);
+    }
+
+    // 기존 Access Token 처리
+    String token = jwtUtil.removeBearer(accessToken);
+    if (isTokenBlacklisted(token)) {
+      throw new UserException(ErrorCode.BLACKLISTED_TOKEN);
+    }
+    addToBlacklist(token); // 만료X 시 추가
+
+    // 사용자 정보 추출
+    String email = jwtUtil.getEmail(refreshToken);
+    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+    String role = userDetails.getAuthorities().toString();
+
+    // 새로운 Access Token, Refresh Token 발급
+    String newAccessToken = jwtUtil.createAccessToken(email, role);
+    String newRefreshToken = jwtUtil.createRefreshToken(email);
+
+    // 기존 Refresh Token 블랙리스트 추가
+    addToBlacklist(refreshToken);
+
+    // HTTP-Only 쿠키 생성
+    addRefreshTokenToCookie(newRefreshToken, response);
+
+    return newAccessToken;
+  }
+
   // ------------------------------------------------------------------------------------
 
   // 사용자 상태 확인 (블락/ 탈퇴)
@@ -126,5 +176,23 @@ public class AuthService {
     cookie.setMaxAge(86400);    // 만료 시간 (1일)
     response.addCookie(cookie);
     log.info("Refresh token 쿠키가 성공적으로 설정되었습니다.");
+  }
+
+  // 토큰이 블랙리스트에 있는지 확인
+  private boolean isTokenBlacklisted(String token) {
+    return redisTemplate.hasKey("blacklist:" + token);
+  }
+
+  // 만료된 토큰이 아닌 경우에만 블랙리스트에 추가
+  private void addToBlacklist(String token) {
+    long remainingTime = jwtUtil.calculateRemainingTime(token);
+    if (remainingTime > 0) {
+      redisTemplate.opsForValue()
+          .set("blacklist:" + token, "true", Duration.ofMillis(remainingTime));
+      log.info("블랙리스트에 토큰이 추가되었습니다. 토큰: {}", token);
+    } else {
+      log.warn("만료된 토큰입니다. 토큰: {}", token);
+      throw new UserException(ErrorCode.TOKEN_EXPIRED);
+    }
   }
 }
