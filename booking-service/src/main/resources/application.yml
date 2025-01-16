@@ -21,14 +21,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus
+        include: prometheus
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-  instance:
-    hostname: ${HOSTNAME}
-    prefer-ip-address: true
+      defaultZone: http://localhost:8761/eureka/
+#  instance:
+#    hostname: ${HOSTNAME}
+#    prefer-ip-address: true

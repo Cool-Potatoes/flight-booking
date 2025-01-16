@@ -2,6 +2,8 @@ server:
   port: 8888
 
 spring:
+  profiles:
+    active: git  # 'git' 프로파일을 활성화 (선택사항)
   application:
     name: config-server
 
@@ -9,32 +11,17 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/Cool-Potatoes/flight-booking
-          username: Hanbeom98
-          password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
-          default-label: dev
-          search-paths: 'config-server/src/main/resources/config-repo'  # 이곳에 설정할 리포지토리 내 경로 입력
+          uri: https://github.com/Cool-Potatoes/config-repo.git # 이렇게보단 config용 레포를 하나 만드시는게
+          username:
+          password:
+          default-label: main
+          search-paths: '{application}'  # 애플리케이션 이름에 맞는 설정 파일을 찾음
           clone-on-start: true
-          basedir: /tmp/config-repo
+#          basedir: /tmp/config-repo  # 원격에서 가져올때는 필요 없는 설정
           skip-ssl-validation: true
-
-management:
-  tracing:
-    sampling:
-      probability: 1.0  # 모든 요청 추적
-    zipkin:
-      endpoint: http://zipkin:9411/api/v2/spans  # ✅ 최신 Zipkin 엔드포인트 적용
-  endpoints:
-    web:
-      exposure:
-        include: health, info, prometheus
 
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-  instance:
-    hostname: ${HOSTNAME:localhost}
-    prefer-ip-address: true
+      defaultZone: http://localhost:8761/eureka/
+

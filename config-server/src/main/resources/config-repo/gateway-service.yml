@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  main:
+    web-application-type: reactive  # Spring 애플리케이션이 리액티브 웹 애플리케이션으로 설정됨
   application:
     name: gateway-service
 
@@ -59,7 +61,7 @@ management:
       exposure:
         include: health, info, prometheus  # ✅ 헬스체크 및 메트릭 노출
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}  # ✅ Eureka 서비스 등록
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}  # ✅ Eureka 서비스 등록

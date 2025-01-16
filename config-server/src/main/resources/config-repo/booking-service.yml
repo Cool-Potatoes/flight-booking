@@ -2,25 +2,31 @@ server:
   port: 8120
 
 spring:
-  application:
-    name: booking-service
+#  application:
+#    name: booking-service
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${BOOKING_DB_URL}
     username: ${BOOKING_DB_USERNAME}
     password: ${BOOKING_DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      auto-offset-reset: latest
+#      auto-offset-reset: latest # 치명적일 수 있는...
 
 resilience4j:
-  circuitbreaker:
+  circuitbreaker: # 이것도 롤백?
     configs:
       default:
         registerHealthIndicator: true
@@ -44,7 +50,7 @@ management:
       exposure:
         include: health, info, prometheus
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: ${EUREKA_CLIENT_SERVICE_URL}

@@ -10,8 +10,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: ["health", "info", "prometheus"]
-  endpoint:
+        include: ["health", "info", "prometheus"]  # 프로메테우스로만 볼꺼라 다르 엔드포인트는 없어도 될듯싶은
+  endpoint: # 빼도 됨
     health:
       show-details: always  # 헬스 체크 상세 정보 제공
 
@@ -19,10 +19,12 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
 
   server:
-    enableSelfPreservation: false #배포시 TRUE로
+    enableSelfPreservation: false # TODO 배포시 TRUE로
 
-logging:
-  level:
-    com.netflix.discovery: DEBUG # 배포시 INFO로
+#logging:
+#  level:
+#    com.netflix.discovery: DEBUG # 배포시 INFO로  # 패키지 위치가..?? -> 출력 안될 것, @Sl4j 쓰는게 좋아보임
