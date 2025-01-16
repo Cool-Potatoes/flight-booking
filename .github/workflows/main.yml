@@ -1,17 +1,28 @@
 name: CI/CD using GitHub Actions & Docker
 
-on:
+on: # (dev, main 브랜치)
   push:
     branches:
-      - "dev"  # dev 브랜치에서만 동작
+      - "feat/cicd/gitaction"
 
+############################################
+#  권한
+############################################
 permissions:
   contents: write
   packages: write
   actions: read
 
+############################################
+#  jobs
+############################################
+
+# ------------------------
+# 1) CI Job
+# ------------------------
 jobs:
-  build-and-deploy:
+  ci:
+    name: CI (Build & Test)
     runs-on: ubuntu-latest
 
     steps:
@@ -39,6 +50,40 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      # 5️⃣ Create .env file for CI (DB 시크릿 주입)
+      - name: Create .env file for CI
+        run: |
+          echo "BOOKING_DB_URL=${{ secrets.BOOKING_DB_URL }}" >> .env
+          echo "BOOKING_DB_USERNAME=${{ secrets.BOOKING_DB_USERNAME }}" >> .env
+          echo "BOOKING_DB_PASSWORD=${{ secrets.BOOKING_DB_PASSWORD }}" >> .env
+          echo "FLIGHT_DB_URL=${{ secrets.FLIGHT_DB_URL }}" >> .env
+          echo "FLIGHT_DB_USERNAME=${{ secrets.FLIGHT_DB_USERNAME }}" >> .env
+          echo "FLIGHT_DB_PASSWORD=${{ secrets.FLIGHT_DB_PASSWORD }}" >> .env
+          echo "PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}" >> .env
+          echo "PAYMENT_DB_USERNAME=${{ secrets.PAYMENT_DB_USERNAME }}" >> .env
+          echo "PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}" >> .env
+          echo "TICKET_DB_URL=${{ secrets.TICKET_DB_URL }}" >> .env
+          echo "TICKET_DB_USERNAME=${{ secrets.TICKET_DB_USERNAME }}" >> .env
+          echo "TICKET_DB_PASSWORD=${{ secrets.TICKET_DB_PASSWORD }}" >> .env
+          echo "USER_DB_URL=${{ secrets.USER_DB_URL }}" >> .env
+          echo "USER_DB_USERNAME=${{ secrets.USER_DB_USERNAME }}" >> .env
+          echo "USER_DB_PASSWORD=${{ secrets.USER_DB_PASSWORD }}" >> .env
+          echo "NOTIFICATION_DB_URL=${{ secrets.NOTIFICATION_DB_URL }}" >> .env
+          echo "NOTIFICATION_DB_USERNAME=${{ secrets.NOTIFICATION_DB_USERNAME }}" >> .env
+          echo "NOTIFICATION_DB_PASSWORD=${{ secrets.NOTIFICATION_DB_PASSWORD }}" >> .env
+          echo "EUREKA_CLIENT_SERVICE_URL=${{ secrets.EUREKA_CLIENT_SERVICE_URL }}" >> .env
+          echo "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+          echo "REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+          echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+          echo "SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=${{ secrets.SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD }}" >> .env
+
       # 5️⃣ Run Tests (테스트 실행)
       - name: Run Tests
         run: ./gradlew test
@@ -47,17 +92,65 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      # 7️⃣ DockerHub 로그인
+
+
+  # ------------------------
+  # 2) CD Job (only main)
+  # ------------------------
+  cd:
+    name: CD (Deploy to Server)
+    # CI Job 결과가 끝난 뒤 실행
+    needs: ci
+    runs-on: ubuntu-latest
+    # main 브랜치에만 실행하는 조건
+    if: github.ref == 'refs/heads/feat/cicd/gitaction'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create .env file
+        run: |
+          echo "BOOKING_DB_URL=${{ secrets.BOOKING_DB_URL }}" >> .env
+          echo "BOOKING_DB_USERNAME=${{ secrets.BOOKING_DB_USERNAME }}" >> .env
+          echo "BOOKING_DB_PASSWORD=${{ secrets.BOOKING_DB_PASSWORD }}" >> .env
+          echo "FLIGHT_DB_URL=${{ secrets.FLIGHT_DB_URL }}" >> .env
+          echo "FLIGHT_DB_USERNAME=${{ secrets.FLIGHT_DB_USERNAME }}" >> .env
+          echo "FLIGHT_DB_PASSWORD=${{ secrets.FLIGHT_DB_PASSWORD }}" >> .env
+          echo "PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}" >> .env
+          echo "PAYMENT_DB_USERNAME=${{ secrets.PAYMENT_DB_USERNAME }}" >> .env
+          echo "PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}" >> .env
+          echo "TICKET_DB_URL=${{ secrets.TICKET_DB_URL }}" >> .env
+          echo "TICKET_DB_USERNAME=${{ secrets.TICKET_DB_USERNAME }}" >> .env
+          echo "TICKET_DB_PASSWORD=${{ secrets.TICKET_DB_PASSWORD }}" >> .env
+          echo "USER_DB_URL=${{ secrets.USER_DB_URL }}" >> .env
+          echo "USER_DB_USERNAME=${{ secrets.USER_DB_USERNAME }}" >> .env
+          echo "USER_DB_PASSWORD=${{ secrets.USER_DB_PASSWORD }}" >> .env
+          echo "NOTIFICATION_DB_URL=${{ secrets.NOTIFICATION_DB_URL }}" >> .env
+          echo "NOTIFICATION_DB_USERNAME=${{ secrets.NOTIFICATION_DB_USERNAME }}" >> .env
+          echo "NOTIFICATION_DB_PASSWORD=${{ secrets.NOTIFICATION_DB_PASSWORD }}" >> .env
+          echo "EUREKA_CLIENT_SERVICE_URL=${{ secrets.EUREKA_CLIENT_SERVICE_URL }}" >> .env
+          echo "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+          echo "REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+          echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+          echo "SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=${{ secrets.SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD }}" >> .env
+        
+      # 2️⃣ DockerHub 로그인
       - name: DockerHub Login
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 8️⃣ Docker 이미지 빌드 및 푸시
+      # 3️⃣ Docker 이미지 빌드 및 푸시 (재실행 필요 시)
       - name: Build and Push Docker Images
         run: |
           docker-compose -f docker-compose.yml build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
           docker-compose -f docker-compose.yml push eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-        timeout-minutes: 10  # 빌드 제한 시간 10분
-        continue-on-error: false  # 실패 시 중단
 
       # 9️⃣ Deploy to dev environment (개발 서버 배포 - 필요 시 주석 해제)
       # - name: Deploy to Dev Server
