@@ -1,28 +1,17 @@
 name: CI/CD using GitHub Actions & Docker
 
-on: # (dev, main 브랜치)
+on:
   push:
     branches:
-      - "feat/cicd/gitaction"
+      - "feat/cicd/docker"
 
-############################################
-#  권한
-############################################
 permissions:
   contents: write
   packages: write
   actions: read
 
-############################################
-#  jobs
-############################################
-
-# ------------------------
-# 1) CI Job
-# ------------------------
 jobs:
-  ci:
-    name: CI (Build & Test)
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -45,97 +34,14 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
       # 4️⃣ Gradle Wrapper 실행 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 5️⃣ Create .env file for CI (DB 시크릿 주입)
-      - name: Create .env file for CI
-        run: |
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
-          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
-          echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
-          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
-          echo "SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=${{ secrets.SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD }}" >> .env
-
       # 5️⃣ Run Tests (테스트 실행)
-      - name: Run Tests (Exclude Kafka & DB Tests)
+      - name: Run Tests
         run: ./gradlew test
 
       # 6️⃣ Build the project using Gradle (테스트 포함 빌드)
       - name: Build with Gradle
         run: ./gradlew build
-
-
-
-  # ------------------------
-  # 2) CD Job (only main)
-  # ------------------------
-  cd:
-    name: CD (Deploy to Server)
-    # CI Job 결과가 끝난 뒤 실행
-    needs: ci
-    runs-on: ubuntu-latest
-    # main 브랜치에만 실행하는 조건
-    if: github.ref == 'refs/heads/feat/cicd/gitaction'
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Create .env file
-        run: |
-          echo "BOOKING_DB_URL=${{ secrets.BOOKING_DB_URL }}" >> .env
-          echo "BOOKING_DB_USERNAME=${{ secrets.BOOKING_DB_USERNAME }}" >> .env
-          echo "BOOKING_DB_PASSWORD=${{ secrets.BOOKING_DB_PASSWORD }}" >> .env
-          echo "FLIGHT_DB_URL=${{ secrets.FLIGHT_DB_URL }}" >> .env
-          echo "FLIGHT_DB_USERNAME=${{ secrets.FLIGHT_DB_USERNAME }}" >> .env
-          echo "FLIGHT_DB_PASSWORD=${{ secrets.FLIGHT_DB_PASSWORD }}" >> .env
-          echo "PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}" >> .env
-          echo "PAYMENT_DB_USERNAME=${{ secrets.PAYMENT_DB_USERNAME }}" >> .env
-          echo "PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}" >> .env
-          echo "TICKET_DB_URL=${{ secrets.TICKET_DB_URL }}" >> .env
-          echo "TICKET_DB_USERNAME=${{ secrets.TICKET_DB_USERNAME }}" >> .env
-          echo "TICKET_DB_PASSWORD=${{ secrets.TICKET_DB_PASSWORD }}" >> .env
-          echo "USER_DB_URL=${{ secrets.USER_DB_URL }}" >> .env
-          echo "USER_DB_USERNAME=${{ secrets.USER_DB_USERNAME }}" >> .env
-          echo "USER_DB_PASSWORD=${{ secrets.USER_DB_PASSWORD }}" >> .env
-          echo "NOTIFICATION_DB_URL=${{ secrets.NOTIFICATION_DB_URL }}" >> .env
-          echo "NOTIFICATION_DB_USERNAME=${{ secrets.NOTIFICATION_DB_USERNAME }}" >> .env
-          echo "NOTIFICATION_DB_PASSWORD=${{ secrets.NOTIFICATION_DB_PASSWORD }}" >> .env
-          
-          
-          
-          
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
-          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
-          echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
-          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
-          echo "SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=${{ secrets.SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD }}" >> .env
-        
-      # 2️⃣ DockerHub 로그인
-      - name: DockerHub Login
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-      # 3️⃣ Docker 이미지 빌드 및 푸시 (재실행 필요 시)
-      - name: Build and Push Docker Images
-        run: |
-          docker-compose -f docker-compose.yml build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-          docker-compose -f docker-compose.yml push eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-
-      # 9️⃣ Deploy to dev environment (개발 서버 배포 - 필요 시 주석 해제)
-      # - name: Deploy to Dev Server
-      #   uses: appleboy/ssh-action@v1.1.0
-      #   with:
-      #     host: ${{ secrets.HOST_DEV }}  # 개발 서버 호스트
-      #     username: ubuntu
-      #     key: ${{ secrets.PRIVATE_KEY_DEV }}  # 개발 서버 SSH 키
-      #     port: ${{ secrets.PORT_DEV }}
-      #     script: |
-      #       cd /home/ubuntu/flight-booking
-      #       docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-      #       docker-compose up -d eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-      #       sudo docker image prune -f  # 사용하지 않는 이미지 삭제
