@@ -70,3 +70,7 @@ management:
     web:
       exposure:
         include: refresh, prometheus  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신) + prometheus
+
+retry-payment:
+  scheduler:
+    thread-pool: 10
