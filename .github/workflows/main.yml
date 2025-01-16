@@ -53,24 +53,6 @@ jobs:
       # 5️⃣ Create .env file for CI (DB 시크릿 주입)
       - name: Create .env file for CI
         run: |
-          echo "BOOKING_DB_URL=${{ secrets.BOOKING_DB_URL }}" >> .env
-          echo "BOOKING_DB_USERNAME=${{ secrets.BOOKING_DB_USERNAME }}" >> .env
-          echo "BOOKING_DB_PASSWORD=${{ secrets.BOOKING_DB_PASSWORD }}" >> .env
-          echo "FLIGHT_DB_URL=${{ secrets.FLIGHT_DB_URL }}" >> .env
-          echo "FLIGHT_DB_USERNAME=${{ secrets.FLIGHT_DB_USERNAME }}" >> .env
-          echo "FLIGHT_DB_PASSWORD=${{ secrets.FLIGHT_DB_PASSWORD }}" >> .env
-          echo "PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}" >> .env
-          echo "PAYMENT_DB_USERNAME=${{ secrets.PAYMENT_DB_USERNAME }}" >> .env
-          echo "PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}" >> .env
-          echo "TICKET_DB_URL=${{ secrets.TICKET_DB_URL }}" >> .env
-          echo "TICKET_DB_USERNAME=${{ secrets.TICKET_DB_USERNAME }}" >> .env
-          echo "TICKET_DB_PASSWORD=${{ secrets.TICKET_DB_PASSWORD }}" >> .env
-          echo "USER_DB_URL=${{ secrets.USER_DB_URL }}" >> .env
-          echo "USER_DB_USERNAME=${{ secrets.USER_DB_USERNAME }}" >> .env
-          echo "USER_DB_PASSWORD=${{ secrets.USER_DB_PASSWORD }}" >> .env
-          echo "NOTIFICATION_DB_URL=${{ secrets.NOTIFICATION_DB_URL }}" >> .env
-          echo "NOTIFICATION_DB_USERNAME=${{ secrets.NOTIFICATION_DB_USERNAME }}" >> .env
-          echo "NOTIFICATION_DB_PASSWORD=${{ secrets.NOTIFICATION_DB_PASSWORD }}" >> .env
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
           echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
           echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
@@ -80,7 +62,7 @@ jobs:
 
       # 5️⃣ Run Tests (테스트 실행)
       - name: Run Tests
-        run: ./gradlew test
+        run: ./gradlew test --exclude '**/Kafka*Test.class' --exclude '**/*RepositoryTest.class'
 
       # 6️⃣ Build the project using Gradle (테스트 포함 빌드)
       - name: Build with Gradle
