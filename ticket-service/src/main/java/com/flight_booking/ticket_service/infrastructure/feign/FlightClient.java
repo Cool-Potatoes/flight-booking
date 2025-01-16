@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface FlightClient {
 
   @GetMapping("/internal/seats/{seatId}")
-  ApiResponse<Long> updateSeatAvailableFalseAndGetSeatPrice(
+  Long updateSeatAvailableFalseAndGetSeatPrice(
       @RequestHeader(value = "X-USER-EMAIL") String email,
       @RequestHeader(value = "X-USER-ROLE") String role,
       @PathVariable UUID seatId);
 
   @GetMapping("/internal/flights/{seatId}")
-  ApiResponse<Boolean> checkFlightStatusBySeatId(
+  Boolean checkFlightStatusBySeatId(
       @RequestHeader(value = "X-USER-EMAIL") String email,
       @RequestHeader(value = "X-USER-ROLE") String role,
       @PathVariable UUID seatId);

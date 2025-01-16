@@ -14,14 +14,13 @@ import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.common.presentation.dto.BookingRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
-import com.flight_booking.ticket_service.application.service.TicketService;
+import com.flight_booking.ticket_service.application.service.BookingService;
+import com.flight_booking.ticket_service.application.service.FlightService;
+import com.flight_booking.ticket_service.application.service.PaymentService;
+import com.flight_booking.ticket_service.application.service.UserService;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
-import com.flight_booking.ticket_service.infrastructure.feign.BookingClient;
-import com.flight_booking.ticket_service.infrastructure.feign.FlightClient;
-import com.flight_booking.ticket_service.infrastructure.feign.PaymentClient;
-import com.flight_booking.ticket_service.infrastructure.feign.UserClient;
 import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
@@ -40,14 +39,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TicketServiceImpl implements TicketService {
+public class TicketService{
 
   private final TicketRepository ticketRepository;
   private final TicketKafkaSender ticketKafkaSender;
-  private final BookingClient bookingClient;
-  private final FlightClient flightClient;
-  private final PaymentClient paymentClient;
-  private final UserClient userClient;
+  private final BookingService bookingservice;
+  private final FlightService flightService;
+  private final PaymentService paymentService;
+  private final UserService userService;
 
   @Transactional
   public TicketResponseDto createTicket(TicketRequestDto ticketRequestDto) {
@@ -133,7 +132,6 @@ public class TicketServiceImpl implements TicketService {
     ticket.updateState(TicketStateEnum.CANNOT_CANCEL);
   }
 
-
   @Transactional
   public void updateTicketStatus(TicketUpdateStatusRequestDto ticketUpdateRequestDto) {
     Ticket ticket = ticketRepository.findByTicketIdAndIsDeletedFalse(
@@ -181,7 +179,7 @@ public class TicketServiceImpl implements TicketService {
       List<PassengerRequestDto> checkedPassengerRequestDtos, CustomUserDetails userDetails) {
 
     // 새로운 예약 생성
-    bookingClient.createBooking(userDetails.email(), userDetails.role(),
+    bookingservice.createBooking(userDetails.email(), userDetails.role(),
         new BookingRequestDto(checkedPassengerRequestDtos));
 
     // 티켓 상태를 환불 완료로 변경
@@ -234,7 +232,7 @@ public class TicketServiceImpl implements TicketService {
   private Boolean checkAndRefundMileage(CustomUserDetails userDetails, Long difference,
       Long paymentFair) {
 
-    return userClient.checkAndRefundMileage(userDetails.email(),
+    return userService.checkAndRefundMileage(userDetails.email(),
         userDetails.role(), userDetails.email(), difference, paymentFair);
   }
 
@@ -242,23 +240,20 @@ public class TicketServiceImpl implements TicketService {
       CustomUserDetails userDetails) {
 
     // 예약할 좌석의 available을 false로 바꾸고 해당 좌석의 요금 리턴
-    ApiResponse<Long> bookingResponse = flightClient.updateSeatAvailableFalseAndGetSeatPrice(
+    return flightService.updateSeatAvailableFalseAndGetSeatPrice(
         userDetails.email(), userDetails.role(), newSeatId);
-
-    return bookingResponse.getData();
   }
 
   private Long getPaymentFair(Ticket ticket, CustomUserDetails userDetails) {
 
     // 환불을 해주기 위해 bookingId로 찾은 결제되어있는 금액 리턴
-    ApiResponse<Long> paymentResponse = paymentClient.getPaymentFairByBookingId(userDetails.email(),
+    return paymentService.getPaymentFairByBookingId(userDetails.email(),
         userDetails.role(), ticket.getBookingId());
-
-    return paymentResponse.getData();
   }
 
 
   private Ticket validateTicketForCancellation(UUID ticketId) {
+
     Ticket ticket = getTicketById(ticketId);
 
     if (!ticket.getState().equals(TicketStateEnum.BOOKED)) {
@@ -270,20 +265,15 @@ public class TicketServiceImpl implements TicketService {
 
   private Boolean checkFlightCancellable(String email, String role, UUID seatId) {
 
-    ApiResponse<Boolean> response = flightClient.checkFlightStatusBySeatId(email, role, seatId);
-
-    return response.getData();
+    return flightService.checkFlightStatusBySeatId(email, role, seatId);
   }
 
   private Boolean ProcessRefund(Ticket ticket, CustomUserDetails userDetails) {
 
     Long paymentFair = getPaymentFair(ticket, userDetails);
 
-    ApiResponse<Boolean> userResponse = userClient.RefundMileage(userDetails.email(),
+    return userService.RefundMileage(userDetails.email(),
         userDetails.role(), userDetails.email(), paymentFair);
-
-    return userResponse.getData();
   }
-
 
 }

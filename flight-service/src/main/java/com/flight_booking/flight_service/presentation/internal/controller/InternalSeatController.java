@@ -17,12 +17,10 @@ public class InternalSeatController {
   private final SeatService seatService;
 
   @GetMapping("/{seatId}")
-  public ApiResponse<?> updateSeatAvailableFalseAndGetSeatPrice(
+  public Long updateSeatAvailableFalseAndGetSeatPrice(
       @PathVariable UUID seatId
   ) {
 
-    Long newSeatPrice = seatService.updateSeatAvailableFalseAndGetSeatPrice(seatId);
-
-    return ApiResponse.ok(newSeatPrice, "좌석 요금 반환 성공, 상태 변경 완료");
+    return seatService.updateSeatAvailableFalseAndGetSeatPrice(seatId);
   }
 }

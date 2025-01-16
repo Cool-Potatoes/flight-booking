@@ -19,7 +19,7 @@ public interface UserClient {
       @RequestParam Long paymentFair);
 
   @GetMapping("/internal/users/cancel/{userEmail}")
-  ApiResponse<Boolean> RefundMileage(
+  Boolean RefundMileage(
       @RequestHeader(value = "X-USER-EMAIL") String email,
       @RequestHeader(value = "X-USER-ROLE") String role,
       @PathVariable String userEmail,

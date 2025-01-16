@@ -19,11 +19,9 @@ public class InternalPaymentController {
   private final PaymentService paymentService;
 
   @GetMapping("/{bookingId}")
-  public ApiResponse<?> getPaymentFairByBookingId(
+  public Long getPaymentFairByBookingId(
       @PathVariable UUID bookingId) {
 
-    Long paymentFair = paymentService.getPaymentFairByBookingId(bookingId);
-
-    return ApiResponse.ok(paymentFair, "결제 데이터 조회 성공");
+    return paymentService.getPaymentFairByBookingId(bookingId);
   }
 }

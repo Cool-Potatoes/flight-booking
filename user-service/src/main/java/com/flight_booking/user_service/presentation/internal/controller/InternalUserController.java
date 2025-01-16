@@ -1,6 +1,5 @@
 package com.flight_booking.user_service.presentation.internal.controller;
 
-import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

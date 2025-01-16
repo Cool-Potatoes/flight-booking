@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface BookingClient {
 
   @PostMapping("/internal/bookings")
-  ApiResponse<BookingResponseDto> createBooking(
+  BookingResponseDto createBooking(
       @RequestHeader(value = "X-USER-EMAIL") String email,
       @RequestHeader(value = "X-USER-ROLE") String role,
       @RequestBody BookingRequestDto bookingRequestDto);
-
 
 }
