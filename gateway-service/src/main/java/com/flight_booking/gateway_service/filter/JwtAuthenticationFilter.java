@@ -40,25 +40,36 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     // Authorization 헤더에서 JWT 토큰 추출
     String token = jwtUtil.extractToken(exchange);
 
-    if (token == null || !jwtUtil.validateToken(token)) {
-      log.info("토큰 검증 실패");
-      // 유효하지 않은 토큰이면 UNAUTHORIZED 응답 반환
+    if (token == null) {
+      log.info("토큰이 존재하지 않습니다.");
       exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
       return exchange.getResponse().setComplete();
     }
 
-    // 토큰이 유효한 경우, 이메일과 역할 추출
-    String email = jwtUtil.extractEmail(token);
-    String role = jwtUtil.extractRole(token);
+    try {
+      jwtUtil.validateToken(token);
+      log.info("토큰 검증 완료");
 
-    // 이메일과 역할을 헤더에 추가
-    ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-        .header("X-USER-EMAIL", email)
-        .header("X-USER-ROLE", role)
-        .build();
+      jwtUtil.isTokenBlacklisted(token);
+      log.info("블랙리스트 체크 완료");
 
-    exchange = exchange.mutate().request(modifiedRequest).build();
+      // 토큰이 유효한 경우, 이메일과 역할 추출
+      String email = jwtUtil.extractEmail(token);
+      String role = jwtUtil.extractRole(token);
 
-    return chain.filter(exchange);
+      // 이메일과 역할을 헤더에 추가
+      ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+          .header("X-USER-EMAIL", email)
+          .header("X-USER-ROLE", role)
+          .build();
+
+      exchange = exchange.mutate().request(modifiedRequest).build();
+
+      return chain.filter(exchange);
+    } catch (IllegalArgumentException e) {
+      log.warn("유효하지 않은 토큰: {}", e.getMessage());
+      exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+      return exchange.getResponse().setComplete();
+    }
   }
 }
