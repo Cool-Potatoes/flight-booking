@@ -24,8 +24,11 @@ public class JwtUtil {
   @Value("${spring.application.name}")
   private String issuer;
   // 토큰 만료 시간
-  @Value("${service.jwt.access-expiration}")
-  private long TOKEN_EXPIRATION;
+  @Value("${service.jwt.access-token-expiration}")
+  private long accessTokenExpiration;
+
+  @Value("${service.jwt.refresh-token-expiration}")
+  private long refreshTokenExpiration;
 
   @Value("${SECRET_KEY}")
   private String secretKey; // Base64 인코딩된 비밀키
@@ -42,17 +45,30 @@ public class JwtUtil {
     }
   }
 
-  // 토큰 생성
-  public String createToken(String email, String role) {
+  // AccessToken 생성
+  public String createAccessToken(String email, String role) {
     Date now = new Date();
-    Date expiration = new Date(now.getTime() + TOKEN_EXPIRATION);
+    Date expirationDate = new Date(now.getTime() + accessTokenExpiration);
 
     return BEARER_PREFIX + Jwts.builder()
         .subject(email) // 발행자
         .claim(JWT_ROLE_KEY, role) // 사용자 권한
         .issuer(issuer)
         .issuedAt(now) // 발급 시간
-        .expiration(expiration) // 만료 시간
+        .expiration(expirationDate) // 만료 시간
+        .signWith(key, SIG.HS256)
+        .compact();
+  }
+
+  // RefreshToken 생성
+  public String createRefreshToken(String email) {
+    Date now = new Date();
+    Date expirationDate = new Date(now.getTime() + refreshTokenExpiration);
+
+    return Jwts.builder()
+        .subject(email) // 발행자
+        .issuedAt(now) // 발급 시간
+        .expiration(expirationDate) // 만료 시간
         .signWith(key, SIG.HS256)
         .compact();
   }

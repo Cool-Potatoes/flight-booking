@@ -8,12 +8,11 @@ import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
 import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,10 +30,6 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
-  private final RedisTemplate<String, Object> redisTemplate;
-
-  @Value("${service.jwt.access-expiration}")
-  private long TOKEN_EXPIRATION;
 
   // 회원가입
   @Transactional
@@ -57,28 +52,30 @@ public class AuthService {
   }
 
   // 로그인
-  public String signIn(String email, String password) {
+  public String signIn(String email, String password, HttpServletResponse response) {
     try {
-      log.info("service");
+      // 이메일로 사용자 조회
+      User user = userRepository.findByEmail(email)
+          .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+
+      // 사용자 상태 확인 (블락/ 탈퇴)
+      validateUserStatus(user);
+
+      // 인증 처리
       Authentication authentication = authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(email, password)
       );
-      CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-      String validatedEmail = userDetails.getUsername();
+      CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
       String role = userDetails.getUser().getRole().toString();
 
-      // 사용자 상태 확인 (블락/ 탈퇴)
-      checkUserStatus(validatedEmail);
+      // 토큰 생성
+      String accessToken = jwtUtil.createAccessToken(email, role);
+      String refreshToken = jwtUtil.createRefreshToken(email);
 
-      // JWT 생성
-      String token = jwtUtil.createToken(validatedEmail, role);
+      addRefreshTokenToCookie(refreshToken, response);
 
-      // JWT를 Redis에 저장 (토큰 저장은 JwtUtil에서 처리하는 방식으로도 가능)
-      redisTemplate.opsForValue()
-          .set(token, validatedEmail, TOKEN_EXPIRATION, TimeUnit.MILLISECONDS);
-
-      return token;
+      return accessToken;
     } catch (AuthenticationException ex) {
       // 인증 실패 시 처리
       log.error("로그인 실패: {}", ex.getMessage());
@@ -86,11 +83,25 @@ public class AuthService {
     }
   }
 
-  // 사용자 상태 확인 (블락/ 탈퇴)
-  private void checkUserStatus(String email) {
-    User user = userRepository.findByEmail(email)
+  // 아이디 찾기
+  @Transactional(readOnly = true)
+  public String findId(FindIdRequest request) {
+    String name = request.name();
+    String phone = request.phone();
+    User user = userRepository.findByNameAndPhone(name, phone)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
+    // 사용자 상태 확인
+    validateUserStatus(user);
+
+    return user.getEmail();
+  }
+
+  // ------------------------------------------------------------------------------------
+
+  // 사용자 상태 확인 (블락/ 탈퇴)
+  private void validateUserStatus(User user) {
+    String email = user.getEmail();
     if (user.getIsBlocked()) {
       log.error("블락된 사용자: {}", email);
       List<String> reasons = user.getBlockedInfo().getBlockedReason();
@@ -105,29 +116,15 @@ public class AuthService {
     }
   }
 
-  // 아이디 찾기
-  @Transactional(readOnly = true)
-  public String findId(FindIdRequest request) {
-    String name = request.name();
-    String phone = request.phone();
-    User user = userRepository.findByNameAndPhone(name, phone)
-        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
-
-    return user.getEmail();
-  }
-
-  // 로그아웃
-  @Transactional
-  public void logout(String token) {
-    // "Bearer " 접두어 제거
-    if (token.startsWith("Bearer ")) {
-      token = token.substring(7);  // "Bearer " 부분 제거
-    }
-
-    // Redis에서 토큰이 존재하는지 확인하고 삭제
-    if (redisTemplate.opsForValue().get(token) != null) {
-      log.info("토큰 존재함: {}", token);
-      redisTemplate.delete(token);
-    }
+  // RefreshToken을 쿠키에 저장
+  private void addRefreshTokenToCookie(String refreshToken, HttpServletResponse response) {
+    log.info("쿠키 설정 값: {}", refreshToken);
+    Cookie cookie = new Cookie("refreshToken", refreshToken);
+    cookie.setHttpOnly(true);   // 클라이언트에서 접근 불가
+//      cookie.setSecure(true);     // HTTPS에서만 전송 (현재 HTTP)
+    cookie.setPath("/");        // 쿠키 경로
+    cookie.setMaxAge(86400);    // 만료 시간 (1일)
+    response.addCookie(cookie);
+    log.info("Refresh token 쿠키가 성공적으로 설정되었습니다.");
   }
 }
