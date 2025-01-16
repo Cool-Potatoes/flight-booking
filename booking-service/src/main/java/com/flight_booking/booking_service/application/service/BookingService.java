@@ -233,7 +233,7 @@ public class BookingService {
   public void updateBookingStatusRefund(BookingStatusUpdateRefundRequestDto requestDto) {
     Booking booking = getBookingEntity(requestDto.bookingId());
 
-    booking.updateBookingStatus(BookingStatusEnum.BOOKING_REFUND_COMPLETE);
+    booking.updateBookingStatus(requestDto.bookingStatusEnum());
   }
 
   private Booking getBookingEntity(UUID bookingId) {
@@ -245,6 +245,6 @@ public class BookingService {
   @Transactional(readOnly = false)
   public void updatePassengerIsDeletedTrue(PassengerIsdeletedUpdateTrueRequestDto requestDto) {
 
-    passengerService.updatePassengerIsDeletedTrue(requestDto.passengerId());
+    passengerService.updatePassengerIsDeletedTrue(requestDto);
   }
 }

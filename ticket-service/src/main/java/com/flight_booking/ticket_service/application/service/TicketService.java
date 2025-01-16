@@ -8,6 +8,8 @@ import com.flight_booking.common.application.dto.PaymentStatusUpdateRefundReques
 import com.flight_booking.common.application.dto.SeatAvailabilityUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
+import com.flight_booking.common.domain.model.BookingStatusEnum;
+import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.common.presentation.dto.BookingRequestDto;
@@ -49,12 +51,9 @@ public class TicketService {
   @Transactional
   public TicketResponseDto createTicket(TicketRequestDto ticketRequestDto) {
 
-    Ticket ticket = Ticket.builder()
-        .bookingId(ticketRequestDto.bookingId())
-        .passengerId(ticketRequestDto.passengerId())
-        .seatId(ticketRequestDto.seatId())
-        .state(TicketStateEnum.BOOKED)
-        .build();
+    Ticket ticket = Ticket.builder().bookingId(ticketRequestDto.bookingId())
+        .passengerId(ticketRequestDto.passengerId()).seatId(ticketRequestDto.seatId())
+        .state(TicketStateEnum.BOOKED).build();
 
     Ticket savedTicket = ticketRepository.save(ticket);
 
@@ -70,11 +69,11 @@ public class TicketService {
   }
 
   @Transactional(readOnly = true)
-  public PagedModel<TicketResponseDto> getTicketsPage(
-      String email, List<UUID> uuidList, Predicate predicate, Pageable pageable) {
+  public PagedModel<TicketResponseDto> getTicketsPage(String email, List<UUID> uuidList,
+      Predicate predicate, Pageable pageable) {
 
-    Page<TicketResponseDto> ticketResponseDtoPage
-        = ticketRepository.findAll(email, uuidList, predicate, pageable);
+    Page<TicketResponseDto> ticketResponseDtoPage = ticketRepository.findAll(email, uuidList,
+        predicate, pageable);
 
     return new PagedModel<>(ticketResponseDtoPage);
   }
@@ -83,143 +82,25 @@ public class TicketService {
   public TicketResponseDto updateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto,
       CustomUserDetails userDetails) {
 
-    Ticket ticket = validateAndFetchTicket(ticketId, ticketRequestDto);
+    Ticket ticket = validateTicket(ticketId, ticketRequestDto);
 
     // 티켓 상태 변경, 환불 진행중
-    updateTicketStateToProcessingRefund(ticket);
+    ticket.updateState(TicketStateEnum.PROCESS_REFUND);
 
     // 승객들의 정보를 먼저 모두 체크한 후에 처리
-    List<PassengerRequestDto> checkedPassengerRequestDtos = processPassengersForRefund(ticket,
+    List<PassengerRequestDto> checkedPassengerRequestDtos = validateAndProcessPassengersForRefund(
+        ticket,
         ticketRequestDto, userDetails);
 
     // 승객 모두 체크가 끝난 후, 새로운 예매를 한 번만 호출
     if (!checkedPassengerRequestDtos.isEmpty()) {
-      handleRefundAndCreateBooking(ticket, checkedPassengerRequestDtos, userDetails);
-    }
+      createBooking(ticket, checkedPassengerRequestDtos, userDetails);
 
-    // TODO updatedBy
-    // ticket.update(ticketRequestDto.seatId());
+      // Kafka 메시지 전송
+      sendKafkaMessagesForUpdateStatusToRefund(ticket);
+    }
 
     return TicketResponseDto.from(ticket);
-  }
-
-  private Ticket validateAndFetchTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
-    Ticket ticket = getTicketById(ticketId);
-
-    if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
-      throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
-    }
-    if (!ticketRequestDto.passengerId().equals(ticket.getPassengerId())) {
-      throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");
-    }
-    return ticket;
-  }
-
-  private void updateTicketStateToProcessingRefund(Ticket ticket) {
-    ticket.updateState(TicketStateEnum.PROCESS_REFUND);
-  }
-
-  private List<PassengerRequestDto> processPassengersForRefund(Ticket ticket,
-      TicketUpdateRequestDto ticketRequestDto, CustomUserDetails userDetails) {
-    List<PassengerRequestDto> checkedPassengerRequestDtos = new ArrayList<>();
-
-    for (PassengerRequestDto passengerRequestDto : ticketRequestDto.passengerRequestDtos()) {
-      boolean isChecked = checkUserMileageAndProcessRefund(ticket, passengerRequestDto.seatId(),
-          userDetails);
-
-      if (isChecked) {
-        checkedPassengerRequestDtos.add(passengerRequestDto);
-      }
-    }
-    return checkedPassengerRequestDtos;
-  }
-
-  private void handleRefundAndCreateBooking(Ticket ticket,
-      List<PassengerRequestDto> checkedPassengerRequestDtos, CustomUserDetails userDetails) {
-
-    // Kafka 메시지 전송
-    sendKafkaMessagesForRefund(ticket);
-
-    // 새로운 예약 생성
-    bookingClient.createBooking(
-        userDetails.email(),
-        userDetails.role(),
-        new BookingRequestDto(checkedPassengerRequestDtos)
-    );
-
-    // 티켓 상태를 환불 완료로 변경
-    ticket.updateState(TicketStateEnum.REFUND);
-  }
-
-  private void sendKafkaMessagesForRefund(Ticket ticket) {
-
-    ticketKafkaSender.sendMessage(
-        "booking-status-update-refund-topic",
-        ticket.getTicketId().toString(),
-        new BookingStatusUpdateRefundRequestDto(ticket.getBookingId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-
-    ticketKafkaSender.sendMessage(
-        "seat-availability-update-true-topic",
-        ticket.getTicketId().toString(),
-        new SeatAvailabilityUpdateTrueRequestDto(ticket.getSeatId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-
-    ticketKafkaSender.sendMessage(
-        "passenger-isdeleted-update-true-topic",
-        ticket.getTicketId().toString(),
-        new PassengerIsdeletedUpdateTrueRequestDto(ticket.getPassengerId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-
-    // payment는 bookingId 전송해서 찾아서 처리
-    ticketKafkaSender.sendMessage(
-        "payment-status-update-refund-topic",
-        ticket.getTicketId().toString(),
-        new PaymentStatusUpdateRefundRequestDto(ticket.getBookingId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-
-  }
-
-  private Boolean checkUserMileageAndProcessRefund(Ticket ticket, UUID newSeatId,
-      CustomUserDetails userDetails) {
-
-    Long seatPrice = updateSeatAvailableFalseAndGetSeatPrice(newSeatId, userDetails);
-    Long paymentFair = getPaymentFair(ticket, userDetails);
-
-    // 예약할 좌석의 가격과 환블해줄 가격의 차이 계산
-    Long difference = Math.abs(seatPrice - paymentFair);
-
-    // 마일리지 체크 후 환불 진행
-    ApiResponse<Boolean> userResponse = userClient.checkAndRefundMileage(userDetails.email(),
-        userDetails.role(), userDetails.email(), difference,
-        paymentFair);
-
-    return userResponse.getData();
-  }
-
-  private Long updateSeatAvailableFalseAndGetSeatPrice(UUID newSeatId,
-      CustomUserDetails userDetails) {
-
-    // 예약할 좌석의 available을 false로 바꾸고 해당 좌석의 요금 리턴
-    ApiResponse<Long> bookingResponse = flightClient.updateSeatAvailableFalseAndGetSeatPrice(
-        userDetails.email(), userDetails.role(), newSeatId);
-    return bookingResponse.getData();
-  }
-
-  private Long getPaymentFair(Ticket ticket, CustomUserDetails userDetails) {
-
-    // 환불을 해주기 위해 bookingId로 찾은 결제되어있는 금액 리턴
-    ApiResponse<Long> paymentResponse = paymentClient.getPaymentFairByBookingId(
-        userDetails.email(), userDetails.role(), ticket.getBookingId());
-    return paymentResponse.getData();
   }
 
   @Transactional
@@ -231,42 +112,17 @@ public class TicketService {
 
     // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
 
-    Boolean flightStatus = checkFlightStatus(userDetails.email(), userDetails.role(),
+    Boolean isCancellable = checkFlightCancellable(userDetails.email(), userDetails.role(),
         ticket.getSeatId());
-    if (!flightStatus) {
+    if (!isCancellable) {
       throw new RuntimeException("해당 항공편은 상태 확인 중 문제가 발생했습니다.");
     }
 
     if (ProcessRefund(ticket, userDetails)) {
 
       ticket.updateState(TicketStateEnum.CANCELLED);
-      sendKafkaMessagesForRefund(ticket);
+      sendKafkaMessagesForUpdateStatusToRefund(ticket);
     }
-  }
-
-  private Ticket validateTicketForCancellation(UUID ticketId) {
-    Ticket ticket = getTicketById(ticketId);
-
-    if (!ticket.getState().equals(TicketStateEnum.BOOKED)) {
-      throw new RuntimeException("취소 불가");
-    }
-
-    return ticket;
-  }
-
-  private Boolean checkFlightStatus(String email, String role, UUID seatId) {
-    ApiResponse<Boolean> response = flightClient.checkFlightStatus(email, role, seatId);
-    return response.getData();
-  }
-
-  private Boolean ProcessRefund(Ticket ticket, CustomUserDetails userDetails) {
-
-    Long paymentFair = getPaymentFair(ticket, userDetails);
-
-    ApiResponse<Boolean> userResponse = userClient.RefundMileage(userDetails.email(),
-        userDetails.role(), userDetails.email(), paymentFair);
-
-    return userResponse.getData();
   }
 
   @Transactional
@@ -288,6 +144,134 @@ public class TicketService {
         .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
 
     ticket.updateState(TicketStateEnum.REFUND);
+  }
+
+
+
+  private Ticket validateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
+    Ticket ticket = getTicketById(ticketId);
+
+    if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
+      throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
+    }
+    if (!ticketRequestDto.passengerId().equals(ticket.getPassengerId())) {
+      throw new RuntimeException("항공권에 해당하는 탑승ID가 아닙니다.");
+    }
+    return ticket;
+  }
+
+
+  private List<PassengerRequestDto> validateAndProcessPassengersForRefund(Ticket ticket,
+      TicketUpdateRequestDto ticketRequestDto, CustomUserDetails userDetails) {
+    List<PassengerRequestDto> checkedPassengerRequestDtos = new ArrayList<>();
+
+    for (PassengerRequestDto passengerRequestDto : ticketRequestDto.passengerRequestDtos()) {
+      boolean isCheckedAndRefund = checkUserMileageAndProcessRefund(ticket,
+          passengerRequestDto.seatId(),
+          userDetails);
+
+      if (isCheckedAndRefund) {
+        checkedPassengerRequestDtos.add(passengerRequestDto);
+      }
+    }
+    return checkedPassengerRequestDtos;
+  }
+
+  private void createBooking(Ticket ticket,
+      List<PassengerRequestDto> checkedPassengerRequestDtos, CustomUserDetails userDetails) {
+
+    // 새로운 예약 생성
+    bookingClient.createBooking(userDetails.email(), userDetails.role(),
+        new BookingRequestDto(checkedPassengerRequestDtos));
+
+    // 티켓 상태를 환불 완료로 변경
+    ticket.updateState(TicketStateEnum.REFUND);
+  }
+
+  private void sendKafkaMessagesForUpdateStatusToRefund(Ticket ticket) {
+
+    ticketKafkaSender.sendMessage("booking-status-update-refund-topic",
+        ticket.getTicketId().toString(),
+        new BookingStatusUpdateRefundRequestDto(ticket.getBookingId(),
+            BookingStatusEnum.BOOKING_REFUND_COMPLETE),
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
+
+    ticketKafkaSender.sendMessage("seat-availability-update-true-topic",
+        ticket.getTicketId().toString(),
+        new SeatAvailabilityUpdateTrueRequestDto(ticket.getSeatId(), true),
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
+
+    ticketKafkaSender.sendMessage("passenger-isdeleted-update-true-topic",
+        ticket.getTicketId().toString(),
+        new PassengerIsdeletedUpdateTrueRequestDto(ticket.getPassengerId(), true),
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
+
+    // payment는 bookingId 전송해서 찾아서 처리
+    ticketKafkaSender.sendMessage("payment-status-update-refund-topic",
+        ticket.getTicketId().toString(),
+        new PaymentStatusUpdateRefundRequestDto(ticket.getBookingId(),
+            PaymentStatusEnum.REFUND_COMPLETE),
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
+
+  }
+
+  private Boolean checkUserMileageAndProcessRefund(Ticket ticket, UUID newSeatId,
+      CustomUserDetails userDetails) {
+
+    Long seatPrice = updateSeatAvailableFalseAndGetSeatPrice(newSeatId, userDetails);
+    Long paymentFair = getPaymentFair(ticket, userDetails);
+
+    // 예약할 좌석의 가격과 환블해줄 가격의 차이 계산
+    Long difference = seatPrice - paymentFair;
+
+    // 마일리지 체크 후 환불 진행
+    ApiResponse<Boolean> userResponse = userClient.checkAndRefundMileage(userDetails.email(),
+        userDetails.role(), userDetails.email(), difference, paymentFair);
+
+    return userResponse.getData();
+  }
+
+  private Long updateSeatAvailableFalseAndGetSeatPrice(UUID newSeatId,
+      CustomUserDetails userDetails) {
+
+    // 예약할 좌석의 available을 false로 바꾸고 해당 좌석의 요금 리턴
+    ApiResponse<Long> bookingResponse = flightClient.updateSeatAvailableFalseAndGetSeatPrice(
+        userDetails.email(), userDetails.role(), newSeatId);
+    return bookingResponse.getData();
+  }
+
+  private Long getPaymentFair(Ticket ticket, CustomUserDetails userDetails) {
+
+    // 환불을 해주기 위해 bookingId로 찾은 결제되어있는 금액 리턴
+    ApiResponse<Long> paymentResponse = paymentClient.getPaymentFairByBookingId(userDetails.email(),
+        userDetails.role(), ticket.getBookingId());
+    return paymentResponse.getData();
+  }
+
+
+  private Ticket validateTicketForCancellation(UUID ticketId) {
+    Ticket ticket = getTicketById(ticketId);
+
+    if (!ticket.getState().equals(TicketStateEnum.BOOKED)) {
+      throw new RuntimeException("취소 불가");
+    }
+
+    return ticket;
+  }
+
+  private Boolean checkFlightCancellable(String email, String role, UUID seatId) {
+    ApiResponse<Boolean> response = flightClient.checkFlightStatus(email, role, seatId);
+    return response.getData();
+  }
+
+  private Boolean ProcessRefund(Ticket ticket, CustomUserDetails userDetails) {
+
+    Long paymentFair = getPaymentFair(ticket, userDetails);
+
+    ApiResponse<Boolean> userResponse = userClient.RefundMileage(userDetails.email(),
+        userDetails.role(), userDetails.email(), paymentFair);
+
+    return userResponse.getData();
   }
 
 

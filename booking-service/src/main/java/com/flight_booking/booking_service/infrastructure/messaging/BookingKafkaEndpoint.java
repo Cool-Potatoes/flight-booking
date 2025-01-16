@@ -93,7 +93,8 @@ public class BookingKafkaEndpoint {
   }
 
   @KafkaListener(groupId = "booking-refund-success-group", topics = "booking-refund-ticket-success-topic")
-  public void consumeBookingRefundTicketComplete(@Payload ApiResponse<BookingRefundRequestDto> message) {
+  public void consumeBookingRefundTicketComplete(
+      @Payload ApiResponse<BookingRefundRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     BookingRefundRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
@@ -103,7 +104,8 @@ public class BookingKafkaEndpoint {
   }
 
   @KafkaListener(groupId = "booking-status-update-refund-group", topics = "booking-status-update-refund-topic")
-  public void consumeBookingStatusUpdate(@Payload ApiResponse<BookingStatusUpdateRefundRequestDto> message) {
+  public void consumeBookingStatusUpdate(
+      @Payload ApiResponse<BookingStatusUpdateRefundRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     BookingStatusUpdateRefundRequestDto requestDto = mapper.convertValue(message.getData(),
@@ -113,7 +115,8 @@ public class BookingKafkaEndpoint {
   }
 
   @KafkaListener(groupId = "passenger-isdeleted-update-true-group", topics = "passenger-isdeleted-update-true-topic")
-  public void consumePassengerIsdeletedUpdateTrue(@Payload ApiResponse<PassengerIsdeletedUpdateTrueRequestDto> message) {
+  public void consumePassengerIsdeletedUpdateTrue(
+      @Payload ApiResponse<PassengerIsdeletedUpdateTrueRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
     PassengerIsdeletedUpdateTrueRequestDto requestDto = mapper.convertValue(message.getData(),

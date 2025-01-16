@@ -246,7 +246,7 @@ public class SeatService {
 
     Seat seat = getSeatEntity(requestDto.seatId());
 
-    seat.updateAvailable(true);
+    seat.updateAvailable(requestDto.available());
   }
 
   private Seat getSeatEntity(UUID seatId) {

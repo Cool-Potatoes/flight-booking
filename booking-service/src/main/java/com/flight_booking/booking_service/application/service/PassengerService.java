@@ -5,6 +5,7 @@ import com.flight_booking.booking_service.domain.model.Passenger;
 import com.flight_booking.booking_service.domain.repository.PassengerRepository;
 import com.flight_booking.booking_service.presentation.global.exception.passenger.InvalidPassengerListException;
 import com.flight_booking.booking_service.presentation.global.exception.passenger.MissingRequiredFieldsException;
+import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.PassengerRequestDto;
 import com.flight_booking.common.presentation.dto.PassengerResponseDto;
 import java.util.List;
@@ -134,10 +135,10 @@ public class PassengerService {
   }
 
   @Transactional(readOnly = false)
-  public void updatePassengerIsDeletedTrue(UUID passengerId) {
-    Passenger passenger = getPassengerEntity(passengerId);
+  public void updatePassengerIsDeletedTrue(PassengerIsdeletedUpdateTrueRequestDto requestDto) {
+    Passenger passenger = getPassengerEntity(requestDto.passengerId());
 
-    passenger.updateIsDeletedTrue();
+    passenger.updateIsDeletedTrue(requestDto.isDeleted());
   }
 
   private Passenger getPassengerEntity(UUID passengerId) {

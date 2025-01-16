@@ -212,8 +212,6 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "user-refund-ticket-topic",
         paymentRefundFromTicketRequestDto.bookingId().toString(),
-// TODO : 너무 기니까 static으로 정리
-//        new UserRefundTicketRequestDto.from(
         new UserRefundTicketRequestDto(
             paymentRefundFromTicketRequestDto.email(),
             payment.getPaymentId(),
@@ -301,7 +299,7 @@ public class PaymentService {
 
     Payment payment = getPaymentEntityByBookingId(requestDto.bookingId());
 
-    payment.updateStatus(PaymentStatusEnum.REFUND_COMPLETE);
+    payment.updateStatus(requestDto.paymentStatusEnum());
   }
 
   private Payment getPaymentEntityByBookingId(UUID bookingId) {
