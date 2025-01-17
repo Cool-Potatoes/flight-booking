@@ -1,3 +1,7 @@
+service:
+  kafka:
+    url: test-url
+
 spring:
   application:
     name: payment-service
