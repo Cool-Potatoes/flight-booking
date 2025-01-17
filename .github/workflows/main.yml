@@ -41,26 +41,38 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 5️⃣ Gradle 빌드 (테스트 제외)
-      - name: Build with Gradle (No Tests)
-        run: ./gradlew build -x test  # ✅ 테스트 제외하고 빌드
+      # 5️⃣ Gradle 빌드 및 테스트 (빌드 실패 시 중단)
+      - name: Build and Test with Gradle
+        run: ./gradlew build  # ✅ 테스트 포함 빌드
 
-      # 6️⃣ 테스트 실행
-      - name: Run Tests
-        run: ./gradlew test  # ✅ 빌드 후 테스트 실행
-
-      # 7️⃣ DockerHub 로그인
+      # 6️⃣ DockerHub 로그인
       - name: DockerHub Login
-        if: contains(github.ref, 'dev') || contains(github.ref, 'main')
+        if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 8️⃣ Docker 이미지 빌드 및 푸시
+      # 7️⃣ Docker 이미지 빌드 및 푸시 (빌드 성공 시에만 실행)
       - name: Build and Push Docker Images
-        if: contains(github.ref, 'dev') || contains(github.ref, 'main')
+        if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
         run: |
           IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)
           docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
           docker-compose -f docker-compose.yml push eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+
+      # 8️⃣ 개발 서버에 배포 (Docker 이미지 빌드 및 푸시 성공 시 실행)
+      - name: Deploy to dev
+        if: success() && github.ref == 'refs/heads/dev'
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.HOST_PROD }}
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/ubuntu/flight-booking  # EC2 서버의 프로젝트 경로로 이동
+            docker-compose down  # 기존 컨테이너 중지
+            docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 최신 이미지 다운로드
+            docker-compose up -d --build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 컨테이너 재시작 및 배포
+            docker image prune -af  # 사용하지 않는 Docker 이미지 정리
 
 #      # 9️⃣ 개발 서버에 배포
 #      - name: Deploy to dev
