@@ -15,7 +15,7 @@ public class UserServiceImpl implements UserService {
   private final UserClient userClient;
 
   @Override
-  public Boolean RefundMileage(String email, String role, String userEmail, Long paymentFair) {
+  public Boolean refundMileage(String email, String role, String userEmail, Long paymentFair) {
 
     return userClient.RefundMileage(email, role, userEmail, paymentFair);
   }

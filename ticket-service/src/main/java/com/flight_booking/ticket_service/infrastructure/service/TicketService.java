@@ -59,7 +59,6 @@ public class TicketService {
 
       oldTicket.updateState(TicketStateEnum.REFUND);
 
-      redisLock.unlock(oldTicket.getSeatId());
     }
 
     return TicketResponseDto.from(savedTicket);
@@ -90,7 +89,7 @@ public class TicketService {
     Ticket ticket = validateTicket(ticketId, ticketRequestDto);
 
     UUID seatId = ticket.getSeatId();
-    boolean lockAcquired = redisLock.tryLock(seatId, 30, TimeUnit.SECONDS);
+    boolean lockAcquired = redisLock.tryLock(seatId, 300, TimeUnit.SECONDS);
     if (!lockAcquired) {
       throw new RuntimeException("다른 사용자가 해당 좌석을 예약 중입니다.");
     }

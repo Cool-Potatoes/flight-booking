@@ -212,18 +212,13 @@ public class SeatService {
 
     Long difference = calculateDifferenceOldAndNewSeatPrice(seatBookingRequestDto);
 
-    boolean successRefund = userService.RefundMileage(seatBookingRequestDto.email(),
+    boolean successRefund = userService.refundMileage(seatBookingRequestDto.email(),
         seatBookingRequestDto.role(),
         seatBookingRequestDto.email(), difference);
 
-    // redis 사용하면 된다
     if (successRefund) {
       seatKafkaSender.sendMessage(
           "create-booking-topic",
-          // 하나의 키는 하나의 파티션으로 고정됨, 자연스럽게 동시성 처리가 되는데
-          // 그거 고려해서 만들면 됨
-          // 처리되는쪽 기준으로
-          // 컨슈머에서 해당 토픽을 소모하니까 그거 기준으로 생각
           seatBookingRequestDto.passengerRequestDto().seatId().toString(),
           new BookingCreateRequestDto(
               new ReBookingRequestDto(seatBookingRequestDto.passengerRequestDto(),
@@ -232,9 +227,7 @@ public class SeatService {
           StackTraceUtils.getCurrentMethodName(),
           StackTraceUtils.getCurrentClassName()
       );
-
-      // todo : 다른 kafka 메시지 보내기,
-      //  ticket에도 보내서 상태업데이트 + lock 해제
+// 필드를 나누고 dto a 가 b로 변경되는거를 스태틱클래스로 치환해서 변경
       sendKafkaMessagesForUpdateStatusToRefund(seatBookingRequestDto.bookingId(),
           seatBookingRequestDto.seatId(), seatBookingRequestDto.passengerId());
     }
@@ -243,7 +236,7 @@ public class SeatService {
 
   private void sendKafkaMessagesForUpdateStatusToRefund(UUID bookingId, UUID seatId,
       UUID passengerId) {
-
+// 시트서비스가 발생한만한 메시지만 보낼걸
     seatKafkaSender.sendMessage("booking-status-update-refund-topic",
         bookingId.toString(),
         new BookingStatusUpdateRefundRequestDto(bookingId,
