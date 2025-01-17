@@ -50,26 +50,26 @@ jobs:
         if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 7️⃣ Docker 이미지 빌드 및 푸시 (서비스 이름 제거)
+      # 7️⃣ Docker 이미지 빌드 및 푸시 (서비스 이름 제거) (main 브랜치 푸시 시에만 실행)
       - name: Build and Push Docker Images
-        if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+        if: success() && github.ref == 'refs/heads/main'
         run: |
           IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)
           docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG  #  전체 서비스 빌드
           docker-compose -f docker-compose.yml push  #  전체 서비스 푸시
 
-      # 8️⃣ 운영 서버에 배포 (main 브랜치 푸시 시 실행)
-      - name: Deploy to production
-        if: success() && github.ref == 'refs/heads/main'
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.HOST_PROD }}
-          username: ubuntu
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            cd /home/ubuntu/flight-booking  # EC2 서버의 프로젝트 경로로 이동
-            docker-compose down  # 기존 컨테이너 중지
-            docker-compose pull  #  전체 서비스 이미지 다운로드
-            docker-compose up -d --build  #  전체 서비스 재시작 및 배포
-            docker image prune -af  # 사용하지 않는 Docker 이미지 정리
+#      # 8️⃣ 운영 서버에 배포 (main 브랜치 푸시 시 실행)
+#      - name: Deploy to production
+#        if: success() && github.ref == 'refs/heads/main'
+#        uses: appleboy/ssh-action@v1.1.0
+#        with:
+#          host: ${{ secrets.HOST_PROD }}
+#          username: ubuntu
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          port: ${{ secrets.PORT }}
+#          script: |
+#            cd /home/ubuntu/flight-booking  # EC2 서버의 프로젝트 경로로 이동
+#            docker-compose down  # 기존 컨테이너 중지
+#            docker-compose pull  #  전체 서비스 이미지 다운로드
+#            docker-compose up -d --build  #  전체 서비스 재시작 및 배포
+#            docker image prune -af  # 사용하지 않는 Docker 이미지 정리
