@@ -149,7 +149,7 @@ public class PaymentService {
         "booking-complete-topic",
         updatedPayment.getBookingId().toString(),
         new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(),
-            payment.getBookingId(),
+            updatedPayment.getBookingId(),
             paymentRefundProcessRequestDto.email()),
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()

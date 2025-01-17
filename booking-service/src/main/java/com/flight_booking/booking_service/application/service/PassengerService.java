@@ -63,6 +63,33 @@ public class PassengerService {
         .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = false)
+  public void createPassengerForRebook(
+      PassengerRequestDto passengerRequestDto,
+      Booking savedBooking
+  ) {
+
+    if (passengerRequestDto == null) {
+      throw new InvalidPassengerListException();
+    }
+
+    if (passengerRequestDto.seatId() == null || passengerRequestDto.passengerName() == null) {
+      throw new MissingRequiredFieldsException();
+    }
+
+    Passenger passenger = Passenger.builder()
+        .seatId(passengerRequestDto.seatId())
+        .passengerType(passengerRequestDto.passengerType())
+        .passengerName(passengerRequestDto.passengerName())
+        .baggage(passengerRequestDto.baggage())
+        .meal(passengerRequestDto.meal())
+        .booking(savedBooking)
+        .build();
+
+    passengerRepository.save(passenger);
+  }
+
+
   public PassengerResponseDto getPassenger(UUID passengerId) {
 
     Passenger passenger = passengerRepository.findById(passengerId)

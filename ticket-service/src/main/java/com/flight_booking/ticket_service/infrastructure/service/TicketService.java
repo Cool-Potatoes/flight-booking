@@ -62,32 +62,6 @@ public class TicketService {
       redisLock.unlock(oldTicket.getSeatId());
     }
 
-
-//    bookingservice.getBooking(ticket.getBookingId());
-    // bookingID는 가지고 있ㄴ으니까? 상태를 굳이 체크해야하나?
-    // booking_refund_complete 는 이미 비동기로 이거 하기 전에 처리해농흠
-    // 여기서 booking 조회해 온 다음에 status가 create면
-    // 여기서 booking 조회해 온 다음에 status가 create가 아니면 booking status를 complete로
-    // ticket을 찾아올때 booking id랑 상태가 환불 진행중인거 찾아오면 될듯?
-    // 찾아와서 상태 업데이트
-    // todo : 다른 kafka 메시지 보내기,
-    //  ticket에도 보내서 상태업데이트 + lock 해제
-    // 여기서 이메일로 조회한다음에
-
-    // 지금 해야할것은 기존 ticket 상태 환부으로 변경
-    // 기존 좌석 true로 바꾸는거
-    // lock 해제
-
-    // 새로운 booking 만들때 상태를 create로 만들어놨음(업데이트할때)
-    // 1. 여기서 booking 상태 완료로 바꿔주긴 해야함.
-    // 어떻게? -> 위에서 booking 아이디 가지고있음
-    // 2. 기존 ticket 상태 환불로 변경
-    // 기존 ticket을 어떻게 찾냐? ->
-    // 3. true로 바꾸는거랑 lock 해제 : booking의 상태가 create인것을 찾으면 새로운 booking인데, 거기에 새로 들어갈 seatid -> 락 된 seat 찾아서 풀수있음, true로 바꿀수있음
-    // 근데 create인거를 찾으면 안될듯 왜냐면 다른거도 create도 있을수있음
-
-    ////// -> 상태로 체크하는거는 ㄴ
-
     return TicketResponseDto.from(savedTicket);
   }
 

@@ -147,7 +147,6 @@ public class SeatService {
           new BookingProcessRequestDto(
               null,
               seatAvailabilityCheckRequestDto.bookingId(),
-              null,
               null),
           StackTraceUtils.getCurrentMethodName(),
           StackTraceUtils.getCurrentClassName()

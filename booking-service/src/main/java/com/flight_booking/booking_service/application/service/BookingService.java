@@ -84,6 +84,8 @@ public class BookingService {
 
     Booking savedBooking = bookingRepository.save(booking);
 
+    passengerService.createPassengerForRebook(bookingRequestDto.passengerRequestDto(),savedBooking);
+
     bookingKafkaSender.sendMessage(
         "seat-availability-check-and-update-for-rebook-topic",
         savedBooking.getBookingId().toString(),
