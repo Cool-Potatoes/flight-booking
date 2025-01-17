@@ -1,6 +1,10 @@
 server:
   port: 8160
 
+service:
+  kafka:
+    url: localhost:9092
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
