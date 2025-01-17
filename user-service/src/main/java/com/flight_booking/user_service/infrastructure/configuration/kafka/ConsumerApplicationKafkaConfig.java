@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -19,6 +20,9 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 @Configuration // Spring 설정 클래스로 선언하는 어노테이션입니다.
 public class ConsumerApplicationKafkaConfig {
 
+  @Value("${service.kafka.url}")
+  private String url;
+
   // Kafka 컨슈머 팩토리를 생성하는 빈을 정의합니다.
   // ConsumerFactory는 Kafka 컨슈머 인스턴스를 생성하는 데 사용됩니다.
   // 각 컨슈머는 이 팩토리를 통해 생성된 설정을 기반으로 작동합니다.
@@ -27,7 +31,7 @@ public class ConsumerApplicationKafkaConfig {
     // 컨슈머 팩토리 설정을 위한 맵을 생성
     Map<String, Object> configProps = new HashMap<>();
     // Kafka 브로커의 주소를 설정
-    configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, url);
     // 메시지 키의 디시리얼라이저 클래스를 설정
     configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 

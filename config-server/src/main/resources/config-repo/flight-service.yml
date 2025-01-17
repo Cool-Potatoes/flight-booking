@@ -2,9 +2,8 @@ server:
   port: 8150
 
 service:
-  jwt:
-    access-expiration: 86400000  # 24시간
-    secret-key: ${SECRET_KEY}
+  kafka:
+    url: localhost:9092
 
 
 spring:
@@ -69,3 +68,6 @@ management:
     web:
       exposure:
         include: refresh, prometheus  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신) + prometheus
+
+kafka:
+  url: ${KAFKA_URL}
