@@ -58,25 +58,9 @@ jobs:
           docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
           docker-compose -f docker-compose.yml push eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
 
-      # 8️⃣ 개발 서버에 배포 (Docker 이미지 빌드 및 푸시 성공 시 실행)
-      - name: Deploy to dev
-        if: success() && github.ref == 'refs/heads/dev'
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.HOST_PROD }}
-          username: ubuntu
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            cd /home/ubuntu/flight-booking  # EC2 서버의 프로젝트 경로로 이동
-            docker-compose down  # 기존 컨테이너 중지
-            docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 최신 이미지 다운로드
-            docker-compose up -d --build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 컨테이너 재시작 및 배포
-            docker image prune -af  # 사용하지 않는 Docker 이미지 정리
-
-#      # 9️⃣ 개발 서버에 배포
+#      # 8️⃣ 개발 서버에 배포 (Docker 이미지 빌드 및 푸시 성공 시 실행)
 #      - name: Deploy to dev
-#        if: contains(github.ref, 'dev')
+#        if: success() && github.ref == 'refs/heads/dev'
 #        uses: appleboy/ssh-action@v1.1.0
 #        with:
 #          host: ${{ secrets.HOST_PROD }}
@@ -85,6 +69,8 @@ jobs:
 #          port: ${{ secrets.PORT }}
 #          script: |
 #            cd /home/ubuntu/flight-booking  # EC2 서버의 프로젝트 경로로 이동
+#            docker-compose down  # 기존 컨테이너 중지
 #            docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 최신 이미지 다운로드
 #            docker-compose up -d --build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 컨테이너 재시작 및 배포
 #            docker image prune -af  # 사용하지 않는 Docker 이미지 정리
+
