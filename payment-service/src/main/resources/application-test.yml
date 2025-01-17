@@ -1,16 +1,13 @@
-server:
-  port: 0  # 임시 포트, Config Server에서 덮어씌워짐
-
 spring:
   application:
     name: payment-service
   config:
-    import: "configserver:"  # Config Server에서 설정 가져오기
+    import: "optional:configserver:"  # Config Server가 없으면 무시됨
   cloud:
+    discovery:
+      enabled: false  # 서비스 디스커버리 비활성화
     config:
-      discovery:
-        enabled: true
-        service-id: config-server
+      enabled: false  # Config Server 관련 비활성화
   datasource:
     url: jdbc:h2:mem:test;  # H2: test용 인메모리 DB
     driver-class-name: org.h2.Driver
@@ -35,8 +32,3 @@ logging:
         orm:
           jdbc:
             bind: TRACE
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
