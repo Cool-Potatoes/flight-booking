@@ -53,15 +53,15 @@ jobs:
         if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 7️⃣ Docker 이미지 빌드 및 푸시 (빌드 성공 시에만 실행)
+      # 7️⃣ Docker 이미지 빌드 및 푸시 (서비스 이름 제거) (main 브랜치 푸시 시에만 실행)
       - name: Build and Push Docker Images
-        if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+        if: success() && github.ref == 'refs/heads/main'
         run: |
           IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)
-          docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
-          docker-compose -f docker-compose.yml push eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service
+          docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG  #  전체 서비스 빌드
+          docker-compose -f docker-compose.yml push  #  전체 서비스 푸시
 
-#      # 8️⃣ 개발 서버에 배포 (Docker 이미지 빌드 및 푸시 성공 시 실행)
+      # 8️⃣ 개발 서버에 배포 (Docker 이미지 빌드 및 푸시 성공 시 실행)
       - name: Deploy to dev
         if: success() && github.ref == 'refs/heads/dev'
         uses: appleboy/ssh-action@v1.1.0
@@ -76,4 +76,3 @@ jobs:
             docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 최신 이미지 다운로드
             docker-compose up -d --build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 컨테이너 재시작 및 배포
             docker image prune -af  # 사용하지 않는 Docker 이미지 정리
-
