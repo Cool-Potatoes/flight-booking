@@ -1,0 +1,17 @@
+package com.flight_booking.notification_service.infrastructure.messaging;
+
+import com.flight_booking.common.infrastructure.kafka.KafkaSender;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class NotificationKafkaSender {
+
+  private final KafkaSender kafkaSender;
+
+  public void sendMessage(
+      String topic, String key, Object data, String methodName, String className) {
+    kafkaSender.sendApiResponseDataWithFrom(topic, key, data, methodName, className);
+  }
+}
