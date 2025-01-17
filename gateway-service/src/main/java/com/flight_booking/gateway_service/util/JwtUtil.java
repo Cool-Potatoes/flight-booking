@@ -114,10 +114,11 @@ public class JwtUtil {
   }
 
   // 블랙리스트에 존재하는지 확인
-  public void isTokenBlacklisted(String token) {
+  public boolean isTokenBlacklisted(String token) {
     if (redisTemplate.hasKey("blacklist:" + token)) {
       log.warn("블랙리스트에 포함된 토큰입니다. Token: {}", token);
       throw new JwtException(JwtErrorCode.BLACKLISTED_TOKEN.getMessage());
     }
+    return false;
   }
 }

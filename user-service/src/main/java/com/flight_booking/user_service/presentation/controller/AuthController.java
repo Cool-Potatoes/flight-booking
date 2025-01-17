@@ -50,19 +50,20 @@ public class AuthController {
   // 토큰 재발급
   @PostMapping("/token")
   public ApiResponse<?> refreshToken(
-      @CookieValue(value = "refreshToken", defaultValue = "") String refreshToken,
+      @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
       @RequestHeader(value = "Authorization") String accessToken,
       HttpServletResponse response) {
-    String newAccessToken = authService.refreshAccessToken(refreshToken, accessToken, response);
+    String newAccessToken = authService.renewTokens(refreshToken, accessToken, response);
     return ApiResponse.ok(newAccessToken, "AccessToken 발급 성공");
   }
 
   // 로그아웃
   @PostMapping("/logout")
   public ApiResponse<?> logout(
-      @CookieValue(value = "refreshToken", required = false) String refreshToken,
+      @CookieValue(value = "REFRESH_TOKEN") String refreshToken,
+      @RequestHeader(value = "Authorization") String accessToken,
       HttpServletResponse response) {
-    authService.logout(refreshToken, response);
+    authService.logout(refreshToken, accessToken, response);
     return ApiResponse.ok("로그아웃 성공");
   }
 }

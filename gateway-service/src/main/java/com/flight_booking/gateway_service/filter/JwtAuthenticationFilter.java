@@ -21,7 +21,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-    // 인증이 필요 없는 경로 리스트 정의
+    // 인증이 필요 없는 경로 리스트
     List<String> excludedPaths = List.of(
         "/v1/auth/signup",
         "/v1/auth/signin",
@@ -37,7 +37,6 @@ public class JwtAuthenticationFilter implements GlobalFilter {
       return chain.filter(exchange);
     }
 
-    // Authorization 헤더에서 JWT 토큰 추출
     String token = jwtUtil.extractToken(exchange);
 
     if (token == null) {
@@ -47,10 +46,16 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     }
 
     try {
+      // 토큰 검증
       jwtUtil.validateToken(token);
       log.info("토큰 검증 완료");
 
-      jwtUtil.isTokenBlacklisted(token);
+      // 블랙리스트 체크
+      if (jwtUtil.isTokenBlacklisted(token)) {
+        log.info("토큰이 블랙리스트에 존재합니다.");
+        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        return exchange.getResponse().setComplete();
+      }
       log.info("블랙리스트 체크 완료");
 
       // 토큰이 유효한 경우, 이메일과 역할 추출
@@ -69,6 +74,10 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     } catch (IllegalArgumentException e) {
       log.warn("유효하지 않은 토큰: {}", e.getMessage());
       exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+      return exchange.getResponse().setComplete();
+    } catch (Exception e) {
+      log.error("토큰 검증 중 오류 발생: {}", e.getMessage());
+      exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
       return exchange.getResponse().setComplete();
     }
   }
