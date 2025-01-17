@@ -41,9 +41,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 5️⃣ Gradle 빌드 및 테스트 (빌드 실패 시 중단)
-      - name: Build and Test with Gradle
-        run: ./gradlew build  #  테스트 포함 빌드
+      # 5️⃣ Gradle 빌드 및 테스트
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Test with Gradle
+        run: ./gradlew test
 
       # 6️⃣ DockerHub 로그인
       - name: DockerHub Login
@@ -58,18 +61,18 @@ jobs:
           docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG  #  전체 서비스 빌드
           docker-compose -f docker-compose.yml push  #  전체 서비스 푸시
 
-#      # 8️⃣ 운영 서버에 배포 (main 브랜치 푸시 시 실행)
-#      - name: Deploy to production
-#        if: success() && github.ref == 'refs/heads/main'
-#        uses: appleboy/ssh-action@v1.1.0
-#        with:
-#          host: ${{ secrets.HOST_PROD }}
-#          username: ubuntu
-#          key: ${{ secrets.PRIVATE_KEY }}
-#          port: ${{ secrets.PORT }}
-#          script: |
-#            cd /home/ubuntu/flight-booking  # EC2 서버의 프로젝트 경로로 이동
-#            docker-compose down  # 기존 컨테이너 중지
-#            docker-compose pull  #  전체 서비스 이미지 다운로드
-#            docker-compose up -d --build  #  전체 서비스 재시작 및 배포
-#            docker image prune -af  # 사용하지 않는 Docker 이미지 정리
+      # 8️⃣ 개발 서버에 배포 (Docker 이미지 빌드 및 푸시 성공 시 실행)
+      - name: Deploy to dev
+        if: success() && github.ref == 'refs/heads/dev'
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.HOST_PROD }}
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/ubuntu/flight-booking  # EC2 서버의 프로젝트 경로로 이동
+            docker-compose down  # 기존 컨테이너 중지
+            docker-compose pull eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 최신 이미지 다운로드
+            docker-compose up -d --build eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service  # 컨테이너 재시작 및 배포
+            docker image prune -af  # 사용하지 않는 Docker 이미지 정리
