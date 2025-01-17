@@ -1,9 +1,11 @@
 package com.flight_booking.notification_service.application.service;
 
 import com.flight_booking.common.application.dto.NotificationRequestDto;
+import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.notification_service.domain.model.Notification;
 import com.flight_booking.notification_service.domain.repository.NotificationRepository;
 import com.flight_booking.notification_service.global.exception.NotificationNotFoundException;
+import com.flight_booking.notification_service.infrastructure.messaging.NotificationKafkaSender;
 import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
 import com.flight_booking.notification_service.presentation.dto.NotificationResponse;
 import java.util.UUID;
@@ -24,6 +26,7 @@ public class NotificationService {
 
   // 이메일 전송 서비스
   private final EmailService emailService;
+  private final NotificationKafkaSender notificationKafkaSender;
 
   // 알림 생성
   public NotificationResponse createNotification(NotificationRequest request) {
@@ -99,7 +102,7 @@ public class NotificationService {
 
   // 비밀번호 변경을 위한 인증 코드 발송
   @Transactional
-  public NotificationResponse sendCode(NotificationRequestDto requestDto) {
+  public void sendCode(NotificationRequestDto requestDto) {
     log.info("Kafka 메시지 수신: {}", requestDto);
 
     // 알림 엔티티 생성
@@ -117,12 +120,15 @@ public class NotificationService {
     // 알림을 DB에 저장
     Notification saved = repository.save(notification);
 
-    // 이메일 전송 (비동기 처리 가능)
+    // 이메일 전송
     emailService.sendNotification(saved);
 
-    log.info("Kafka 메시지 수신 완료");
-
-    // 응답 반환
-    return toResponse(saved);
+    notificationKafkaSender.sendMessage(
+        "code-send-topic",
+        requestDto.receiverEmail(),
+        saved,
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName()
+    );
   }
 }

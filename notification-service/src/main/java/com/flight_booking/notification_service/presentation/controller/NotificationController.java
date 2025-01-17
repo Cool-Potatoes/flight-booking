@@ -1,6 +1,5 @@
 package com.flight_booking.notification_service.presentation.controller;
 
-import com.flight_booking.common.application.dto.NotificationRequestDto;
 import com.flight_booking.notification_service.application.service.NotificationService;
 import com.flight_booking.notification_service.global.ApiResponse;
 import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
@@ -12,8 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -68,20 +65,5 @@ public class NotificationController {
   public ResponseEntity<ApiResponse<String>> deleteNotification(@PathVariable UUID id) {
     notificationService.deleteNotification(id);
     return ResponseEntity.ok(ApiResponse.ok("Notification deleted successfully."));
-  }
-
-  // 비밀번호 변경을 위한 인증 번호 전송
-  @KafkaListener(topics = "password-reset-topic", groupId = "notification-group")
-  public ResponseEntity<ApiResponse<NotificationResponse>> handleNotificationEvent(
-      @Payload NotificationRequestDto notificationRequestDto) {
-
-    log.info("Kafka 메시지 수신: {}", notificationRequestDto);
-
-    NotificationResponse notificationResponse = notificationService.sendCode(
-        notificationRequestDto);
-
-    log.info("이메일 전송 완료: {}", notificationResponse);
-
-    return ResponseEntity.ok(ApiResponse.ok(notificationResponse));
   }
 }
