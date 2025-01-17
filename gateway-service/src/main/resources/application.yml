@@ -2,6 +2,8 @@ server:
   port: 0  # Gateway 서비스는 일반적으로 8080 포트를 사용
 
 spring:
+  main:
+    web-application-type: reactive  # Spring 애플리케이션이 리액티브 웹 애플리케이션으로 설정됨
   application:
     name: gateway-service
   config:
@@ -21,7 +23,7 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:8761/eureka/}
 #  instance:
 #    hostname: ${HOSTNAME:localhost}
 #    prefer-ip-address: true  # IP 기반 서비스 등록
