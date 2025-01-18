@@ -23,7 +23,7 @@ public class ConsumerApplicationKafkaConfig {
   // Kafka 컨슈머 팩토리를 생성하는 빈을 정의합니다.
   // ConsumerFactory는 Kafka 컨슈머 인스턴스를 생성하는 데 사용됩니다.
   // 각 컨슈머는 이 팩토리를 통해 생성된 설정을 기반으로 작동합니다.
-  @Value("${kafka.url}")
+  @Value("${service.kafka.url}")
   String url;
 
   @Bean
