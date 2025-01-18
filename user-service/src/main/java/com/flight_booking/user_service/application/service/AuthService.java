@@ -31,9 +31,12 @@ public class AuthService {
   // 회원가입
   @Transactional
   public void createUser(SignUpRequest request) {
-    if (userRepository.existsByEmail(request.email()) && userRepository.existsByPhone(
-        request.phone())) {
+    if (userRepository.existsByEmail(request.email())) {
       throw new UserException(ErrorCode.DUPLICATE_EMAIL);
+    }
+
+    if (userRepository.existsByPhone(request.phone())) {
+      throw new UserException(ErrorCode.DUPLICATE_PHONE);
     }
 
     User user = User.builder()
