@@ -39,7 +39,7 @@ public class Ticket extends BaseEntity {
   @Enumerated(value = EnumType.STRING)
   TicketStateEnum state;
 
-  public void update(UUID seatId) {
+  public void updateSeatId(UUID seatId) {
     this.seatId = seatId;
   }
 

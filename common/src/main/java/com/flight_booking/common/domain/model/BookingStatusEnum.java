@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum BookingStatusEnum {
 
+  BOOKING_CREATE("BOOKING_CREATE"),
   BOOKING_WAITING("BOOKING_WAITING"),
   BOOKING_COMPLETE("BOOKING_COMPLETE"),
   BOOKING_CHANGE_PENDING("BOOKING_PROCESS_UPDATE"),

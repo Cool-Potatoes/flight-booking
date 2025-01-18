@@ -2,6 +2,7 @@ package com.flight_booking.booking_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.booking_service.application.service.BookingService;
+import com.flight_booking.common.application.dto.BookingCreateRequestDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
@@ -19,15 +20,16 @@ public class BookingKafkaEndpoint {
 
   private final BookingService bookingService;
 
-  @KafkaListener(groupId = "payment-complete-group", topics = "payment-complete-topic")
-  public void consumeProcessBooking(
-      @Payload ApiResponse<BookingProcessRequestDto> message) {
+
+  @KafkaListener(groupId = "create-booking-group", topics = "create-booking-topic")
+  public void consumeCreateBooking(
+      @Payload ApiResponse<BookingCreateRequestDto> message) {
 
     ObjectMapper mapper = new ObjectMapper();
-    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
-        BookingProcessRequestDto.class);
+    BookingCreateRequestDto requestDto = mapper.convertValue(message.getData(),
+        BookingCreateRequestDto.class);
 
-    bookingService.processBooking(bookingProcessRequestDto);
+    bookingService.rebookBooking(requestDto.bookingRequestDto(), requestDto.username());
   }
 
   @KafkaListener(groupId = "payment-fail-groups", topics = "payment-fail-topic")
@@ -39,17 +41,6 @@ public class BookingKafkaEndpoint {
         BookingProcessRequestDto.class);
 
     bookingService.processBooking(bookingProcessRequestDto);
-  }
-
-  @KafkaListener(groupId = "booking-update-group", topics = "booking-update-topic")
-  public void consumeBookingUpdate(
-      @Payload ApiResponse<BookingUpdateRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    BookingUpdateRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
-        BookingUpdateRequestDto.class);
-
-    bookingService.updateBookingStatus(bookingProcessRequestDto);
   }
 
   @KafkaListener(groupId = "booking-complete-group", topics = "booking-complete-topic")
@@ -72,15 +63,6 @@ public class BookingKafkaEndpoint {
     bookingService.failBooking(bookingProcessRequestDto);
   }
 
-  @KafkaListener(groupId = "booking-refund-success-group", topics = "booking-refund-success-topic")
-  public void consumeBookingRefundSuccess(@Payload ApiResponse<BookingProcessRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
-        BookingProcessRequestDto.class);
-
-    bookingService.processRefundBooking(bookingProcessRequestDto);
-  }
 
   @KafkaListener(groupId = "booking-refund-fail-group", topics = "booking-refund-fail-topic")
   public void consumeBookingRefundFail(@Payload ApiResponse<BookingProcessRequestDto> message) {

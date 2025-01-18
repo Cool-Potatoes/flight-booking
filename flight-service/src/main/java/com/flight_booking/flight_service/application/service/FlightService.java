@@ -136,18 +136,6 @@ public class FlightService {
     );
   }
 
-  /**
-   * flightId로 Flight 조회 메서드
-   *
-   * @param flightId UUID
-   * @return Flight
-   */
-  private Flight getFlight(UUID flightId) {
-    return flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(
-        () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
-    );
-  }
-
   public Boolean checkFlightStatusBySeatId(UUID seatId) {
 
     SeatResponseDto seatResponseDto = seatService.getSeat(seatId);
@@ -163,5 +151,15 @@ public class FlightService {
     return true;
   }
 
-
+  /**
+   * flightId로 Flight 조회 메서드
+   *
+   * @param flightId UUID
+   * @return Flight
+   */
+  private Flight getFlight(UUID flightId) {
+    return flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(
+        () -> new RuntimeException("해당하는 공항이 존재하지 않습니다.")
+    );
+  }
 }

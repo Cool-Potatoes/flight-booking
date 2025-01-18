@@ -5,7 +5,7 @@ import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.application.dto.TicketUpdateStatusRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
-import com.flight_booking.ticket_service.application.service.TicketService;
+import com.flight_booking.ticket_service.infrastructure.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -37,14 +37,5 @@ public class TicketKafkaEndpoint {
     ticketService.cancelFail(flightCancelRequestDto);
   }
 
-  @KafkaListener(groupId = "ticket-update-group", topics = "ticket-update-topic")
-  public void consumeUpdateTicketStatus(@Payload ApiResponse<TicketUpdateStatusRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    TicketUpdateStatusRequestDto ticketUpdateStatusRequestDto
-        = mapper.convertValue(message.getData(), TicketUpdateStatusRequestDto.class);
-
-    ticketService.updateTicketStatus(ticketUpdateStatusRequestDto);
-  }
 
 }

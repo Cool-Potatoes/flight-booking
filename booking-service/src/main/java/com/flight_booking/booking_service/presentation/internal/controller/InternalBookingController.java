@@ -1,8 +1,8 @@
 package com.flight_booking.booking_service.presentation.internal.controller;
 
 import com.flight_booking.booking_service.application.service.BookingService;
-import com.flight_booking.booking_service.presentation.request.BookingRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
+import com.flight_booking.common.presentation.dto.BookingRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
