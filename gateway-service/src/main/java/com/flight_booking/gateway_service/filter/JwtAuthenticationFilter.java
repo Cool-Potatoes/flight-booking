@@ -1,6 +1,7 @@
 package com.flight_booking.gateway_service.filter;
 
 import com.flight_booking.gateway_service.util.JwtUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -20,34 +21,64 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-    // 로그인 및 회원가입 경로는 인증 없이 처리
+    // 인증이 필요 없는 경로 리스트
+    List<String> excludedPaths = List.of(
+        "/v1/auth/signup",
+        "/v1/auth/signin",
+        "/v1/auth/find-id",
+        "/v1/auth/send-code",
+        "/v1/auth/verify-code",
+        "/v1/auth/token"
+    );
+
+    // 경로가 제외 리스트에 포함되어 있으면 인증 없이 필터 통과
     String path = exchange.getRequest().getURI().getPath();
-    if (path.startsWith("/v1/auth/") && !path.endsWith("pw") && !path.endsWith("logout")) {
-      return chain.filter(exchange); // 인증 없이 다음 필터로 넘김
+    if (excludedPaths.contains(path)) {
+      return chain.filter(exchange);
     }
 
-    // Authorization 헤더에서 JWT 토큰 추출
     String token = jwtUtil.extractToken(exchange);
 
-    if (token == null || !jwtUtil.validateToken(token)) {
-      log.info("토큰 검증 실패");
-      // 유효하지 않은 토큰이면 UNAUTHORIZED 응답 반환
+    if (token == null) {
+      log.info("토큰이 존재하지 않습니다.");
       exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
       return exchange.getResponse().setComplete();
     }
 
-    // 토큰이 유효한 경우, 이메일과 역할 추출
-    String email = jwtUtil.extractEmail(token);
-    String role = jwtUtil.extractRole(token);
+    try {
+      // 토큰 검증
+      jwtUtil.validateToken(token);
+      log.info("토큰 검증 완료");
 
-    // 이메일과 역할을 헤더에 추가
-    ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-        .header("X-USER-EMAIL", email)
-        .header("X-USER-ROLE", role)
-        .build();
+      // 블랙리스트 체크
+      if (jwtUtil.isTokenBlacklisted(token)) {
+        log.info("토큰이 블랙리스트에 존재합니다.");
+        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        return exchange.getResponse().setComplete();
+      }
+      log.info("블랙리스트 체크 완료");
 
-    exchange = exchange.mutate().request(modifiedRequest).build();
+      // 토큰이 유효한 경우, 이메일과 역할 추출
+      String email = jwtUtil.extractEmail(token);
+      String role = jwtUtil.extractRole(token);
 
-    return chain.filter(exchange);
+      // 이메일과 역할을 헤더에 추가
+      ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+          .header("X-USER-EMAIL", email)
+          .header("X-USER-ROLE", role)
+          .build();
+
+      exchange = exchange.mutate().request(modifiedRequest).build();
+
+      return chain.filter(exchange);
+    } catch (IllegalArgumentException e) {
+      log.warn("유효하지 않은 토큰: {}", e.getMessage());
+      exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+      return exchange.getResponse().setComplete();
+    } catch (Exception e) {
+      log.error("토큰 검증 중 오류 발생: {}", e.getMessage());
+      exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+      return exchange.getResponse().setComplete();
+    }
   }
 }
