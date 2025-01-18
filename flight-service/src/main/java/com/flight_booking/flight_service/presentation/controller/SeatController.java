@@ -48,6 +48,4 @@ public class SeatController {
 
     return ApiResponse.ok(seatResponseDtoPagedModel, "좌석 데이터 목록 조회 성공");
   }
-
-
 }

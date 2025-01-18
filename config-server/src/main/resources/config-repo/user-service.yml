@@ -6,6 +6,8 @@ service:
     access-token-expiration: 1800000  # 30분
     refresh-token-expiration: 86400000  # 1일
     secret-key: ${SECRET_KEY}
+  kafka:
+    url: localhost:9092
 
 
 spring:
