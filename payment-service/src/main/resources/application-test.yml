@@ -1,6 +1,6 @@
 service:
   kafka:
-    url: test-url
+    url: localhost:9092
 
 spring:
   application:
