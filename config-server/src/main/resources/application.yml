@@ -22,8 +22,6 @@ management:
   tracing:
     sampling:
       probability: 1.0  # 전체 트레이싱 활성화
-    zipkin:
-      endpoint: http://zipkin:9411/api/v2/spans  # localhost 대신 zipkin 서비스 이름 사용
   endpoints:
     web:
       exposure:
