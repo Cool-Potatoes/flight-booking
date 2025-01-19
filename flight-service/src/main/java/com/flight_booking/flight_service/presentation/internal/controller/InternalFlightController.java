@@ -17,7 +17,7 @@ public class InternalFlightController {
   private final FlightService flightService;
 
   @GetMapping("/{seatId}")
-  public ApiResponse<?> checkFlightBySeatId(@PathVariable UUID seatId) {
+  public ApiResponse<?> checkFlightStatusBySeatId(@PathVariable UUID seatId) {
     return ApiResponse.ok(flightService.checkFlightStatusBySeatId(seatId), "항공편 체크 성공");
   }
 }

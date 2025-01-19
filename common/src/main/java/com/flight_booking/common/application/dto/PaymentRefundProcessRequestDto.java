@@ -9,7 +9,6 @@ import java.util.UUID;
 public record PaymentRefundProcessRequestDto(
     UUID ticketId,
     @NotNull(message = "Payment ID cannot be null") UUID paymentId,
-    List<PassengerRequestDto> passengerRequestDtos,
     @NotNull(message = "Email cannot be null") String email
 ) {
 

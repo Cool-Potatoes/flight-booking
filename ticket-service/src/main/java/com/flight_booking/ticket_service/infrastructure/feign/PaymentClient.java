@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface PaymentClient {
 
   @GetMapping("/internal/payments/{bookingId}")
-  ApiResponse<Long> getPaymentFairByBookingId(
+  Long getPaymentFairByBookingId(
       @RequestHeader(value = "X-USER-EMAIL") String email,
       @RequestHeader(value = "X-USER-ROLE") String role,
       @PathVariable UUID bookingId);

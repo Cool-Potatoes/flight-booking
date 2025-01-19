@@ -1,3 +1,7 @@
+service:
+  kafka:
+    url: localhost:9092
+
 spring:
   application:
     name: payment-service
