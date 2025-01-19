@@ -1,21 +1,16 @@
-# Base image
-FROM openjdk:17-jdk-slim
+FROM ubuntu:20.04
 
-# Set environment variables
-ENV APP_HOME=/app
-ENV SERVER_PORT=8160
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Seoul
 
-# Create app directory
-WORKDIR $APP_HOME
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jdk curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy build artifacts
+WORKDIR /app
+
 COPY build/libs/notification-service-*.jar app.jar
 
-# Expose the server port
-EXPOSE $SERVER_PORT
+EXPOSE 8160
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s CMD curl -f http://localhost:$SERVER_PORT/actuator/health || exit 1
-
-# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

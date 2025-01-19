@@ -1,18 +1,26 @@
 server:
-  port: 0  # Temporary port, will be overwritten by Config Server
+  port: 8888  # Gateway 서비스는 일반적으로 8080 포트를 사용
 
 spring:
+  main:
+    web-application-type: reactive  # Spring 애플리케이션이 리액티브 웹 애플리케이션으로 설정됨
   application:
     name: gateway-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: optional:configserver:http://config-server:8888  # Config Server에서 설정 불러오기
   cloud:
     config:
       discovery:
         enabled: true
         service-id: config-server
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/

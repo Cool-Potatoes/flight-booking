@@ -1,18 +1,32 @@
 server:
-  port: 0  # Temporary port, will be overwritten by Config server settings later.
+  port: 8100  # User 서비스 고정 포트
 
 spring:
   application:
     name: user-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: optional:configserver:http://config-server:8888
   cloud:
     config:
       discovery:
-        enabled: true  # Discover Config Server through Eureka
+        enabled: true  # Eureka를 통해 Config Server 검색
         service-id: config-server
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # 전체 트레이싱 활성화
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans  # localhost 대신 zipkin 서비스 이름 사용
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+
 
 eureka:
   client:
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA:false}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY:false}
     service-url:
-      defaultZone: http://localhost:8761/eureka/  # Use Eureka server name within Docker network
+      defaultZone: http://eureka-server:8761/eureka/

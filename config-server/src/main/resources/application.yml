@@ -3,11 +3,43 @@ server:
 
 spring:
   profiles:
-    active: native
+    active: git  # 'git' 프로파일을 활성화 (선택사항)
   application:
     name: config-server
+
   cloud:
     config:
       server:
-        native:
-          search-locations: classpath:/config-repo
+        git:
+          uri: https://github.com/Cool-Potatoes/config-repo.git
+          username: HanBeom98
+          password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
+          default-label: main
+          search-paths: '{application}'  # 애플리케이션 이름에 맞는 설정 파일을 찾음
+          clone-on-start: true
+          skip-ssl-validation: true
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # 전체 트레이싱 활성화
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans  # localhost 대신 zipkin 서비스 이름 사용
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  endpoint:
+    health:
+      show-details: always
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+
+service:
+  jwt:
+    access-token-expiration: 3600  # Access token 유효 시간 (초 단위)
+    refresh-token-expiration: 604800  # Refresh token 유효 시간 (초 단위)
+    secret-key: ${SECRET_KEY}  # JWT 서명에 사용할 비밀 키
