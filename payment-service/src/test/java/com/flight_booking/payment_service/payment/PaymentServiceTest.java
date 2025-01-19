@@ -1,7 +1,9 @@
 package com.flight_booking.payment_service.payment;
 
-import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.payment_service.application.service.PaymentService;
+import com.flight_booking.payment_service.domain.model.Payment;
+import com.flight_booking.payment_service.domain.repository.PaymentRepository;
 import com.flight_booking.payment_service.presentation.request.UpdateFareRequestDto;
 import com.flight_booking.payment_service.presentation.response.PaymentResponseDto;
 import java.util.UUID;
@@ -20,18 +22,28 @@ public class PaymentServiceTest {
 
   private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
+
   @Autowired
   private PaymentService paymentService;
+
+  @Autowired
+  private PaymentRepository paymentRepository;
 
   @Test
   public void testPessimisticLocking() throws InterruptedException {
     // 초기 데이터 설정
     logger.info("초기 아이템 데이터를 설정합니다.");
     UUID bookingId = UUID.randomUUID();
-    PaymentRequestDto paymentRequestDto = new PaymentRequestDto("email", bookingId, 1000L);
-    PaymentResponseDto paymentResponseDto = paymentService.createPayment(paymentRequestDto);
 
-    UUID paymentId = paymentResponseDto.paymentId();
+    Payment payment = Payment.builder()
+        .bookingId(bookingId)
+        .fare(1000L)
+        .status(PaymentStatusEnum.PENDING)
+        .build();
+
+    Payment savedPayment = paymentRepository.save(payment);
+
+    UUID paymentId = savedPayment.getPaymentId();
 
     UpdateFareRequestDto updateFareRequestDto1
         = new UpdateFareRequestDto(bookingId, 1000L, 2000L);

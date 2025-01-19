@@ -24,7 +24,11 @@ public enum ErrorCode {
   PASSWORDS_SAME(HttpStatus.BAD_REQUEST, "기존 비밀번호와 동일합니다."),
   INVALID_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 인증 코드입니다."),
   CODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 이메일에 대한 인증 코드가 존재하지 않습니다."),
-  CODE_ALREADY_SENT(HttpStatus.BAD_REQUEST, "이미 인증 코드가 발급되었습니다. 1분 뒤에 다시 발급 가능합니다.");
+  CODE_ALREADY_SENT(HttpStatus.BAD_REQUEST, "이미 인증 코드가 발급되었습니다. 1분 뒤에 다시 발급 가능합니다."),
+  REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "리프레시 토큰이 존재하지 않습니다."),
+  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+  BLACKLISTED_TOKEN(HttpStatus.FORBIDDEN, "블랙리스트에 존재하는 토큰입니다."),
+  TOKEN_EXPIRED(HttpStatus.FORBIDDEN, "만료된 토큰입니다.");
 
   private final HttpStatus httpStatus;
   private final String message;
