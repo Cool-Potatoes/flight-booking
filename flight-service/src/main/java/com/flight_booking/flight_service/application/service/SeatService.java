@@ -1,13 +1,18 @@
 package com.flight_booking.flight_service.application.service;
 
+import com.flight_booking.common.application.dto.BookingCreateRequestDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
-import com.flight_booking.common.application.dto.PassengerRequestDto;
-import com.flight_booking.common.application.dto.PaymentRefundRequestDto;
+import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
+import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityCheckAndReturnRequestDto;
+import com.flight_booking.common.application.dto.PaymentStatusUpdateRefundRequestDto;
+import com.flight_booking.common.application.dto.ReBookingRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityCheckForRebookRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityUpdateTrueRequestDto;
+import com.flight_booking.common.application.dto.SeatCalculateDifferenceAndRefundRequestDto;
+import com.flight_booking.common.domain.model.BookingStatusEnum;
+import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.flight_service.domain.model.Flight;
 import com.flight_booking.flight_service.domain.model.Seat;
@@ -35,6 +40,7 @@ public class SeatService {
 
   private final SeatRepository seatRepository;
   private final SeatKafkaSender seatKafkaSender;
+  private final UserService userService;
 
   public void createSeat(Flight flight) {
 
@@ -102,29 +108,6 @@ public class SeatService {
   }
 
 
-  // 좌석 클래스에 따른 Seat 생성
-  private void createSeatsForClass(Flight flight, Set<Seat> seatSet, SeatClassEnum seatClass,
-      int totalSeats) {
-    for (int i = 0; i < totalSeats; i++) {
-      Seat seat = Seat.builder()
-          .seatCode(generateSeatCode(i))
-          .seatClass(seatClass)
-          .flight(flight)
-          .isAvailable(true)
-          .price(0L)
-          .build();
-      seatSet.add(seat);
-    }
-  }
-
-  // 좌석 코드 생성
-  private String generateSeatCode(int index) {
-    char rowLetter = (char) ('A' + (index % 7)); // A to G
-    int seatNumber = (index % 12) + 1;  // 1 to 12
-
-    return String.format("%c%02d", rowLetter, seatNumber);
-  }
-
   @Transactional
   public void consumeSeatAvailabilityCheckAndUpdate(
       SeatAvailabilityCheckRequestDto seatAvailabilityCheckRequestDto) {
@@ -149,6 +132,7 @@ public class SeatService {
           seatAvailabilityCheckRequestDto.bookingId().toString(),
           new PaymentRequestDto(
               seatAvailabilityCheckRequestDto.email(),
+              null,
               seatAvailabilityCheckRequestDto.bookingId(),
               totalPrice),
           StackTraceUtils.getCurrentMethodName(),
@@ -163,7 +147,6 @@ public class SeatService {
           new BookingProcessRequestDto(
               null,
               seatAvailabilityCheckRequestDto.bookingId(),
-              null,
               null),
           StackTraceUtils.getCurrentMethodName(),
           StackTraceUtils.getCurrentClassName()
@@ -172,48 +155,26 @@ public class SeatService {
     }
   }
 
-  private boolean checkSeatListAvailable(List<Seat> seatList) {
-    for (Seat seat : seatList) {
-      if (!seat.getIsAvailable()) {
-        return false;
-      }
-    }
-    return true;
-  }
 
-  // 비동기
-  @Transactional(readOnly = false)
-  public void seatAvailabilityCheckAndReturn(
-      SeatAvailabilityCheckAndReturnRequestDto seatAvailabilityCheckAndReturnRequestDto) {
+  @Transactional
+  public void consumeSeatAvailabilityCheckAndUpdateForRebook(
+      SeatAvailabilityCheckForRebookRequestDto requestDto) {
 
-    Long newSeatTotalPrice = 0L;
+    Seat seat = getSeatEntity(requestDto.seatId());
 
-    for (PassengerRequestDto dto : seatAvailabilityCheckAndReturnRequestDto.passengerRequestDtos()) {
-      Seat seat = seatRepository.findById(dto.seatId()).orElseThrow(IllegalArgumentException::new);
-      if (!seat.getIsAvailable()) {
-        throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seat.getSeatId());
-      }
-      if (seat.getIsDeleted()) {
-        throw new RuntimeException("삭제된 좌석입니다.");
-      }
-      // TODO : 여기서 미리 좌석을 false로 바꿔놓는 방식 말고, lock으로 할 것
-      // seat.updateAvailable(false);
-      newSeatTotalPrice += seat.getPrice();
-    }
+    seat.updateAvailable(false);
 
     seatKafkaSender.sendMessage(
-        "payment-refund-topic",
-        seatAvailabilityCheckAndReturnRequestDto.bookingId().toString(),
-        new PaymentRefundRequestDto(
-            seatAvailabilityCheckAndReturnRequestDto.ticketId(),
-            seatAvailabilityCheckAndReturnRequestDto.email(),
-            seatAvailabilityCheckAndReturnRequestDto.bookingId(),
-            seatAvailabilityCheckAndReturnRequestDto.passengerRequestDtos(),
-            newSeatTotalPrice),
+        "payment-creation-topic",
+        seat.getSeatId().toString(),
+        new PaymentRequestDto(
+            requestDto.email(),
+            requestDto.ticketId(),
+            requestDto.bookingId(),
+            seat.getPrice()),
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );
-
   }
 
   // 동기
@@ -227,18 +188,8 @@ public class SeatService {
       // 실패 로직.. 동기화? 비동기화?
       throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seat.getSeatId());
     } else {
-      // TODO : 대체 예약하고싶은 seat의 available은 어디서 false로 바꾸는것이 맞나?
-      //  여기서 바꿈 : 이후 재 예매 시 생성할 때 false라서 예약 안됨 -
-      //  -> 재 예매 로직을 아예 새로 만드는것?
-//      seat.updateAvailable(false);
       return seat.getPrice();
     }
-  }
-
-  private Seat getSeatIsDeletedFalse(UUID seatId) {
-
-    return seatRepository.findBySeatIdAndIsDeletedFalse(seatId)
-        .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
   }
 
   @Transactional(readOnly = false)
@@ -249,9 +200,121 @@ public class SeatService {
     seat.updateAvailable(requestDto.available());
   }
 
+  public Boolean getSeatIsAvailable(UUID seatId) {
+
+    Seat seat = getSeatEntity(seatId);
+
+    return seat.getIsAvailable();
+  }
+
+  public void seatCalculateDifferenceAndRefund(
+      SeatCalculateDifferenceAndRefundRequestDto seatBookingRequestDto) {
+
+    Long difference = calculateDifferenceOldAndNewSeatPrice(seatBookingRequestDto);
+
+    boolean successRefund = userService.refundMileage(seatBookingRequestDto.email(),
+        seatBookingRequestDto.role(),
+        seatBookingRequestDto.email(), difference);
+
+    if (successRefund) {
+      seatKafkaSender.sendMessage(
+          "create-booking-topic",
+          seatBookingRequestDto.passengerRequestDto().seatId().toString(),
+          new BookingCreateRequestDto(
+              new ReBookingRequestDto(seatBookingRequestDto.passengerRequestDto(),
+                  seatBookingRequestDto.ticketId()),
+              seatBookingRequestDto.email()),
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName()
+      );
+// 필드를 나누고 dto a 가 b로 변경되는거를 스태틱클래스로 치환해서 변경
+      sendKafkaMessagesForUpdateStatusToRefund(seatBookingRequestDto.bookingId(),
+          seatBookingRequestDto.seatId(), seatBookingRequestDto.passengerId());
+    }
+
+  }
+
+  private void sendKafkaMessagesForUpdateStatusToRefund(UUID bookingId, UUID seatId,
+      UUID passengerId) {
+// 시트서비스가 발생한만한 메시지만 보낼걸
+    seatKafkaSender.sendMessage("booking-status-update-refund-topic",
+        bookingId.toString(),
+        new BookingStatusUpdateRefundRequestDto(bookingId,
+            BookingStatusEnum.BOOKING_REFUND_COMPLETE), StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName());
+
+    seatKafkaSender.sendMessage("seat-availability-update-true-topic",
+        seatId.toString(),
+        new SeatAvailabilityUpdateTrueRequestDto(seatId, true),
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
+
+    seatKafkaSender.sendMessage("passenger-isdeleted-update-true-topic",
+        passengerId.toString(),
+        new PassengerIsdeletedUpdateTrueRequestDto(passengerId, true),
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
+
+    // payment는 bookingId 전송해서 찾아서 처리
+    seatKafkaSender.sendMessage("payment-status-update-refund-topic",
+        bookingId.toString(),
+        new PaymentStatusUpdateRefundRequestDto(bookingId,
+            PaymentStatusEnum.REFUND_COMPLETE), StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName());
+
+  }
+
+  private Long calculateDifferenceOldAndNewSeatPrice(
+      SeatCalculateDifferenceAndRefundRequestDto seatBookingRequestDto) {
+
+    Seat oldSeat = getSeatEntity(seatBookingRequestDto.seatId());
+
+    Seat newSeat = getSeatEntity(seatBookingRequestDto.passengerRequestDto().seatId());
+
+    return oldSeat.getPrice() - newSeat.getPrice();
+  }
+
+  private Seat getSeatIsDeletedFalse(UUID seatId) {
+
+    return seatRepository.findBySeatIdAndIsDeletedFalse(seatId)
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
+  }
+
   private Seat getSeatEntity(UUID seatId) {
 
     return seatRepository.findBySeatIdAndIsDeletedFalse(seatId)
         .orElseThrow(() -> new RuntimeException("존재하지 않는 seatId"));
   }
+
+  // 좌석 클래스에 따른 Seat 생성
+  private void createSeatsForClass(Flight flight, Set<Seat> seatSet, SeatClassEnum seatClass,
+      int totalSeats) {
+    for (int i = 0; i < totalSeats; i++) {
+      Seat seat = Seat.builder()
+          .seatCode(generateSeatCode(i))
+          .seatClass(seatClass)
+          .flight(flight)
+          .isAvailable(true)
+          .price(0L)
+          .build();
+      seatSet.add(seat);
+    }
+  }
+
+  // 좌석 코드 생성
+  private String generateSeatCode(int index) {
+    char rowLetter = (char) ('A' + (index % 7)); // A to G
+    int seatNumber = (index % 12) + 1;  // 1 to 12
+
+    return String.format("%c%02d", rowLetter, seatNumber);
+  }
+
+  private boolean checkSeatListAvailable(List<Seat> seatList) {
+    for (Seat seat : seatList) {
+      if (!seat.getIsAvailable()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+
 }

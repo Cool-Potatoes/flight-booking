@@ -2,7 +2,6 @@ package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
-import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
@@ -101,18 +100,15 @@ public class UserService {
   @Transactional
   public void updateUserMileage(UserRequestDto userRequestDto) {
 
-    // TODO lock 걸어서 유저 정보 변경 할 때 중복변경 되지 않게
     User user = userRepository.findByEmail(userRequestDto.email())
         .orElseThrow();
 
-    // 마일리지가 충분한지 확인
     if (user.getMileage() < userRequestDto.fare()) {
-
-      // payment fallback 로직
       userKafkaSender.sendMessage(
           "payment-fail-process-topic",
           userRequestDto.paymentId().toString(),
-          new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null),
+          new PaymentRefundProcessRequestDto(userRequestDto.ticketId(), userRequestDto.paymentId(),
+              userRequestDto.email()),
           StackTraceUtils.getCurrentMethodName(),
           StackTraceUtils.getCurrentClassName()
       );
@@ -120,59 +116,13 @@ public class UserService {
       return;
     }
 
-    // 마일리지 차감
     user.updateMile(userRequestDto.fare());
 
-    // 결제 상태 업데이트
     userKafkaSender.sendMessage(
         "payment-success-process-topic",
         user.getId().toString(),
-        new PaymentRefundProcessRequestDto(null, userRequestDto.paymentId(), null, null),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-
-  }
-
-  // 환불
-  @Transactional
-  public void refundProcessing(UserRefundRequestDto userRefundRequestDto) {
-
-    User user = userRepository.findByEmail(userRefundRequestDto.email())
-        .orElseThrow();
-
-    Long difference = Math.abs(
-        userRefundRequestDto.newSeatTotalPrice() - userRefundRequestDto.refundFair());
-    // 마일리지가 충분한지 확인
-    if (user.getMileage() < difference) {
-
-      // payment fallback 로직
-      userKafkaSender.sendMessage(
-          "payment-refund-fail-topic",
-          userRefundRequestDto.paymentId().toString(),
-          new PaymentRefundProcessRequestDto(
-              null,
-              userRefundRequestDto.paymentId(),
-              null,
-              null),
-          StackTraceUtils.getCurrentMethodName(),
-          StackTraceUtils.getCurrentClassName()
-      );
-
-      return;
-    }
-
-    // 환불해줌 ( 마일리지가 여유가 있으니 재 결제 )
-    user.refundMile(userRefundRequestDto.refundFair());
-
-    // 결제 상태 업데이트
-    userKafkaSender.sendMessage(
-        "payment-refund-success-topic",
-        user.getId().toString(),
-        new PaymentRefundProcessRequestDto(
-            userRefundRequestDto.ticketId(), userRefundRequestDto.paymentId(),
-            userRefundRequestDto.passengerRequestDtos(),
-            userRefundRequestDto.email()),
+        new PaymentRefundProcessRequestDto(userRequestDto.ticketId(), userRequestDto.paymentId(),
+            userRequestDto.email()),
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );

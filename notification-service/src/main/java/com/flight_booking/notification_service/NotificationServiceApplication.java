@@ -3,11 +3,13 @@ package com.flight_booking.notification_service;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableFeignClients
 @SpringBootApplication
 @EnableAsync // 비동기 처리를 활성화
+@ComponentScan(basePackages = {"com.flight_booking.notification_service", "com.flight_booking.common"})
 public class NotificationServiceApplication {
 
   public static void main(String[] args) {

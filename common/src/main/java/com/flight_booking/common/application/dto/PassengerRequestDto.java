@@ -8,7 +8,8 @@ public record PassengerRequestDto(
     PassengerTypeEnum passengerType,
     String passengerName,
     Boolean baggage,
-    Boolean meal
+    Boolean meal,
+    Boolean update
 ) {
 
 }

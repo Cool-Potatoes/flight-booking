@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,12 +18,18 @@ public class InternalSeatController {
   private final SeatService seatService;
 
   @GetMapping("/{seatId}")
-  public ApiResponse<?> updateSeatAvailableFalseAndGetSeatPrice(
+  public Long updateSeatAvailableFalseAndGetSeatPrice(
       @PathVariable UUID seatId
   ) {
 
-    Long newSeatPrice = seatService.updateSeatAvailableFalseAndGetSeatPrice(seatId);
+    return seatService.updateSeatAvailableFalseAndGetSeatPrice(seatId);
+  }
 
-    return ApiResponse.ok(newSeatPrice, "좌석 요금 반환 성공, 상태 변경 완료");
+  @GetMapping("/available/{seatId}")
+  public Boolean getSeatIsAvailable(
+      @PathVariable UUID seatId
+  ) {
+
+    return seatService.getSeatIsAvailable(seatId);
   }
 }

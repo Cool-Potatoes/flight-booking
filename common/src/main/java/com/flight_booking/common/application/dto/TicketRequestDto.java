@@ -6,6 +6,8 @@ import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record TicketRequestDto(
+    UUID ticketId,
+    String email,
     @NotNull(message = "Booking ID cannot be null")
     UUID bookingId,
     @NotNull(message = "Passenger ID cannot be null")

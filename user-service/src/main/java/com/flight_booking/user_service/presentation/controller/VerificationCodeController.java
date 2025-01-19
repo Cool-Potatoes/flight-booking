@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/users")
+@RequestMapping("/v1/auth")
 public class VerificationCodeController {
 
   private final VerificationCodeService verificationCodeService;

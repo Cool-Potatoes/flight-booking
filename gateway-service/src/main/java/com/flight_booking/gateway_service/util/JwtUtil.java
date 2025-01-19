@@ -13,12 +13,19 @@ import java.util.Base64;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
 @Slf4j(topic = "JWT 검증 및 정보 추출")
 @Component
 public class JwtUtil {
+
+  private final RedisTemplate<String, Object> redisTemplate;
+
+  public JwtUtil(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
+  }
 
   // Header KEY 값
   public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -43,13 +50,12 @@ public class JwtUtil {
   }
 
   // 토큰 검증
-  public boolean validateToken(String token) {
+  public void validateToken(String token) {
     try {
       Jws<Claims> claimsJws = Jwts.parser()
           .verifyWith(key)
           .build().parseSignedClaims(token);
       log.info("payload: {}", claimsJws.getPayload().toString());
-      return true;
     } catch (ExpiredJwtException e) {
       log.error("만료된 JWT token 입니다. Token: {}", token);
       throw new JwtException(JwtErrorCode.EXPIRED_TOKEN.getMessage());
@@ -105,5 +111,14 @@ public class JwtUtil {
         .verifyWith(key)
         .build().parseSignedClaims(token);
     return jws.getPayload();
+  }
+
+  // 블랙리스트에 존재하는지 확인
+  public boolean isTokenBlacklisted(String token) {
+    if (redisTemplate.hasKey("blacklist:" + token)) {
+      log.warn("블랙리스트에 포함된 토큰입니다. Token: {}", token);
+      throw new JwtException(JwtErrorCode.BLACKLISTED_TOKEN.getMessage());
+    }
+    return false;
   }
 }
