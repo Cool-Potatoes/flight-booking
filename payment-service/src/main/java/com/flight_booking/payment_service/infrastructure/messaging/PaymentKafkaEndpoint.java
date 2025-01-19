@@ -40,17 +40,6 @@ public class PaymentKafkaEndpoint {
     paymentService.processPaymentSuccess(paymentRequestDto);
   }
 
-  @KafkaListener(groupId = "payment-fail-group", topics = "payment-fail-process-topic")
-  public void consumePaymentFailProcess(@Payload ApiResponse<PaymentRefundProcessRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    PaymentRefundProcessRequestDto paymentRequestDto = mapper.convertValue(message.getData(),
-        PaymentRefundProcessRequestDto.class);
-
-    paymentService.processPaymentFail(paymentRequestDto);
-  }
-
-
   @KafkaListener(groupId = "payment-refund-group", topics = "payment-refund-ticket-topic")
   public void consumePaymentRefundFromTicket(
       @Payload ApiResponse<PaymentRefundFromTicketRequestDto> message) {
