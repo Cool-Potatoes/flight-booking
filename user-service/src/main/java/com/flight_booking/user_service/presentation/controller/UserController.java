@@ -1,6 +1,7 @@
 package com.flight_booking.user_service.presentation.controller;
 
 import com.flight_booking.common.presentation.global.ApiResponse;
+import com.flight_booking.user_service.application.dto.UserStatusDto;
 import com.flight_booking.user_service.application.service.UserService;
 import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
@@ -74,6 +75,12 @@ public class UserController {
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     userService.deleteUser(id, userDetails);
     return ApiResponse.ok("회원 탈퇴 성공");
+  }
+
+  // 상태 조회 (WebClient용)
+  @GetMapping("/status/{email}")
+  public UserStatusDto getUserStatus(@PathVariable("email") String email) {
+    return userService.getUserStatus(email);
   }
 
 }

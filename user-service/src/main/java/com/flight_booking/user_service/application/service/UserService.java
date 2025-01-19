@@ -5,6 +5,7 @@ import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.user_service.application.dto.UserStatusDto;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
@@ -89,6 +90,13 @@ public class UserService {
     user.setDeletedBy(userDetails.getUsername());
     user.setIsDeleted(true);
     user.setDeletedAt(LocalDateTime.now());
+  }
+
+  // 상태 조회 (WebClient용)
+  public UserStatusDto getUserStatus(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+    return new UserStatusDto(user.getIsBlocked(), user.getIsDeleted());
   }
 
 
