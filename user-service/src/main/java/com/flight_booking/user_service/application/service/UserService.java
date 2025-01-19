@@ -6,6 +6,7 @@ import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.presentation.dto.NotificationRequest;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,7 +122,7 @@ public class UserService {
               TimeUnit.MINUTES);
 
       // TODO 알림 발송. 잠시 후 자동으로 결제가 재시도 됩니다. 마일리지를 충전해주세요.
-//      userKafkaSender.sendMessage();
+      sendInsufficientMileageMessage(user);
 
       return false;
     }
@@ -197,6 +199,13 @@ public class UserService {
 
   }
 
+  public void createNotificationByEmail(NotificationRequest request) {
+    String email = request.receiverEmail();
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("일치하는 email을 찾을 수 없습니다."));
+    sendNotificationCreationMessage(user, request.title(), request.content());
+  }
+
   /**
    * private methods
    */
@@ -254,6 +263,25 @@ public class UserService {
 
   private boolean isRetrying(UUID paymentId) {
     return redisTemplate.hasKey("Retry:paymentId:" + paymentId.toString());
+  }
+
+  private void sendInsufficientMileageMessage(User user) {
+    sendNotificationCreationMessage(
+        user,
+        "마일리지 부족으로 인한 결제 오류 안내",
+        "마일리지 부족으로 인하여 결제가 이루어지지 않았습니다.\n"
+            + "잠시 후 자동적으로 재결제가 이루어질 예정이니, 마일리지를 충전해주세요.");
+  }
+
+  private void sendNotificationCreationMessage(User user, String title, String message) {
+    userKafkaSender.sendMessage(
+        "notification-create-notification-topic",
+        user.getId().toString(),
+        new NotificationRequest(
+            user.getId(), "From System", user.getEmail(), title, message
+        ),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName());
   }
 
 }

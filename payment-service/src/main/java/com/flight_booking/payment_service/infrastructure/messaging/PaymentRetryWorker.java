@@ -48,17 +48,12 @@ public class PaymentRetryWorker {
       boolean success = retryPayment(requestDto);
       if (success) {
         log.info("Payment Retry Success, PaymentId: " + requestDto.paymentId());
-        // TODO 알림 유저에게 결제 완료 알림 발솔
-//        paymentKafkaSender.sendMessage();
+        paymentService.sendPayedMessage(requestDto);
       } else {
 
         if (retryCount >= MAX_RETRY_COUNT) {  // 예매 취소
           paymentService.processPaymentFail(PaymentRefundProcessRequestDto.from(requestDto));
-          // TODO 알림 유저에게 취소 알림 발송
-//      paymentKafkaSender.sendMessage();
-
-          // 해당 결제를 DLQ로 전송
-          paymentService.sendPaymentDLQ(requestDto);
+          paymentService.sendPaymentDLQ(requestDto);  // 결제를 DLQ로 전송
           return;
         }
 
