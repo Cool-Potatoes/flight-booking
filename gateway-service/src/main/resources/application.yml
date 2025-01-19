@@ -22,5 +22,7 @@ management:
 
 eureka:
   client:
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA:false}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY:false}
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
