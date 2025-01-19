@@ -1,4 +1,4 @@
-package com.flight_booking.ticket_service.infrastructure.Redis;
+package com.flight_booking.ticket_service.infrastructure.redis;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

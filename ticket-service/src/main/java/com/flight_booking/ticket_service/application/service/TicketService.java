@@ -1,18 +1,14 @@
-package com.flight_booking.ticket_service.infrastructure.service;
+package com.flight_booking.ticket_service.application.service;
 
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.SeatCalculateDifferenceAndRefundRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
-import com.flight_booking.ticket_service.application.service.BookingService;
-import com.flight_booking.ticket_service.application.service.FlightService;
-import com.flight_booking.ticket_service.application.service.PaymentService;
-import com.flight_booking.ticket_service.application.service.UserService;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
-import com.flight_booking.ticket_service.infrastructure.Redis.RedisLock;
+import com.flight_booking.ticket_service.infrastructure.redis.RedisLock;
 import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
@@ -86,9 +82,9 @@ public class TicketService {
   public TicketResponseDto updateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto,
       CustomUserDetails userDetails) {
 
-    Ticket ticket = validateTicket(ticketId, ticketRequestDto);
+    Ticket ticket = getTicketIfValid(ticketId, ticketRequestDto);
 
-    UUID seatId = ticket.getSeatId();
+    UUID seatId = ticketRequestDto.passengerRequestDto().seatId();
     boolean lockAcquired = redisLock.tryLock(seatId, 300, TimeUnit.SECONDS);
     if (!lockAcquired) {
       throw new RuntimeException("다른 사용자가 해당 좌석을 예약 중입니다.");
@@ -98,6 +94,14 @@ public class TicketService {
       throw new RuntimeException("해당 좌석은 예약이 불가능한 상태입니다.");
     }
 
+    // jmeter 로 테스트해보기
+    // 돌아가는도중에 db가 바뀔수도있으니 낙천적락, 비관적락도 같이 고려해볼것
+    // feign 하나당 서킷 하나 달기
+    // 실패는 실패큐로만 들어가
+    // 바꾸려는 seatid가
+    // 티켓이라는 entity가 들어가면 안되니까 아래 dto에서 저렇게 파라미터로 넘김
+    // jmeter, grafana : 트랜잭션 오래걸리는곳 확인 및 개선 적용 -> 사용자가 몰릴거같은 요청 + 캐싱
+    // 코드는 대충 돌아가면 됬고 이제 어필할 문서가 필요하다
     ticket.updateState(TicketStateEnum.PROCESS_REFUND);
 
     ticketKafkaSender.sendMessage("seat-calculate-difference-and-refund-topic",
@@ -146,9 +150,13 @@ public class TicketService {
         .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
   }
 
-  private Ticket validateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
+  private Ticket getTicketIfValid(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
 
     Ticket ticket = getTicketById(ticketId);
+
+    if(ticket.getState() == TicketStateEnum.PROCESS_REFUND){
+      throw new RuntimeException("이미 환불중인 티켓 중입니다.");
+    }
 
     if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
       throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
