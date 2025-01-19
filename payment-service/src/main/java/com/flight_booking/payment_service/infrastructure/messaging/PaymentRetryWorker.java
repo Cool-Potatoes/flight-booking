@@ -1,8 +1,9 @@
 package com.flight_booking.payment_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRetryRequestDto;
-import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.payment_service.application.service.PaymentService;
 import com.flight_booking.payment_service.infrastructure.scheduling.PaymentScheduler;
@@ -10,17 +11,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Slf4j
+@Component
 public class PaymentRetryWorker {
 
-  private final PaymentKafkaSender paymentKafkaSender;
   private final PaymentScheduler paymentScheduler;
   private final PaymentService paymentService;
 
   private final int MAX_RETRY_COUNT = 5;
-  private final int[] delays = {3, 5, 7, 9, 10}; // minutes
+  private final int[] delays = {3, 2, 2, 2, 1}; // minutes
 
   @KafkaListener(groupId = "payment-retry-group", topics = "payment-retry-topic")
   public void processRetry(@Payload ApiResponse<PaymentRetryRequestDto> message) {
@@ -36,16 +38,8 @@ public class PaymentRetryWorker {
       retryCount++;
 
       schedulePaymentRetry(requestDto, retryCount, delay);
+      paymentService.updatePaymentState(PaymentStatusEnum.IN_RETRY, requestDto.paymentId());
 
-      return;
-    }
-
-    if (retryCount >= MAX_RETRY_COUNT) {
-      // TODO 예매 취소 로직
-      // TODO 유저에게 알림 발송
-      paymentKafkaSender.sendMessage(
-          "payment-dlq-topic", requestDto.email(), requestDto,
-          StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
       return;
     }
 
@@ -53,15 +47,27 @@ public class PaymentRetryWorker {
       // 결제 재시도
       boolean success = retryPayment(requestDto);
       if (success) {
-        log.info("Payment Retry Success, BookingId: " + requestDto.bookingId());
-        // TODO 유저에게 알림 발솔
+        log.info("Payment Retry Success, PaymentId: " + requestDto.paymentId());
+        // TODO 알림 유저에게 결제 완료 알림 발솔
+//        paymentKafkaSender.sendMessage();
       } else {
+
+        if (retryCount >= MAX_RETRY_COUNT) {  // 예매 취소
+          paymentService.processPaymentFail(PaymentRefundProcessRequestDto.from(requestDto));
+          // TODO 알림 유저에게 취소 알림 발송
+//      paymentKafkaSender.sendMessage();
+
+          // 해당 결제를 DLQ로 전송
+          paymentService.sendPaymentDLQ(requestDto);
+          return;
+        }
+
         throw new RuntimeException("Payment failed");
       }
     } catch (RuntimeException e) {
-      log.error("Payment Retry failed, BookingId: " + requestDto.bookingId()
+      log.error("Payment Retry failed, PaymentId: " + requestDto.paymentId()
           + " , Retry Count: " + retryCount);
-      long delay = (long) delays[retryCount] * 1000 * 60;
+      long delay = (long) delays[retryCount - 1] * 1000 * 60;
       retryCount++;
       schedulePaymentRetry(requestDto, retryCount, delay);
     }
@@ -76,10 +82,7 @@ public class PaymentRetryWorker {
   }
 
   private boolean retryPayment(PaymentRetryRequestDto requestDto) {
-    // 재결제 메서드 호출 TODO
-//    boolean success = paymentService.retryPayment(requestDto);
-
-    return Math.random() > 0.5;
+    return paymentService.retryPayment(requestDto);
   }
 
 
