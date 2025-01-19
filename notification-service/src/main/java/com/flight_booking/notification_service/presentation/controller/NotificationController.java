@@ -2,7 +2,7 @@ package com.flight_booking.notification_service.presentation.controller;
 
 import com.flight_booking.notification_service.application.service.NotificationService;
 import com.flight_booking.notification_service.global.ApiResponse;
-import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
+import com.flight_booking.common.presentation.dto.NotificationRequest;
 import com.flight_booking.notification_service.presentation.dto.NotificationResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
