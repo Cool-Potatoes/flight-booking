@@ -94,14 +94,6 @@ public class TicketService {
       throw new RuntimeException("해당 좌석은 예약이 불가능한 상태입니다.");
     }
 
-    // jmeter 로 테스트해보기
-    // 돌아가는도중에 db가 바뀔수도있으니 낙천적락, 비관적락도 같이 고려해볼것
-    // feign 하나당 서킷 하나 달기
-    // 실패는 실패큐로만 들어가
-    // 바꾸려는 seatid가
-    // 티켓이라는 entity가 들어가면 안되니까 아래 dto에서 저렇게 파라미터로 넘김
-    // jmeter, grafana : 트랜잭션 오래걸리는곳 확인 및 개선 적용 -> 사용자가 몰릴거같은 요청 + 캐싱
-    // 코드는 대충 돌아가면 됬고 이제 어필할 문서가 필요하다
     ticket.updateState(TicketStateEnum.PROCESS_REFUND);
 
     ticketKafkaSender.sendMessage("seat-calculate-difference-and-refund-topic",
