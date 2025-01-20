@@ -22,9 +22,6 @@ public class Notification extends BaseEntity {
   @Column(name = "notification_id", nullable = false, unique = true)
   private UUID notificationId;
 
-  @Column(name = "ticket_id", nullable = false)
-  private Long ticketId;
-
   @Column(name = "user_id", nullable = false)
   private Long userId;
 

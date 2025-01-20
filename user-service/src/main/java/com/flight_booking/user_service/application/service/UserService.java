@@ -1,10 +1,12 @@
 package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
+import com.flight_booking.common.application.dto.PaymentRetryRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.presentation.dto.NotificationRequest;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
@@ -18,10 +20,14 @@ import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
 import java.time.LocalDateTime;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +38,7 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final UserKafkaSender userKafkaSender;
+  private final RedisTemplate<String, String> redisTemplate;
 
   // 전체 회원 목록 조회
   @Transactional(readOnly = true)
@@ -98,22 +105,26 @@ public class UserService {
 
   // 마일리지 차감
   @Transactional
-  public void updateUserMileage(UserRequestDto userRequestDto) {
+  public boolean updateUserMileage(UserRequestDto userRequestDto) {
 
     User user = userRepository.findByEmail(userRequestDto.email())
         .orElseThrow();
 
     if (user.getMileage() < userRequestDto.fare()) {
-      userKafkaSender.sendMessage(
-          "payment-fail-process-topic",
-          userRequestDto.paymentId().toString(),
-          new PaymentRefundProcessRequestDto(userRequestDto.ticketId(), userRequestDto.paymentId(),
-              userRequestDto.email()),
-          StackTraceUtils.getCurrentMethodName(),
-          StackTraceUtils.getCurrentClassName()
-      );
 
-      return;
+      if (isRetrying(userRequestDto.paymentId())) {
+        return false;
+      }
+
+      sendPaymentRetryQueue(userRequestDto, user);
+      redisTemplate.opsForValue()
+          .set("Retry:paymentId:" + userRequestDto.paymentId().toString(), "In Retry Queue", 15,
+              TimeUnit.MINUTES);
+
+      // TODO 알림 발송. 잠시 후 자동으로 결제가 재시도 됩니다. 마일리지를 충전해주세요.
+      sendInsufficientMileageMessage(user);
+
+      return false;
     }
 
     user.updateMile(userRequestDto.fare());
@@ -126,6 +137,8 @@ public class UserService {
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );
+
+    return true;
   }
 
   // 동기, 환불
@@ -186,6 +199,13 @@ public class UserService {
 
   }
 
+  public void createNotificationByEmail(NotificationRequest request) {
+    String email = request.receiverEmail();
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("일치하는 email을 찾을 수 없습니다."));
+    sendNotificationCreationMessage(user, request.title(), request.content());
+  }
+
   /**
    * private methods
    */
@@ -232,6 +252,36 @@ public class UserService {
     if (updateRequest.role() != null) {
       throw new UserException(ErrorCode.CANNOT_MODIFY_FIELD);
     }
+  }
+
+  private void sendPaymentRetryQueue(UserRequestDto userRequestDto, User user) {
+    userKafkaSender.sendMessage("payment-retry-topic", user.getId().toString(),
+        PaymentRetryRequestDto.from(user.getEmail(), userRequestDto),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName());
+  }
+
+  private boolean isRetrying(UUID paymentId) {
+    return redisTemplate.hasKey("Retry:paymentId:" + paymentId.toString());
+  }
+
+  private void sendInsufficientMileageMessage(User user) {
+    sendNotificationCreationMessage(
+        user,
+        "마일리지 부족으로 인한 결제 오류 안내",
+        "마일리지 부족으로 인하여 결제가 이루어지지 않았습니다.\n"
+            + "잠시 후 자동적으로 재결제가 이루어질 예정이니, 마일리지를 충전해주세요.");
+  }
+
+  private void sendNotificationCreationMessage(User user, String title, String message) {
+    userKafkaSender.sendMessage(
+        "notification-create-notification-topic",
+        user.getId().toString(),
+        new NotificationRequest(
+            user.getId(), "From System", user.getEmail(), title, message
+        ),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName());
   }
 
 }

@@ -15,6 +15,7 @@ import com.flight_booking.common.application.dto.ReBookingRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckForRebookRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
+import com.flight_booking.common.application.dto.SeatAvailabilityUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
@@ -84,7 +85,8 @@ public class BookingService {
 
     Booking savedBooking = bookingRepository.save(booking);
 
-    passengerService.createPassengerForRebook(bookingRequestDto.passengerRequestDto(),savedBooking);
+    passengerService.createPassengerForRebook(bookingRequestDto.passengerRequestDto(),
+        savedBooking);
 
     bookingKafkaSender.sendMessage(
         "seat-availability-check-and-update-for-rebook-topic",
@@ -175,6 +177,15 @@ public class BookingService {
         .orElseThrow(NotFoundBookingException::new);
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_FAIL);
+
+    List<UUID> seatIdList = booking.getPassengers().stream().map(Passenger::getSeatId).toList();
+    for (UUID seatId : seatIdList) {
+      bookingKafkaSender.sendMessage("seat-availability-update-true-topic",
+          booking.getBookingId().toString(),
+          new SeatAvailabilityUpdateTrueRequestDto(seatId, true),
+          StackTraceUtils.getCurrentMethodName(),
+          StackTraceUtils.getCurrentClassName());
+    }
   }
 
 

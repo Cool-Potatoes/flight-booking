@@ -6,7 +6,6 @@ import com.flight_booking.common.application.dto.BookingCreateRequestDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
 import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
-import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,17 +29,6 @@ public class BookingKafkaEndpoint {
         BookingCreateRequestDto.class);
 
     bookingService.rebookBooking(requestDto.bookingRequestDto(), requestDto.username());
-  }
-
-  @KafkaListener(groupId = "payment-fail-groups", topics = "payment-fail-topic")
-  public void consumeProcessBookingfail(
-      @Payload ApiResponse<BookingProcessRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    BookingProcessRequestDto bookingProcessRequestDto = mapper.convertValue(message.getData(),
-        BookingProcessRequestDto.class);
-
-    bookingService.processBooking(bookingProcessRequestDto);
   }
 
   @KafkaListener(groupId = "booking-complete-group", topics = "booking-complete-topic")

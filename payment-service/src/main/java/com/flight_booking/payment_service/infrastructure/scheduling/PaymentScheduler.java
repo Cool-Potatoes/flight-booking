@@ -1,8 +1,7 @@
 package com.flight_booking.payment_service.infrastructure.scheduling;
 
 import com.flight_booking.common.application.dto.PaymentRetryRequestDto;
-import com.flight_booking.common.infrastructure.util.StackTraceUtils;
-import com.flight_booking.payment_service.infrastructure.messaging.PaymentKafkaSender;
+import com.flight_booking.payment_service.application.service.PaymentService;
 import jakarta.annotation.PostConstruct;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,7 +21,7 @@ public class PaymentScheduler {
   private int threadPool;
 
   private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(threadPool);
-  private final PaymentKafkaSender paymentKafkaSender;
+  private final PaymentService paymentService;
 
   @PostConstruct
   public void init() {
@@ -38,13 +37,10 @@ public class PaymentScheduler {
   }
 
   public void scheduleRetryWithDelay(long delay, PaymentRetryRequestDto requestDto) {
-    log.info("Payment retry is scheduled, BookingId: " + requestDto.bookingId());
+    log.info("Payment retry is scheduled, PaymentId: " + requestDto.paymentId());
 
     scheduler.schedule(() -> {
-      paymentKafkaSender.sendMessage(
-          "payment-retry-topic", requestDto.bookingId().toString(), requestDto,
-          StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName()
-      );
+      paymentService.sendPaymentRetry(requestDto);
     }, delay, TimeUnit.MILLISECONDS);
   }
 
