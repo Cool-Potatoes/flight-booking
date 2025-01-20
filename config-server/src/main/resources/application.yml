@@ -18,18 +18,6 @@ spring:
           search-paths: '{application}'  # 애플리케이션 이름에 맞는 설정 파일을 찾음
           clone-on-start: true
           skip-ssl-validation: true
-management:
-  tracing:
-    sampling:
-      probability: 1.0  # 전체 트레이싱 활성화
-  endpoints:
-    web:
-      exposure:
-        include: prometheus
-  endpoint:
-    health:
-      show-details: always
-
 
 eureka:
   client:
