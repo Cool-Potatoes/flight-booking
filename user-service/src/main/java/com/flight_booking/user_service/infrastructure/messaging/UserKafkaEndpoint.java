@@ -1,9 +1,9 @@
 package com.flight_booking.user_service.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flight_booking.common.application.dto.UserRefundRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
+import com.flight_booking.common.presentation.dto.NotificationRequest;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -36,5 +36,15 @@ public class UserKafkaEndpoint {
         UserRefundTicketRequestDto.class);
 
     userService.refundTicketPayment(userRefundRequestDto);
+  }
+
+  @KafkaListener(groupId = "user-notification-group", topics = "user-create-notification-topic")
+  public void createNotificationByEmail(@Payload ApiResponse<?> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    NotificationRequest notificationRequest = mapper.convertValue(message.getData(),
+        NotificationRequest.class);
+
+    userService.createNotificationByEmail(notificationRequest);
   }
 }

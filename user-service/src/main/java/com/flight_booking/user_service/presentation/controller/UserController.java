@@ -1,5 +1,6 @@
 package com.flight_booking.user_service.presentation.controller;
 
+import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.dto.UserStatusDto;
 import com.flight_booking.user_service.application.service.UserService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -81,6 +83,11 @@ public class UserController {
   @GetMapping("/status/{email}")
   public UserStatusDto getUserStatus(@PathVariable("email") String email) {
     return userService.getUserStatus(email);
+  }
+
+  @PostMapping("/mileage")
+  public boolean updateMileage(@RequestBody UserRequestDto requestDto) {
+    return userService.updateUserMileage(requestDto);
   }
 
 }

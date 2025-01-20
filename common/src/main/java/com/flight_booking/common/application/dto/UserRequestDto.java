@@ -10,4 +10,7 @@ public record UserRequestDto(
     @NotNull(message = "Payment ID cannot be null") UUID paymentId
 ) {
 
+  public static UserRequestDto from(PaymentRetryRequestDto requestDto) {
+    return new UserRequestDto(null, requestDto.email(), requestDto.fare(), requestDto.paymentId());
+  }
 }
