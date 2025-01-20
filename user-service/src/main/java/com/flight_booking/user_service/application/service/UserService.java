@@ -7,6 +7,7 @@ import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.common.presentation.dto.NotificationRequest;
+import com.flight_booking.user_service.application.dto.UserStatusDto;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
