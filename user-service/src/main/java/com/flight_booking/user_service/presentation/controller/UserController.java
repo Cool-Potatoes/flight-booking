@@ -1,5 +1,6 @@
 package com.flight_booking.user_service.presentation.controller;
 
+import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.service.UserService;
 import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -74,6 +76,11 @@ public class UserController {
       @AuthenticationPrincipal CustomUserDetails userDetails) {
     userService.deleteUser(id, userDetails);
     return ApiResponse.ok("회원 탈퇴 성공");
+  }
+
+  @PostMapping("/mileage")
+  public boolean updateMileage(@RequestBody UserRequestDto requestDto) {
+    return userService.updateUserMileage(requestDto);
   }
 
 }

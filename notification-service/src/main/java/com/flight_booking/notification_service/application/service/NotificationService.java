@@ -6,7 +6,7 @@ import com.flight_booking.notification_service.domain.model.Notification;
 import com.flight_booking.notification_service.domain.repository.NotificationRepository;
 import com.flight_booking.notification_service.global.exception.NotificationNotFoundException;
 import com.flight_booking.notification_service.infrastructure.messaging.NotificationKafkaSender;
-import com.flight_booking.notification_service.presentation.dto.NotificationRequest;
+import com.flight_booking.common.presentation.dto.NotificationRequest;
 import com.flight_booking.notification_service.presentation.dto.NotificationResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,6 @@ public class NotificationService {
   public NotificationResponse createNotification(NotificationRequest request) {
     // 알림 엔티티 생성
     Notification notification = Notification.builder()
-        .ticketId(request.ticketId())
         .userId(request.userId())
         .notificationType(request.notificationType())
         .receiverEmail(request.receiverEmail())

@@ -5,12 +5,15 @@ import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundFromTicketRequestDto;
 import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRequestDto;
+import com.flight_booking.common.application.dto.PaymentRetryRequestDto;
 import com.flight_booking.common.application.dto.PaymentStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
 import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.domain.model.PaymentStatusEnum;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
+import com.flight_booking.common.presentation.dto.NotificationRequest;
+import com.flight_booking.payment_service.application.service.user.UserService;
 import com.flight_booking.payment_service.domain.model.Payment;
 import com.flight_booking.payment_service.domain.repository.PaymentRepository;
 import com.flight_booking.payment_service.infrastructure.messaging.PaymentKafkaSender;
@@ -37,6 +40,7 @@ public class PaymentService {
 
   private final PaymentRepository paymentRepository;
   private final PaymentKafkaSender paymentKafkaSender;
+  private final UserService userService;
 
   @Transactional
   public PaymentResponseDto createPayment(PaymentRequestDto paymentRequestDto) {
@@ -173,6 +177,14 @@ public class PaymentService {
         StackTraceUtils.getCurrentClassName()
     );
 
+    paymentKafkaSender.sendMessage(
+        "user-create-notification-topic",
+        requestDto.email(),
+        new NotificationRequest(null, "from System", requestDto.email(),
+            "결제 실패 알림", "마일리지 부족으로 인한 결제 실패 알림."),
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName());
+
   }
 
 
@@ -215,7 +227,8 @@ public class PaymentService {
     paymentKafkaSender.sendMessage(
         "booking-refund-fail-topic",
         refundPayment.getBookingId().toString(),
-        new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(), refundPayment.getBookingId(),
+        new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(),
+            refundPayment.getBookingId(),
             paymentRefundProcessRequestDto.email()),
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
@@ -263,8 +276,52 @@ public class PaymentService {
     payment.updateStatus(requestDto.paymentStatusEnum());
   }
 
+  @Transactional
+  public void updatePaymentState(PaymentStatusEnum paymentStatusEnum, UUID paymentId) {
+
+    Payment payment = getPaymentById(paymentId);
+
+    payment.updateStatus(paymentStatusEnum);
+  }
+
+  public boolean retryPayment(PaymentRetryRequestDto requestDto) {
+    return userService.updateMileage(requestDto);
+  }
+
+  public void sendPaymentDLQ(PaymentRetryRequestDto requestDto) {
+    paymentKafkaSender.sendMessage(
+        "payment-dlq-topic", requestDto.email(), requestDto,
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName());
+  }
+
+  public void sendPaymentRetry(PaymentRetryRequestDto requestDto) {
+    paymentKafkaSender.sendMessage(
+        "payment-retry-topic", requestDto.paymentId().toString(), requestDto,
+        StackTraceUtils.getCurrentMethodName(), StackTraceUtils.getCurrentClassName()
+    );
+  }
+
+  public void sendPayedMessage(PaymentRetryRequestDto dto) {
+    NotificationRequest request = new NotificationRequest(
+        null, "from System", dto.email(),
+        "결제가 완료되었습니다.",
+        "PaymentId: " + dto.paymentId() + ", 결제 금액: " + dto.fare() + " 원이 결제 되었습니다."
+    );
+
+    createNotification(request);
+  }
+
   private Payment getPaymentEntityByBookingId(UUID bookingId) {
     return paymentRepository.findPaymentByBookingIdAndIsDeletedFalse(bookingId)
         .orElseThrow(() -> new ApiException("존재하지 않는 bookingId"));
+  }
+
+  private void createNotification(NotificationRequest notificationRequest) {
+    paymentKafkaSender.sendMessage(
+        "user-create-notification-topic",
+        notificationRequest.receiverEmail(),
+        notificationRequest,
+        StackTraceUtils.getCurrentMethodName(),
+        StackTraceUtils.getCurrentClassName());
   }
 }
