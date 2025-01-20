@@ -15,12 +15,6 @@ public class FlightServiceImpl implements FlightService {
   private final FlightClient flightClient;
 
   @Override
-  public Long updateSeatAvailableFalseAndGetSeatPrice(String email, String role, UUID seatId) {
-
-    return flightClient.updateSeatAvailableFalseAndGetSeatPrice(email, role, seatId);
-  }
-
-  @Override
   public Boolean checkFlightStatusBySeatId(String email, String role, UUID seatId) {
 
     return flightClient.checkFlightStatusBySeatId(email, role, seatId);

@@ -8,11 +8,12 @@ import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
-import com.flight_booking.ticket_service.infrastructure.redis.RedisLock;
 import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
+import com.flight_booking.ticket_service.infrastructure.redis.RedisLock;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
 import com.querydsl.core.types.Predicate;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +33,6 @@ public class TicketService {
   private final TicketRepository ticketRepository;
   private final TicketKafkaSender ticketKafkaSender;
   private final RedisLock redisLock;
-  private final BookingService bookingservice;
   private final FlightService flightService;
   private final PaymentService paymentService;
   private final UserService userService;
@@ -48,9 +48,10 @@ public class TicketService {
     Ticket savedTicket = ticketRepository.save(ticket);
 
     // oldTicket 처리
-    if(ticketRequestDto.ticketId() != null){
+    if (ticketRequestDto.ticketId() != null) {
 
-      Ticket oldTicket = ticketRepository.findByTicketIdAndIsDeletedFalse(ticketRequestDto.ticketId())
+      Ticket oldTicket = ticketRepository.findByTicketIdAndIsDeletedFalse(
+              ticketRequestDto.ticketId())
           .orElseThrow(RuntimeException::new);
 
       oldTicket.updateState(TicketStateEnum.REFUND);
@@ -150,6 +151,10 @@ public class TicketService {
       throw new RuntimeException("이미 환불중인 티켓 중입니다.");
     }
 
+    if (ticket.getState() == TicketStateEnum.PROCESS_REFUND) {
+      throw new RuntimeException("이미 환불중인 티켓 중입니다.");
+    }
+
     if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
       throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
     }
@@ -184,6 +189,8 @@ public class TicketService {
     return flightService.checkFlightStatusBySeatId(email, role, seatId);
   }
 
+  // CircuitBreaker를 따로 클래스 분리 하려고 했지만 내부 로직 중에서 다른 서비스에서 호출해야만 하는 부분이 있어서 롤백.
+  @CircuitBreaker(name = "ticketService-ProcessRefund", fallbackMethod = "fallbackProcessRefund")
   private Boolean ProcessRefund(Ticket ticket, CustomUserDetails userDetails) {
 
     Long paymentFair = getPaymentFair(ticket, userDetails);
@@ -192,8 +199,22 @@ public class TicketService {
         paymentFair);
   }
 
+  @CircuitBreaker(name = "ticketService-validateSeatAvailable", fallbackMethod = "fallbackValidateSeatAvailable")
   private Boolean validateSeatAvailable(CustomUserDetails userDetails, UUID seatId) {
 
     return flightService.getSeatIsAvailable(userDetails.email(), userDetails.role(), seatId);
+  }
+
+  private Boolean fallbackProcessRefund(Throwable t) {
+    log.warn("Refund failed. Reason: {}", t.getMessage());
+    // 실패 트랜잭션
+    // feign 호출하면서 try catch 하면 되는데, 서킷브레이커하면 될듯
+    // 모니터링보다는 테스트?
+    return false;
+  }
+
+  private Boolean fallbackValidateSeatAvailable(Throwable t) {
+    log.warn("Seat availability check failed. Defaulting to unavailable.");
+    return false;
   }
 }
