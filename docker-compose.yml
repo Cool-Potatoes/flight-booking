@@ -216,12 +216,6 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-    environment:
-      - GF_DATABASE_TYPE=postgres
-      - GF_DATABASE_HOST=postgres:5432
-      - GF_DATABASE_NAME=flight_booking
-      - GF_DATABASE_USER=postgres
-      - GF_DATABASE_PASSWORD=systempass
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1" ]
       interval: 10s
