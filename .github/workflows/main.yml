@@ -1,52 +1,54 @@
-# This workflow will build and push a new container image to Amazon ECR,
-# and then will deploy a new task definition to Amazon ECS, when there is a push to the "main" branch.
-#
-# To use this workflow, you will need to complete the following set-up steps:
-#
-# 1. Create an ECR repository to store your images.
-#    For example: aws ecr create-repository --repository-name my-ecr-repo --region us-east-2.
-#    Replace the value of the ECR_REPOSITORY environment variable in the workflow below with your repository's name.
-#    Replace the value of the AWS_REGION environment variable in the workflow below with your repository's region.
-#
-# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
-#    For example, follow the Getting Started guide on the ECS console:
-#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
-#    Replace the value of the ECS_SERVICE environment variable in the workflow below with the name you set for the Amazon ECS service.
-#    Replace the value of the ECS_CLUSTER environment variable in the workflow below with the name you set for the cluster.
-#
-# 3. Store your ECS task definition as a JSON file in your repository.
-#    The format should follow the output of aws ecs register-task-definition --generate-cli-skeleton.
-#    Replace the value of the ECS_TASK_DEFINITION environment variable in the workflow below with the path to the JSON file.
-#    Replace the value of the CONTAINER_NAME environment variable in the workflow below with the name of the container
-#    in the containerDefinitions section of the task definition.
-#
-# 4. Store an IAM user access key in GitHub Actions secrets named AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
-#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
-#    and best practices on handling the access key credentials.
-
-name: Deploy to Amazon ECS
+name: CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
 
 env:
   AWS_REGION: ap-northeast-2                  # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: potato/flight-booking         # set this to your Amazon ECR repository name
-  ECS_SERVICE: flight-booking-service                 # set this to your Amazon ECS service name
-  ECS_CLUSTER: flight-booking-cluster                # set this to your Amazon ECS cluster name
+  ECR_REPOSITORY: potato/flight-booking       # set this to your Amazon ECR repository name
+  ECS_SERVICE: flight-booking-service         # set this to your Amazon ECS service name
+  ECS_CLUSTER: flight-booking-cluster         # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: .github/workflows/flight-booking-task-revision1.json # set this to the path to your Amazon ECS task definition
-  # file, e.g. aws/task-definition.json
-  CONTAINER_NAME: flight-booking-container           # set this to the name of the container in the
-  # containerDefinitions section of your task definition
+  CONTAINER_NAME: flight-booking-container   # set this to the name of the container in the containerDefinitions section of your task definition
 
 permissions:
   contents: read
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Tests with Gradle
+        env:
+          SPRING_PROFILES_ACTIVE: docker
+          CONFIG_SERVER_URI: http://config-server:8888
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          REDIS_HOST: redis
+          REDIS_PORT: 6379
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: ./gradlew test
+
   build:
     name: Build Jar
     runs-on: ubuntu-latest
+    needs: test
 
     steps:
       - name: Checkout
@@ -62,14 +64,22 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew clean build
+        env:
+          SPRING_PROFILES_ACTIVE: docker
+          CONFIG_SERVER_URI: http://config-server:8888
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          REDIS_HOST: redis
+          REDIS_PORT: 6379
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: ./gradlew build
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-libs
           path: build/libs/*.jar
-
 
   deploy:
     name: Deploy
