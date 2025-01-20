@@ -1,4 +1,4 @@
-package com.flight_booking.gateway_service.filter;
+package com.flight_booking.gateway_service.infrastructure.filter;
 
 import java.util.logging.Logger;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
