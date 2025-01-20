@@ -8,7 +8,7 @@ service:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/flight_booking?currentSchema=notification_service}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
@@ -25,6 +25,17 @@ spring:
       group-id: notification-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  mail:
+    host: ${SMTP_HOST}             # ✅ SMTP 호스트 추가
+    port: ${SMTP_PORT}              # ✅ SMTP 포트 추가
+    username: ${SMTP_USERNAME}    # ✅ SMTP 계정 추가
+    password: ${SMTP_PASSWORD}       # ✅ SMTP 비밀번호 추가
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 resilience4j:
   circuitbreaker:
