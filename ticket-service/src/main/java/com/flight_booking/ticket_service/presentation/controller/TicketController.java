@@ -4,7 +4,7 @@ import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.ticket_service.domain.model.Ticket;
-import com.flight_booking.ticket_service.infrastructure.service.TicketService;
+import com.flight_booking.ticket_service.application.service.TicketService;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
 import com.querydsl.core.types.Predicate;

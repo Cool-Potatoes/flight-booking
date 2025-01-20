@@ -1,18 +1,14 @@
-package com.flight_booking.ticket_service.infrastructure.service;
+package com.flight_booking.ticket_service.application.service;
 
 import com.flight_booking.common.application.dto.FlightCancelRequestDto;
 import com.flight_booking.common.application.dto.SeatCalculateDifferenceAndRefundRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.infrastructure.security.CustomUserDetails;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
-import com.flight_booking.ticket_service.application.service.BookingService;
-import com.flight_booking.ticket_service.application.service.FlightService;
-import com.flight_booking.ticket_service.application.service.PaymentService;
-import com.flight_booking.ticket_service.application.service.UserService;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
-import com.flight_booking.ticket_service.infrastructure.Redis.RedisLock;
+import com.flight_booking.ticket_service.infrastructure.redis.RedisLock;
 import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
@@ -86,9 +82,9 @@ public class TicketService {
   public TicketResponseDto updateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto,
       CustomUserDetails userDetails) {
 
-    Ticket ticket = validateTicket(ticketId, ticketRequestDto);
+    Ticket ticket = getTicketIfValid(ticketId, ticketRequestDto);
 
-    UUID seatId = ticket.getSeatId();
+    UUID seatId = ticketRequestDto.passengerRequestDto().seatId();
     boolean lockAcquired = redisLock.tryLock(seatId, 300, TimeUnit.SECONDS);
     if (!lockAcquired) {
       throw new RuntimeException("다른 사용자가 해당 좌석을 예약 중입니다.");
@@ -146,9 +142,13 @@ public class TicketService {
         .orElseThrow(() -> new RuntimeException("해당하는 항공권이 존재하지 않습니다."));
   }
 
-  private Ticket validateTicket(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
+  private Ticket getTicketIfValid(UUID ticketId, TicketUpdateRequestDto ticketRequestDto) {
 
     Ticket ticket = getTicketById(ticketId);
+
+    if(ticket.getState() == TicketStateEnum.PROCESS_REFUND){
+      throw new RuntimeException("이미 환불중인 티켓 중입니다.");
+    }
 
     if (!ticketRequestDto.bookingId().equals(ticket.getBookingId())) {
       throw new RuntimeException("예약 ID와 항공권이 일치하지 않습니다.");
