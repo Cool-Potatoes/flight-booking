@@ -36,3 +36,7 @@ logging:
         orm:
           jdbc:
             bind: TRACE
+
+retry-payment:
+  scheduler:
+    thread-pool: 5
