@@ -31,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -227,7 +229,7 @@ public class SeatService {
           StackTraceUtils.getCurrentMethodName(),
           StackTraceUtils.getCurrentClassName()
       );
-// 필드를 나누고 dto a 가 b로 변경되는거를 스태틱클래스로 치환해서 변경
+
       sendKafkaMessagesForUpdateStatusToRefund(seatBookingRequestDto.bookingId(),
           seatBookingRequestDto.seatId(), seatBookingRequestDto.passengerId());
     }
@@ -236,7 +238,7 @@ public class SeatService {
 
   private void sendKafkaMessagesForUpdateStatusToRefund(UUID bookingId, UUID seatId,
       UUID passengerId) {
-// 시트서비스가 발생한만한 메시지만 보낼걸
+// 시트서비스가 발생한만한 메시지만 보낼것
     seatKafkaSender.sendMessage("booking-status-update-refund-topic",
         bookingId.toString(),
         new BookingStatusUpdateRefundRequestDto(bookingId,

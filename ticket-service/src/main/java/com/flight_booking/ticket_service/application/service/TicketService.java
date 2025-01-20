@@ -55,7 +55,6 @@ public class TicketService {
           .orElseThrow(RuntimeException::new);
 
       oldTicket.updateState(TicketStateEnum.REFUND);
-
     }
 
     return TicketResponseDto.from(savedTicket);
@@ -147,10 +146,6 @@ public class TicketService {
 
     Ticket ticket = getTicketById(ticketId);
 
-    if(ticket.getState() == TicketStateEnum.PROCESS_REFUND){
-      throw new RuntimeException("이미 환불중인 티켓 중입니다.");
-    }
-
     if (ticket.getState() == TicketStateEnum.PROCESS_REFUND) {
       throw new RuntimeException("이미 환불중인 티켓 중입니다.");
     }
@@ -205,16 +200,18 @@ public class TicketService {
     return flightService.getSeatIsAvailable(userDetails.email(), userDetails.role(), seatId);
   }
 
-  private Boolean fallbackProcessRefund(Throwable t) {
-    log.warn("Refund failed. Reason: {}", t.getMessage());
-    // 실패 트랜잭션
-    // feign 호출하면서 try catch 하면 되는데, 서킷브레이커하면 될듯
-    // 모니터링보다는 테스트?
-    return false;
+  private Boolean fallbackProcessRefund(Ticket ticket, CustomUserDetails userDetails, Throwable t) {
+    log.warn("Refund failed for ticket {} and user {}. Reason: {}", ticket.getTicketId(),
+        userDetails.getUsername(), t.getMessage());
+    // 특정 동작을 원한다면 처리 후 return 값
+    return false;  // 기본값 반환
   }
 
-  private Boolean fallbackValidateSeatAvailable(Throwable t) {
-    log.warn("Seat availability check failed. Defaulting to unavailable.");
-    return false;
+  private Boolean fallbackValidateSeatAvailable(CustomUserDetails userDetails, UUID seatId,
+      Throwable t) {
+    log.warn("Seat availability check failed for seat {} and user {}. Reason: {}", seatId,
+        userDetails.getUsername(), t.getMessage());
+    // 예시: 기본값을 false로 반환하고, 이후 알림이나 다른 처리를 할 수 있음
+    return false;  // 기본값 반환
   }
 }
