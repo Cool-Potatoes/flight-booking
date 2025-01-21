@@ -5,6 +5,7 @@ import com.flight_booking.ticket_service.infrastructure.feign.FlightClient;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,9 +21,10 @@ public class FlightServiceImpl implements FlightService {
     return flightClient.checkFlightStatusBySeatId(email, role, seatId);
   }
 
+  @Cacheable(cacheNames = "ticket:update:seat:get:availability", key = "#seatId")
   @Override
   public Boolean getSeatIsAvailable(String email, String role, UUID seatId) {
 
-    return flightClient.getSeatIsAvailable(email,role,seatId);
+    return flightClient.getSeatIsAvailable(email, role, seatId);
   }
 }
