@@ -1,4 +1,4 @@
-package com.flight_booking.gateway_service.util;
+package com.flight_booking.gateway_service.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

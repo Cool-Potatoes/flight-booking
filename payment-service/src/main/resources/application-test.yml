@@ -1,38 +1,43 @@
-#service:
-#  kafka:
-#    url: localhost:9092
-#
-#spring:
-#  application:
-#    name: payment-service
-#  config:
-#    import: "optional:configserver:"  # Config Server가 없으면 무시됨
-#  cloud:
-#    discovery:
-#      enabled: false  # 서비스 디스커버리 비활성화
-#    config:
-#      enabled: false  # Config Server 관련 비활성화
-#  datasource:
-#    url: jdbc:h2:mem:test;  # H2: test용 인메모리 DB
-#    driver-class-name: org.h2.Driver
-#    username: sa
-#    password:
-#  jpa:
-#    hibernate:
-#      ddl-auto: create-drop
-#    defer-datasource-initialization: true
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        show_sql: true
-#        format_sql: true
-#        use_sql_comments: true
-#
-#logging:
-#  level:
-#    org:
-#      hibernate:
-#        SQL: debug
-#        orm:
-#          jdbc:
-#            bind: TRACE
+service:
+  kafka:
+    url: localhost:9092
+
+spring:
+  application:
+    name: payment-service
+  config:
+    import: "optional:configserver:"  # Config Server가 없으면 무시됨
+  cloud:
+    discovery:
+      enabled: false  # 서비스 디스커버리 비활성화
+    config:
+      enabled: false  # Config Server 관련 비활성화
+  datasource:
+    url: jdbc:h2:mem:test;  # H2: test용 인메모리 DB
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        orm:
+          jdbc:
+            bind: TRACE
+
+retry-payment:
+  scheduler:
+    thread-pool: 5
+

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.common.application.dto.NotificationRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.notification_service.application.service.NotificationService;
+import com.flight_booking.common.presentation.dto.NotificationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -25,5 +26,15 @@ public class NotificationKafkaEndpoint {
         NotificationRequestDto.class);
 
     notificationService.sendCode(requestDto);
+  }
+
+  @KafkaListener(topics = "notification-create-notification-topic", groupId = "notification-group")
+  public void sendMessage(@Payload ApiResponse<NotificationRequest> message) {
+
+    ObjectMapper mapper = new ObjectMapper();
+    NotificationRequest requestDto = mapper.convertValue(message.getData(),
+        NotificationRequest.class);
+
+    notificationService.createNotification(requestDto);
   }
 }
