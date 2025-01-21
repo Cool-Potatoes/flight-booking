@@ -115,8 +115,6 @@ public class TicketService {
 
     ticket.updateState(TicketStateEnum.CANCEL_PENDING);
 
-    // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
-
     Boolean isCancellable = checkFlightCancellable(userDetails.email(), userDetails.role(),
         ticket.getSeatId());
     if (!isCancellable) {
@@ -126,7 +124,6 @@ public class TicketService {
     if (ProcessRefund(ticket, userDetails)) {
 
       ticket.updateState(TicketStateEnum.CANCELLED);
-//      sendKafkaMessagesForUpdateStatusToRefund(ticket);
     }
   }
 
@@ -162,7 +159,6 @@ public class TicketService {
 
   private Long getPaymentFair(Ticket ticket, CustomUserDetails userDetails) {
 
-    // 환불을 해주기 위해 bookingId로 찾은 결제되어있는 금액 리턴
     return paymentService.getPaymentFairByBookingId(userDetails.email(), userDetails.role(),
         ticket.getBookingId());
   }
@@ -184,7 +180,6 @@ public class TicketService {
     return flightService.checkFlightStatusBySeatId(email, role, seatId);
   }
 
-  // CircuitBreaker를 따로 클래스 분리 하려고 했지만 내부 로직 중에서 다른 서비스에서 호출해야만 하는 부분이 있어서 롤백.
   @CircuitBreaker(name = "ticketService-ProcessRefund", fallbackMethod = "fallbackProcessRefund")
   private Boolean ProcessRefund(Ticket ticket, CustomUserDetails userDetails) {
 
@@ -203,15 +198,13 @@ public class TicketService {
   private Boolean fallbackProcessRefund(Ticket ticket, CustomUserDetails userDetails, Throwable t) {
     log.warn("Refund failed for ticket {} and user {}. Reason: {}", ticket.getTicketId(),
         userDetails.getUsername(), t.getMessage());
-    // 특정 동작을 원한다면 처리 후 return 값
-    return false;  // 기본값 반환
+    return false;
   }
 
   private Boolean fallbackValidateSeatAvailable(CustomUserDetails userDetails, UUID seatId,
       Throwable t) {
     log.warn("Seat availability check failed for seat {} and user {}. Reason: {}", seatId,
         userDetails.getUsername(), t.getMessage());
-    // 예시: 기본값을 false로 반환하고, 이후 알림이나 다른 처리를 할 수 있음
-    return false;  // 기본값 반환
+    return false;
   }
 }
