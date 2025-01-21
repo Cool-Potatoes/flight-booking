@@ -27,7 +27,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     env_file:
-      - .env
+      - .env.prod
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 30s
@@ -45,7 +45,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -65,7 +65,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -154,7 +154,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     volumes:
       - redis_data:/data
     healthcheck:
@@ -232,7 +232,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -249,7 +249,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -266,7 +266,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -283,7 +283,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -300,7 +300,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -317,7 +317,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - .env.prod
     depends_on:
       eureka-server:
         condition: service_healthy
