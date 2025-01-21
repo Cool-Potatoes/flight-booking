@@ -60,8 +60,8 @@ public class SeatKafkaEndpoint {
     SeatCalculateDifferenceAndRefundRequestDto seatBookingRequestDto = objectMapper.convertValue(
         message.getData(), SeatCalculateDifferenceAndRefundRequestDto.class
     );
-
     seatService.seatCalculateDifferenceAndRefund(seatBookingRequestDto);
+
   }
 
   @KafkaListener(groupId = "seat-availability-update-true-group", topics = "seat-availability-update-true-topic")

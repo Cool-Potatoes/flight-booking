@@ -19,8 +19,8 @@ public class SeatDltHandler {
     this.dltService = dltService;
   }
 
-  @KafkaListener(groupId = "seat-calculate-difference-and-refund-group-dlt", //  topics = {"seat-calculate-difference-and-refund-topic.dlt", "another-topic.dlt"}
-      topics = "seat-calculate-difference-and-refund-topic.dlt")
+  @KafkaListener(groupId = "seat-calculate-difference-and-refund-group-dlt",
+      topics = "seat-calculate-difference-and-refund-topic.dlt") //  topics = {"seat-calculate-difference-and-refund-topic.dlt", "another-topic.dlt"}
   public void handleDltMessage(@Payload String message) {
     log.error("DLT message received: {}", message);
 
