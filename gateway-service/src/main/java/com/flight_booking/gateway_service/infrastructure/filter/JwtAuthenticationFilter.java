@@ -1,6 +1,10 @@
-package com.flight_booking.gateway_service.filter;
+package com.flight_booking.gateway_service.infrastructure.filter;
 
-import com.flight_booking.gateway_service.util.JwtUtil;
+import com.flight_booking.gateway_service.application.UserStatusDto;
+import com.flight_booking.gateway_service.application.UserStatusService;
+import com.flight_booking.gateway_service.presentation.exception.ErrorResponseUtil;
+import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
+import com.flight_booking.gateway_service.infrastructure.JwtUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +22,7 @@ import reactor.core.publisher.Mono;
 public class JwtAuthenticationFilter implements GlobalFilter {
 
   private final JwtUtil jwtUtil;
+  private final UserStatusService userStatusService;
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -31,9 +36,9 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         "/v1/auth/token"
     );
 
-    // 경로가 제외 리스트에 포함되어 있으면 인증 없이 필터 통과
+// 경로가 제외 리스트에 포함되어 있으면 인증 없이 필터 통과
     String path = exchange.getRequest().getURI().getPath();
-    if (excludedPaths.contains(path)) {
+    if (excludedPaths.contains(path) || path.startsWith("/v1/users/status/")) {
       return chain.filter(exchange);
     }
 
@@ -53,13 +58,25 @@ public class JwtAuthenticationFilter implements GlobalFilter {
       // 블랙리스트 체크
       if (jwtUtil.isTokenBlacklisted(token)) {
         log.info("토큰이 블랙리스트에 존재합니다.");
-        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-        return exchange.getResponse().setComplete();
+        return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.BLACKLISTED_TOKEN);
       }
       log.info("블랙리스트 체크 완료");
 
       // 토큰이 유효한 경우, 이메일과 역할 추출
       String email = jwtUtil.extractEmail(token);
+
+      UserStatusDto userStatusDto = userStatusService.getUserStatus(email);
+
+      if (userStatusDto.isBlocked()) {
+        log.info("블락 처리된 회원입니다.");
+        return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_BLOCKED);
+      }
+
+      if (userStatusDto.isDeleted()) {
+        log.info("탈퇴한 회원입니다.");
+        return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_DELETED);
+      }
+
       String role = jwtUtil.extractRole(token);
 
       // 이메일과 역할을 헤더에 추가
@@ -73,12 +90,10 @@ public class JwtAuthenticationFilter implements GlobalFilter {
       return chain.filter(exchange);
     } catch (IllegalArgumentException e) {
       log.warn("유효하지 않은 토큰: {}", e.getMessage());
-      exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-      return exchange.getResponse().setComplete();
+      return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.INVALID_TOKEN);
     } catch (Exception e) {
       log.error("토큰 검증 중 오류 발생: {}", e.getMessage());
-      exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-      return exchange.getResponse().setComplete();
+      return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.TOKEN_VALIDATION_ERROR);
     }
   }
 }

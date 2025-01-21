@@ -1,5 +1,6 @@
-package com.flight_booking.gateway_service.util;
+package com.flight_booking.gateway_service.infrastructure;
 
+import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
