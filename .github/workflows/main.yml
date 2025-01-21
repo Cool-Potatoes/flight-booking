@@ -85,15 +85,33 @@ jobs:
             cd /home/ec2-user/flight-booking  # EC2 서버의 프로젝트 경로로 이동
             cp .env.prod .env  # 운영 환경용 .env 파일 복사
 
-            # 서비스 순차 실행
-            SERVICES=("eureka-server" "config-server" "gateway-service" "notification-service" "user-service" "booking-service" "payment-service" "flight-service" "ticket-service")
+            # 서비스 순차 실행 (의존성 기반 순서)
+            SERVICES=(
+              "zookeeper"          # Kafka 의존
+              "kafka"              # Zookeeper 의존
+              "redis"              # 데이터 캐시
+              "postgres"           # 데이터베이스
+              "prometheus"         # 모니터링
+              "grafana"            # 모니터링 대시보드
+              "eureka-server"      # 서비스 디스커버리
+              "config-server"      # 설정 관리
+              "gateway-service"    # API Gateway
+              "notification-service" # 알림 서비스
+              "user-service"       # 사용자 서비스
+              "booking-service"    # 예약 서비스
+              "payment-service"    # 결제 서비스
+              "flight-service"     # 항공편 서비스
+              "ticket-service"     # 티켓 서비스
+              "kafka-ui"           # Kafka UI (모니터링)
+            )
 
+            # 순차 실행
             for SERVICE in "${SERVICES[@]}"; do
               echo "Starting $SERVICE..."
-              docker-compose pull $SERVICE
-              docker-compose up -d --build $SERVICE
+              docker-compose pull $SERVICE  # 최신 이미지를 가져옴
+              docker-compose up -d --build $SERVICE  # 서비스를 백그라운드로 실행
               sleep 30  # 각 서비스 실행 후 대기 시간 (필요시 조정 가능)
             done
 
-            docker image prune -af  # 불필요한 이미지 정리
+            docker image prune -af  # 불필요한 Docker 이미지 정리
             docker ps  # 실행 중인 컨테이너 확인
