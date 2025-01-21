@@ -7,9 +7,9 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
 	// Zipkin
-	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-	implementation 'io.github.openfeign:feign-micrometer'
-	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+//	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+//	implementation 'io.github.openfeign:feign-micrometer'
+//	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
 	// Spring Boot Actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'

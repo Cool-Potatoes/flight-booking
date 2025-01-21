@@ -14,11 +14,7 @@ spring:
         enabled: true
         service-id: config-server
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: prometheus
+
 
 eureka:
   client:
