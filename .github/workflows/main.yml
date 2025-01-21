@@ -72,17 +72,6 @@ jobs:
           docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG  # 전체 서비스 빌드
           docker-compose -f docker-compose.yml push  # 전체 서비스 푸시
 
-      # 9️⃣ .env.prod 파일 업로드
-      - name: Upload .env.prod to EC2
-        uses: appleboy/scp-action@v0.1.1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          source: .env.prod
-          target: /home/ec2-user/flight-booking/.env.prod
-
       # 🔟 서버에 배포
       - name: Deploy to server
         if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd/docker2')
@@ -94,7 +83,7 @@ jobs:
           port: 22
           script: |
             cd /home/ec2-user/flight-booking  # EC2 서버의 프로젝트 경로로 이동
-            cp .env.prod .env  # 운영 환경용 .env 파일 복사
+            cp .env.prod .env  #미리 업로드해놓은 운영 환경용 .env 파일 복사
             SERVICES="eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service"
             docker-compose down
             docker-compose pull $SERVICES
