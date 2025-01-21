@@ -83,10 +83,17 @@ jobs:
           port: 22
           script: |
             cd /home/ec2-user/flight-booking  # EC2 서버의 프로젝트 경로로 이동
-            cp .env.prod .env  #미리 업로드해놓은 운영 환경용 .env 파일 복사
-            SERVICES="eureka-server config-server gateway-service notification-service user-service booking-service payment-service flight-service ticket-service"
-            docker-compose down
-            docker-compose pull $SERVICES
-            docker-compose up -d --build $SERVICES
-            docker image prune -af
-            docker ps
+            cp .env.prod .env  # 운영 환경용 .env 파일 복사
+
+            # 서비스 순차 실행
+            SERVICES=("eureka-server" "config-server" "gateway-service" "notification-service" "user-service" "booking-service" "payment-service" "flight-service" "ticket-service")
+
+            for SERVICE in "${SERVICES[@]}"; do
+              echo "Starting $SERVICE..."
+              docker-compose pull $SERVICE
+              docker-compose up -d --build $SERVICE
+              sleep 30  # 각 서비스 실행 후 대기 시간 (필요시 조정 가능)
+            done
+
+            docker image prune -af  # 불필요한 이미지 정리
+            docker ps  # 실행 중인 컨테이너 확인
