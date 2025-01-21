@@ -190,7 +190,7 @@ public class TicketService {
 
     Long paymentFair = getPaymentFair(ticket, userDetails);
 
-    return userService.RefundMileage(userDetails.email(), userDetails.role(), userDetails.email(),
+    return userService.refundMileage(userDetails.email(), userDetails.role(), userDetails.email(),
         paymentFair);
   }
 

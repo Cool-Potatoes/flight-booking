@@ -51,17 +51,6 @@ public class PaymentKafkaEndpoint {
     paymentService.processPaymentSuccess(paymentRequestDto);
   }
 
-  @KafkaListener(groupId = "payment-refund-group", topics = "payment-refund-ticket-topic")
-  public void consumePaymentRefundFromTicket(
-      @Payload ApiResponse<PaymentRefundFromTicketRequestDto> message) {
-
-    PaymentRefundFromTicketRequestDto paymentRefundRequestDto = objectMapper.convertValue(
-        message.getData(),
-        PaymentRefundFromTicketRequestDto.class);
-
-    paymentService.refundPaymentFromTicket(paymentRefundRequestDto);
-  }
-
   @KafkaListener(groupId = "payment-refund-fail-group", topics = "payment-refund-fail-topic")
   public void consumePaymentRefundFail(
       @Payload ApiResponse<PaymentRefundProcessRequestDto> message) {
@@ -70,16 +59,6 @@ public class PaymentKafkaEndpoint {
         PaymentRefundProcessRequestDto.class);
 
     paymentService.processPaymentRefundFail(paymentRequestDto);
-  }
-
-  @KafkaListener(groupId = "payment-refund-ticket-group", topics = "payment-refund-ticket-success-process-topic")
-  public void consumePaymentRefundTicketProcess(
-      @Payload ApiResponse<ProcessTicketPaymentRequestDto> message) {
-
-    ProcessTicketPaymentRequestDto paymentRequestDto = objectMapper.convertValue(message.getData(),
-        ProcessTicketPaymentRequestDto.class);
-
-    paymentService.processTicketPaymentRefundSuccess(paymentRequestDto);
   }
 
   @KafkaListener(groupId = "payment-status-update-refund-group", topics = "payment-status-update-refund-topic")

@@ -73,17 +73,6 @@ public class BookingKafkaEndpoint {
     bookingService.failRefundBooking(bookingProcessRequestDto);
   }
 
-  @KafkaListener(groupId = "booking-refund-success-group", topics = "booking-refund-ticket-success-topic")
-  public void consumeBookingRefundTicketComplete(
-      @Payload ApiResponse<BookingRefundRequestDto> message) {
-
-    BookingRefundRequestDto bookingProcessRequestDto = objectMapper.convertValue(
-        message.getData(), BookingRefundRequestDto.class
-    );
-
-    bookingService.processRefundTicketBooking(bookingProcessRequestDto);
-  }
-
   @KafkaListener(groupId = "booking-status-update-refund-group", topics = "booking-status-update-refund-topic")
   public void consumeBookingStatusUpdate(
       @Payload ApiResponse<BookingStatusUpdateRefundRequestDto> message) {

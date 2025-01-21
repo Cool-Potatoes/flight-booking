@@ -199,29 +199,6 @@ public class BookingService {
   }
 
   @Transactional(readOnly = false)
-  public void processRefundTicketBooking(BookingRefundRequestDto bookingProcessRequestDto) {
-
-    // TODO
-    passengerService.updateOnePassenger(bookingProcessRequestDto.passengerId());
-
-    Booking booking = bookingRepository.findById(bookingProcessRequestDto.bookingId())
-        .orElseThrow(NotFoundBookingException::new);
-
-    booking.updateBookingStatus(BookingStatusEnum.BOOKING_REFUND_COMPLETE);
-
-    // TODO : 물어볼거 1 = 토픽에 들어가는 id는 해당 도메인 기준?
-    bookingKafkaSender.sendMessage(
-        "seat-availability-refund-topic",
-        booking.getBookingId().toString(),
-        new SeatAvailabilityRefundRequestDto(
-            bookingProcessRequestDto.seatId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-  }
-
-
-  @Transactional(readOnly = false)
   public void updateBookingStatusRefund(BookingStatusUpdateRefundRequestDto requestDto) {
     Booking booking = getBookingEntity(requestDto.bookingId());
 

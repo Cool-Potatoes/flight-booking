@@ -64,17 +64,6 @@ public class SeatKafkaEndpoint {
     seatService.seatCalculateDifferenceAndRefund(seatBookingRequestDto);
   }
 
-  @KafkaListener(groupId = "seat-availability-refund-group", topics = "seat-availability-refund-topic")
-  public void consumeSeatAvailabilityRefund(
-      @Payload ApiResponse<SeatAvailabilityUpdateTrueRequestDto> message) {
-
-    SeatAvailabilityUpdateTrueRequestDto seatBookingRequestDto = objectMapper.convertValue(
-        message.getData(), SeatAvailabilityUpdateTrueRequestDto.class
-    );
-
-    seatService.seatAvailabilityUpdateTrue(seatBookingRequestDto);
-  }
-
   @KafkaListener(groupId = "seat-availability-update-true-group", topics = "seat-availability-update-true-topic")
   public void consumeSeatAvailabilityUpdateTrue(
       @Payload ApiResponse<SeatAvailabilityUpdateTrueRequestDto> message) {

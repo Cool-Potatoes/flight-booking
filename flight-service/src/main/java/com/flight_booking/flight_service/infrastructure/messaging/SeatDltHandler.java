@@ -9,19 +9,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class SeatDLTHandler {
+public class SeatDltHandler {
 
   private final ObjectMapper objectMapper;
   private final DltService dltService; // 문제 복구/저장/알림 처리용 서비스
 
-  public SeatDLTHandler(ObjectMapper objectMapper, DltService dltService) {
+  public SeatDltHandler(ObjectMapper objectMapper, DltService dltService) {
     this.objectMapper = objectMapper;
     this.dltService = dltService;
   }
 
   @KafkaListener(groupId = "seat-calculate-difference-and-refund-group-dlt", //  topics = {"seat-calculate-difference-and-refund-topic.dlt", "another-topic.dlt"}
       topics = "seat-calculate-difference-and-refund-topic.dlt")
-  public void handleDLTMessage(@Payload String message) {
+  public void handleDltMessage(@Payload String message) {
     log.error("DLT message received: {}", message);
 
     try {
