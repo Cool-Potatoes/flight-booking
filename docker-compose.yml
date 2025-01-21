@@ -15,16 +15,6 @@ volumes:
   grafana_data:
 
 services:
-  x-common-settings: &common-settings
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.2"
-          memory: 256M
-
   # 1️⃣ Eureka Server
   eureka-server:
     build:
@@ -44,7 +34,14 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
 
   # 2️⃣ Config Server
   config-server:
@@ -65,7 +62,14 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
   # 3️⃣ Gateway Service
   gateway-service:
     build:
@@ -87,7 +91,14 @@ services:
       interval: 10s
       timeout: 20s
       retries: 5
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
   # 4️⃣ Zookeeper
   # 1️⃣ Zookeeper 서버 1
   zookeeper:
@@ -249,7 +260,14 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
   # 13️⃣ Ticket Service
   ticket-service:
     build:
@@ -266,7 +284,14 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
   # 14️⃣ Notification Service
   notification-service:
     build:
@@ -283,7 +308,14 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
   # 15️⃣ Payment Service
   payment-service:
     build:
@@ -300,7 +332,14 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
   # 16️⃣ Booking Service
   booking-service:
     build:
@@ -317,7 +356,14 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
-
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
   # 17️⃣ Flight Service
   flight-service:
     build:
@@ -334,3 +380,11 @@ services:
         condition: service_healthy
       config-server:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 256M
