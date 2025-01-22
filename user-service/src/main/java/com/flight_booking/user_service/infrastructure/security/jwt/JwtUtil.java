@@ -135,7 +135,7 @@ public class JwtUtil {
     if (token != null && token.startsWith("Bearer ")) {
       token = token.substring(7);
     }
-    return token.trim();
+    return token;
   }
 
   // 이메일 추출
@@ -172,23 +172,23 @@ public class JwtUtil {
     log.info("블랙리스트에 토큰이 추가되었습니다. 토큰: {}", token);
   }
 
-  // RefreshToken을 쿠키에 저장
+  // RefreshToken 쿠키에 저장
   public void addRefreshTokenToCookie(String refreshToken, HttpServletResponse response) {
     log.info("쿠키 설정 값: {}", refreshToken);
     Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
-    cookie.setHttpOnly(true);   // 클라이언트에서 접근 불가
-//      cookie.setSecure(true);     // HTTPS에서만 전송 (현재 HTTP)
-    cookie.setPath("/");        // 쿠키 경로
-    cookie.setMaxAge(86400);    // 만료 시간 (1일)
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(86400);
     response.addCookie(cookie);
     log.info("Refresh token 쿠키가 성공적으로 설정되었습니다.");
   }
 
-  // RefreshToken을 쿠키에서 삭제
+  // RefreshToken 쿠키에서 삭제
   public void deleteRefreshTokenFromCookie(String refreshToken, HttpServletResponse response) {
     Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
     cookie.setHttpOnly(true);
-//    cookie.setSecure(true);
+    cookie.setSecure(true);
     cookie.setPath("/");
     cookie.setMaxAge(0);  // 쿠키 만료
     response.addCookie(cookie);
