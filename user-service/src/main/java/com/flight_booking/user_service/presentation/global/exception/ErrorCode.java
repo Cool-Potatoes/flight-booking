@@ -20,7 +20,7 @@ public enum ErrorCode {
   USER_BLOCKED(HttpStatus.BAD_REQUEST, "블락 상태의 회원입니다."),
   USER_NOT_BLOCKED(HttpStatus.BAD_REQUEST, "블락 해제 상태의 회원입니다."),
   CANNOT_ADMIN_BLOCKED(HttpStatus.BAD_REQUEST, "관리자는 블락 설정 할 수 없습니다."),
-  INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호와 일치하지 않습니다."),
+  INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
   PASSWORDS_DO_NOT_MATCH(HttpStatus.BAD_REQUEST, "새로운 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
   PASSWORDS_SAME(HttpStatus.BAD_REQUEST, "기존 비밀번호와 동일합니다."),
   INVALID_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 인증 코드입니다."),

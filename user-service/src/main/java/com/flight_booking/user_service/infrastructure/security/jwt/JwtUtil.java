@@ -10,6 +10,7 @@ import io.jsonwebtoken.Jwts.SIG;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.util.Base64;
@@ -84,6 +85,28 @@ public class JwtUtil {
         .expiration(expirationDate)
         .signWith(key, SIG.HS256)
         .compact();
+  }
+
+  // Authorization 헤더에서 accessToken 추출
+  public String extractAccessTokenFromRequest(HttpServletRequest request) {
+    String authorizationHeader = request.getHeader("Authorization");
+    if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+      return authorizationHeader.substring(7);
+    }
+    return null;
+  }
+
+  // 쿠키에서 refreshToken 추출
+  public String extractRefreshTokenFromRequest(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if (REFRESH_TOKEN_COOKIE.equals(cookie.getName())) {
+          return cookie.getValue();
+        }
+      }
+    }
+    return null;
   }
 
   // Claims 추출

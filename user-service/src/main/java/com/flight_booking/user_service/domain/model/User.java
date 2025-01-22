@@ -84,10 +84,10 @@ public class User extends BaseEntity {
     this.mileage = this.mileage + refundFair;
   }
 
-  @PreRemove
-  public void preRemove() {
+  public void softDelete(String deletedBy) {
     this.isDeleted = true;
     this.deletedAt = LocalDateTime.now();
+    this.deletedBy = deletedBy;
   }
 
   public void blockUser(String reason, String blockedBy) {
