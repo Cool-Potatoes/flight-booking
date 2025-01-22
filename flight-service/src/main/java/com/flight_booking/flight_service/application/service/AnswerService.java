@@ -15,11 +15,18 @@ public class AnswerService {
   private final StringRedisTemplate redisTemplate;
 
   private static final String REGULATION_CACHE_PREFIX = "regulation:";
+  private static final String WEATHER_CACHE_PREFIX = "weather:";
 
   // 기내 수하물 규정
   public ApiResponse<?> saveRegulationAnswer(String airline, String seatClass) {
     return saveAnswer(REGULATION_CACHE_PREFIX + airline + ":" + seatClass,
         () -> aiService.getRegulation(airline, seatClass));
+  }
+
+  // TODO 날씨 정보 -> 현재 날씨 위해선 API 접목 필요
+  public ApiResponse<?> saveWeatherAnswer(String country, String month) {
+    return saveAnswer(WEATHER_CACHE_PREFIX + country + ":" + month,
+        () -> aiService.getWeather(country, month));
   }
 
   // 데이터 저장 및 조회
