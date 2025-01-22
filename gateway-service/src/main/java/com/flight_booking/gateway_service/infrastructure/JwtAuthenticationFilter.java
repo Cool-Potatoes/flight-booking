@@ -50,29 +50,25 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     }
 
     try {
-      // 토큰 검증
+      // JWT 검증
       jwtUtil.validateToken(token);
-      log.info("토큰 검증 완료");
 
       // 블랙리스트 체크
       if (jwtUtil.isTokenBlacklisted(token)) {
-        log.info("토큰이 블랙리스트에 존재합니다.");
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.BLACKLISTED_TOKEN);
       }
-      log.info("블랙리스트 체크 완료");
 
       // 토큰이 유효한 경우, 이메일과 역할 추출
       String email = jwtUtil.extractEmail(token);
 
+      // 사용자 상태(블락/탈퇴) 확인
       UserStatusDto userStatusDto = userFeignService.getUserStatus(email);
 
       if (userStatusDto.isBlocked()) {
-        log.info("블락 처리된 회원입니다.");
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_BLOCKED);
       }
 
       if (userStatusDto.isDeleted()) {
-        log.info("탈퇴한 회원입니다.");
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_DELETED);
       }
 
@@ -87,9 +83,6 @@ public class JwtAuthenticationFilter implements GlobalFilter {
       exchange = exchange.mutate().request(modifiedRequest).build();
 
       return chain.filter(exchange);
-    } catch (IllegalArgumentException e) {
-      log.warn("유효하지 않은 토큰: {}", e.getMessage());
-      return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.INVALID_TOKEN);
     } catch (Exception e) {
       log.error("토큰 검증 중 오류 발생: {}", e.getMessage());
       return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.TOKEN_VALIDATION_ERROR);

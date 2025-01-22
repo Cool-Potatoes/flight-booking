@@ -51,7 +51,7 @@ public class JwtUtil {
   }
 
   // 토큰 검증
-  public void validateToken(String token) {
+  public void validateToken(String token) throws JwtException {
     try {
       Jws<Claims> claimsJws = Jwts.parser()
           .verifyWith(key)
@@ -116,10 +116,6 @@ public class JwtUtil {
 
   // 블랙리스트에 존재하는지 확인
   public boolean isTokenBlacklisted(String token) {
-    if (redisTemplate.hasKey("blacklist:" + token)) {
-      log.warn("블랙리스트에 포함된 토큰입니다. Token: {}", token);
-      throw new JwtException(JwtErrorCode.BLACKLISTED_TOKEN.getMessage());
-    }
-    return false;
+    return redisTemplate.hasKey("blacklist:" + token);
   }
 }
