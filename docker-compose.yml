@@ -267,7 +267,7 @@ services:
       context: ./ticket-service
     container_name: ticket-service
     ports:
-      - "8170:8170"
+      - "8140:8140"
     networks:
       - app-network
     env_file:
