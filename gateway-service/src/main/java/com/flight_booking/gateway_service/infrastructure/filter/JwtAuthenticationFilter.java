@@ -1,15 +1,15 @@
 package com.flight_booking.gateway_service.infrastructure.filter;
 
+import com.flight_booking.gateway_service.UserFeignClient;
 import com.flight_booking.gateway_service.application.UserStatusDto;
-import com.flight_booking.gateway_service.application.UserStatusService;
+import com.flight_booking.gateway_service.infrastructure.JwtUtil;
 import com.flight_booking.gateway_service.presentation.exception.ErrorResponseUtil;
 import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
-import com.flight_booking.gateway_service.infrastructure.JwtUtil;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -18,11 +18,15 @@ import reactor.core.publisher.Mono;
 
 @Slf4j(topic = "JWT 인증 처리")
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter {
 
   private final JwtUtil jwtUtil;
-  private final UserStatusService userStatusService;
+  private final UserFeignClient userFeignClient;
+
+  public JwtAuthenticationFilter(JwtUtil jwtUtil, @Lazy UserFeignClient userFeignClient) {
+    this.jwtUtil = jwtUtil;
+    this.userFeignClient = userFeignClient;
+  }
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -65,7 +69,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
       // 토큰이 유효한 경우, 이메일과 역할 추출
       String email = jwtUtil.extractEmail(token);
 
-      UserStatusDto userStatusDto = userStatusService.getUserStatus(email);
+      UserStatusDto userStatusDto = userFeignClient.getUserStatus(email);
 
       if (userStatusDto.isBlocked()) {
         log.info("블락 처리된 회원입니다.");
