@@ -7,6 +7,7 @@ import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
 import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,25 +83,18 @@ public class AuthService {
     User user = userRepository.findByNameAndPhone(name, phone)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-    validateUserStatus(user); // 사용자 상태 확인 (블락/ 탈퇴)
+    validateUserStatus(user);
 
     return user.getEmail();
   }
 
   // 토큰 재발급
-  public String renewTokens(String refreshToken, String accessToken,
-      HttpServletResponse response) {
+  public String renewTokens(HttpServletRequest request, HttpServletResponse response) {
+    String accessToken = jwtUtil.extractAccessTokenFromRequest(request);
+    String refreshToken = jwtUtil.extractRefreshTokenFromRequest(request);
 
     // refreshToken 확인 및 검증
-    if (refreshToken.isEmpty()) {
-      throw new UserException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
-    }
-    if (!jwtUtil.validateToken(refreshToken)) {
-      throw new UserException(ErrorCode.INVALID_REFRESH_TOKEN);
-    }
-    if (jwtUtil.isTokenBlacklisted(refreshToken)) {
-      throw new UserException(ErrorCode.BLACKLISTED_TOKEN);
-    }
+    validateRefreshToken(refreshToken);
 
     // 기존 Access Token 처리
     String accessTokenWithoutBearer = jwtUtil.removeBearer(accessToken);
@@ -111,7 +106,7 @@ public class AuthService {
     // 사용자 정보 추출
     String email = jwtUtil.getEmail(refreshToken);
     User user = getUser(email);
-    validateUserStatus(user); // 사용자 상태 확인 (블락/ 탈퇴)
+    validateUserStatus(user);
     String role = user.getRole().toString();
 
     // 새로운 Access Token, Refresh Token 발급
@@ -125,14 +120,18 @@ public class AuthService {
   }
 
   // 로그아웃
-  public void logout(String refreshToken, String accessToken, HttpServletResponse response) {
+  public void logout(HttpServletRequest request, HttpServletResponse response) {
+    String accessToken = jwtUtil.extractAccessTokenFromRequest(request);
+    String refreshToken = jwtUtil.extractRefreshTokenFromRequest(request);
+
     jwtUtil.addToBlacklist(accessToken);
     jwtUtil.addToBlacklist(refreshToken);
 
     jwtUtil.deleteRefreshTokenFromCookie(refreshToken, response);
+    SecurityContextHolder.clearContext();
   }
 
-  // ------------------------------------------------------------------------------------
+  // private method ------------------------------------------------------------------------------------
 
   // 이메일로 사용자 확인
   private User getUser(String email) {
@@ -154,6 +153,19 @@ public class AuthService {
     if (user.getIsDeleted()) {
       log.error("탈퇴된 사용자: {}", email);
       throw new UserException(ErrorCode.USER_DELETED);
+    }
+  }
+
+  // refreshToken 검증
+  private void validateRefreshToken(String refreshToken) {
+    if (refreshToken == null || refreshToken.isEmpty()) {
+      throw new UserException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+    }
+    if (!jwtUtil.validateToken(refreshToken)) {
+      throw new UserException(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+    if (jwtUtil.isTokenBlacklisted(refreshToken)) {
+      throw new UserException(ErrorCode.BLACKLISTED_TOKEN);
     }
   }
 }
