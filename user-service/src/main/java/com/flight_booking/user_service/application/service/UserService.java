@@ -120,7 +120,7 @@ public class UserService {
     SecurityContextHolder.clearContext();
   }
 
-  // 상태 조회 (WebClient용)
+  // 상태 조회 (FeignClient)
   public UserStatusDto getUserStatus(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
