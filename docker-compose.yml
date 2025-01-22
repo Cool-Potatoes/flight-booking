@@ -141,6 +141,14 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+        reservations:
+          memory: 512M
+          cpus: "0.2"
 
   # 6️⃣ Kafka UI
   kafka-ui:
@@ -157,9 +165,9 @@ services:
     networks:
       - app-network
     depends_on:
-      kafka:
-        condition: service_healthy
       zookeeper:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
 
   # 7️⃣ Redis
@@ -194,16 +202,6 @@ services:
       - app-network
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-#  # 9️⃣ Zipkin
-#  zipkin:
-#    image: openzipkin/zipkin
-#    container_name: zipkin
-#    ports:
-#      - "9411:9411"
-#    networks:
-#      - app-network
-
 
   # 🔟 Prometheus
   prometheus:
