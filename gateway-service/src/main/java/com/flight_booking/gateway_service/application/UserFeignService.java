@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flight_booking.gateway_service.infrastructure.feign.UserFeignClient;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +13,6 @@ public class UserFeignService {
 
   private static final String REDIS_KEY_PREFIX = "userStatus:";
 
-  @Lazy
   private final UserFeignClient userFeignClient;
   private final RedisTemplate<String, Object> redisTemplate;
   private final ObjectMapper objectMapper;

@@ -5,10 +5,10 @@ import com.flight_booking.gateway_service.application.UserStatusDto;
 import com.flight_booking.gateway_service.presentation.exception.ErrorResponseUtil;
 import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -17,11 +17,15 @@ import reactor.core.publisher.Mono;
 
 @Slf4j(topic = "JWT 인증 처리")
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter {
 
-  private final JwtUtil jwtUtil;
   private final UserFeignService userFeignService;
+  private final JwtUtil jwtUtil;
+
+  public JwtAuthenticationFilter(@Lazy UserFeignService userFeignService, JwtUtil jwtUtil) {
+    this.userFeignService = userFeignService;
+    this.jwtUtil = jwtUtil;
+  }
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
