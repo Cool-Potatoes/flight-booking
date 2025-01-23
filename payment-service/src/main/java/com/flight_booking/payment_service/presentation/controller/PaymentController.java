@@ -31,15 +31,6 @@ public class PaymentController {
 
   private final PaymentService paymentService;
 
-//  @PostMapping
-//  public ApiResponse<?> createPayment(
-//      @RequestBody @Valid PaymentRequestDto paymentRequestDto) {
-//
-//    PaymentResponseDto paymentResponseDto = paymentService.createPayment(paymentRequestDto);
-//
-//    return ApiResponse.ok(paymentResponseDto, "결제 데이터 생성 성공");
-//  }
-
   @GetMapping("/{paymentId}")
   public ApiResponse<?> getPayment(
       @PathVariable UUID paymentId) {

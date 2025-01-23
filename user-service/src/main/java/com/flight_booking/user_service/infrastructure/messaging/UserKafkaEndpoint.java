@@ -27,17 +27,6 @@ public class UserKafkaEndpoint {
     userService.updateUserMileage(userRequestDto);
   }
 
-  @KafkaListener(groupId = "user-refund-group", topics = "user-refund-ticket-topic")
-  public void consumeUserRefundTicket(
-      @Payload ApiResponse<UserRefundTicketRequestDto> message) {
-
-    ObjectMapper mapper = new ObjectMapper();
-    UserRefundTicketRequestDto userRefundRequestDto = mapper.convertValue(message.getData(),
-        UserRefundTicketRequestDto.class);
-
-    userService.refundTicketPayment(userRefundRequestDto);
-  }
-
   @KafkaListener(groupId = "user-notification-group", topics = "user-create-notification-topic")
   public void createNotificationByEmail(@Payload ApiResponse<?> message) {
 
