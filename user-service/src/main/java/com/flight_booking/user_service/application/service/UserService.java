@@ -115,7 +115,7 @@ public class UserService {
   @Transactional
   public boolean updateUserMileage(UserRequestDto userRequestDto) {
 
-    User user = userRepository.findByEmail(userRequestDto.email())
+    User user = userRepository.findByEmailWithLock(userRequestDto.email())
         .orElseThrow();
 
     if (user.getMileage() < userRequestDto.fare()) {
