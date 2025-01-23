@@ -51,8 +51,7 @@ public class UserServiceTest {
     Thread thread1 = new Thread(() -> {
       try {
 
-        User lockUser = userRepository.findByEmailWithLock(userEmail)
-            .orElseThrow();
+        User lockUser = userService.getUserWithLock(userEmail);
         Thread.sleep(2000);
         lockUser.updateMile(1500L);
 
@@ -64,8 +63,7 @@ public class UserServiceTest {
     Thread thread2 = new Thread(() -> {
       try {
 
-        User lockUser = userRepository.findByEmailWithLock(userEmail)
-            .orElseThrow();
+        User lockUser = userService.getUserWithLock(userEmail);
         Thread.sleep(2000);
         lockUser.updateMile(500L);
 
@@ -111,8 +109,7 @@ public class UserServiceTest {
     Thread thread1 = new Thread(() -> {
       try {
 
-        User lockUser = userRepository.findByEmail(userEmail)
-            .orElseThrow();
+        User lockUser = userService.getUserNonLock(userEmail);
         Thread.sleep(2000);
         lockUser.updateMile(1500L);
 
@@ -124,8 +121,7 @@ public class UserServiceTest {
     Thread thread2 = new Thread(() -> {
       try {
 
-        User lockUser = userRepository.findByEmail(userEmail)
-            .orElseThrow();
+        User lockUser = userService.getUserNonLock(userEmail);
         Thread.sleep(2000);
         lockUser.updateMile(500L);
 

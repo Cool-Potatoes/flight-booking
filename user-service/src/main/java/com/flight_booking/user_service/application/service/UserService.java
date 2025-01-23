@@ -177,6 +177,17 @@ public class UserService {
     return true;
   }
 
+  @Transactional
+  public User getUserWithLock(String email) {
+
+    return userRepository.findByEmailWithLock(email).orElseThrow();
+  }
+
+  @Transactional
+  public User getUserNonLock(String userEmail) {
+    return userRepository.findByEmail(userEmail).orElseThrow();
+  }
+
   private User getUserByEmailAndIsDeletedFalse(String email) {
 
     return userRepository.findByEmailAndIsDeletedFalse(email)
