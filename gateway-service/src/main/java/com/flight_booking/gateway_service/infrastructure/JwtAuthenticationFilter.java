@@ -2,6 +2,7 @@ package com.flight_booking.gateway_service.infrastructure;
 
 import com.flight_booking.gateway_service.application.UserFeignService;
 import com.flight_booking.gateway_service.application.UserStatusDto;
+import com.flight_booking.gateway_service.presentation.exception.CustomJwtException;
 import com.flight_booking.gateway_service.presentation.exception.ErrorResponseUtil;
 import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
 import java.util.List;
@@ -85,11 +86,12 @@ public class JwtAuthenticationFilter implements GlobalFilter {
           .build();
 
       exchange = exchange.mutate().request(modifiedRequest).build();
-
-      return chain.filter(exchange);
+    } catch (CustomJwtException e) {
+      return ErrorResponseUtil.createErrorResponse(exchange, e.getErrorCode());
     } catch (Exception e) {
-      log.error("토큰 검증 중 오류 발생: {}", e.getMessage());
+      log.error("알 수 없는 오류: {}", e.getMessage());
       return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.TOKEN_VALIDATION_ERROR);
     }
+    return chain.filter(exchange);
   }
 }

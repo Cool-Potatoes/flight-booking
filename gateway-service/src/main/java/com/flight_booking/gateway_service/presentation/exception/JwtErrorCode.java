@@ -19,7 +19,7 @@ public enum JwtErrorCode {
   BLACKLISTED_TOKEN(HttpServletResponse.SC_UNAUTHORIZED, "해당 토큰은 블랙리스트에 포함되어 있습니다."),
   USER_BLOCKED(HttpServletResponse.SC_FORBIDDEN, "블락 처리된 회원입니다."),
   USER_DELETED(HttpServletResponse.SC_FORBIDDEN, "탈퇴한 회원입니다."),
-  TOKEN_VALIDATION_ERROR(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "토큰 검증 중 오류가 발생했습니다.");
+  TOKEN_VALIDATION_ERROR(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "토큰 검증 중 서버 오류가 발생했습니다. ");
 
   private final int statusCode;
   private final String message;
