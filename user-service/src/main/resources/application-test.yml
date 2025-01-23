@@ -5,6 +5,9 @@ service:
   kafka:
     url: localhost:9092
 
+SECRET_KEY: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+
+
 spring:
   application:
     name: user-service
