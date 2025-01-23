@@ -14,8 +14,8 @@ public class AnswerService {
   private final AiService aiService;
   private final StringRedisTemplate redisTemplate;
 
-  private static final String REGULATION_CACHE_PREFIX = "regulation:";
-  private static final String WEATHER_CACHE_PREFIX = "weather:";
+  private static final String REGULATION_CACHE_PREFIX = "ai:regulation:";
+  private static final String WEATHER_CACHE_PREFIX = "ai:weather:";
 
   // 기내 수하물 규정
   public ApiResponse<?> saveRegulationAnswer(String airline, String seatClass) {
