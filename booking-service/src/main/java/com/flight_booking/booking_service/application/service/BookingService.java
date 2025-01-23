@@ -7,14 +7,12 @@ import com.flight_booking.booking_service.infrastructure.messaging.BookingKafkaS
 import com.flight_booking.booking_service.presentation.global.exception.booking.NotFoundBookingException;
 import com.flight_booking.booking_service.presentation.response.BookingResponseCustomDto;
 import com.flight_booking.common.application.dto.BookingProcessRequestDto;
-import com.flight_booking.common.application.dto.BookingRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingStatusUpdateRefundRequestDto;
 import com.flight_booking.common.application.dto.BookingUpdateRequestDto;
 import com.flight_booking.common.application.dto.PassengerIsdeletedUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.ReBookingRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckForRebookRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityCheckRequestDto;
-import com.flight_booking.common.application.dto.SeatAvailabilityRefundRequestDto;
 import com.flight_booking.common.application.dto.SeatAvailabilityUpdateTrueRequestDto;
 import com.flight_booking.common.application.dto.TicketRequestDto;
 import com.flight_booking.common.domain.model.BookingStatusEnum;
@@ -197,29 +195,6 @@ public class BookingService {
 
     booking.updateBookingStatus(BookingStatusEnum.BOOKING_REFUND_FAIL);
   }
-
-  @Transactional(readOnly = false)
-  public void processRefundTicketBooking(BookingRefundRequestDto bookingProcessRequestDto) {
-
-    // TODO
-    passengerService.updateOnePassenger(bookingProcessRequestDto.passengerId());
-
-    Booking booking = bookingRepository.findById(bookingProcessRequestDto.bookingId())
-        .orElseThrow(NotFoundBookingException::new);
-
-    booking.updateBookingStatus(BookingStatusEnum.BOOKING_REFUND_COMPLETE);
-
-    // TODO : 물어볼거 1 = 토픽에 들어가는 id는 해당 도메인 기준?
-    bookingKafkaSender.sendMessage(
-        "seat-availability-refund-topic",
-        booking.getBookingId().toString(),
-        new SeatAvailabilityRefundRequestDto(
-            bookingProcessRequestDto.seatId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-  }
-
 
   @Transactional(readOnly = false)
   public void updateBookingStatusRefund(BookingStatusUpdateRefundRequestDto requestDto) {

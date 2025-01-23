@@ -10,12 +10,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "flight-service")
 public interface FlightClient {
 
-  @GetMapping("/internal/seats/{seatId}")
-  Long updateSeatAvailableFalseAndGetSeatPrice(
-      @RequestHeader(value = "X-USER-EMAIL") String email,
-      @RequestHeader(value = "X-USER-ROLE") String role,
-      @PathVariable UUID seatId);
-
   @GetMapping("/internal/flights/{seatId}")
   Boolean checkFlightStatusBySeatId(
       @RequestHeader(value = "X-USER-EMAIL") String email,
