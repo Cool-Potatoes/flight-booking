@@ -1,7 +1,7 @@
 package com.flight_booking.gateway_service.infrastructure;
 
-import com.flight_booking.gateway_service.application.UserFeignService;
-import com.flight_booking.gateway_service.application.UserStatusDto;
+import com.flight_booking.gateway_service.application.UserCacheService;
+import com.flight_booking.gateway_service.application.UserInfo;
 import com.flight_booking.gateway_service.presentation.exception.CustomJwtException;
 import com.flight_booking.gateway_service.presentation.exception.ErrorResponseUtil;
 import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -20,11 +19,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter {
 
-  private final UserFeignService userFeignService;
+  private final UserCacheService userCacheService;
   private final JwtUtil jwtUtil;
 
-  public JwtAuthenticationFilter(@Lazy UserFeignService userFeignService, JwtUtil jwtUtil) {
-    this.userFeignService = userFeignService;
+  public JwtAuthenticationFilter(@Lazy UserCacheService userCacheService, JwtUtil jwtUtil) {
+    this.userCacheService = userCacheService;
     this.jwtUtil = jwtUtil;
   }
 
@@ -49,9 +48,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     String token = jwtUtil.extractToken(exchange);
 
     if (token == null) {
-      log.info("토큰이 존재하지 않습니다.");
-      exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-      return exchange.getResponse().setComplete();
+      return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.TOKEN_NOT_FOUND);
     }
 
     try {
@@ -63,26 +60,21 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.BLACKLISTED_TOKEN);
       }
 
-      // 토큰이 유효한 경우, 이메일과 역할 추출
-      String email = jwtUtil.extractEmail(token);
-
       // 사용자 상태(블락/탈퇴) 확인
-      UserStatusDto userStatusDto = userFeignService.getUserStatus(email);
+      UserInfo userInfo = userCacheService.getUserInfo(token);
 
-      if (userStatusDto.isBlocked()) {
+      if (userInfo.isBlocked()) {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_BLOCKED);
       }
 
-      if (userStatusDto.isDeleted()) {
+      if (userInfo.isDeleted()) {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_DELETED);
       }
 
-      String role = jwtUtil.extractRole(token);
-
       // 이메일과 역할을 헤더에 추가
       ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-          .header("X-USER-EMAIL", email)
-          .header("X-USER-ROLE", role)
+          .header("X-USER-EMAIL", userInfo.email())
+          .header("X-USER-ROLE", userInfo.role())
           .build();
 
       exchange = exchange.mutate().request(modifiedRequest).build();
