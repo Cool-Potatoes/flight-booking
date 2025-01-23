@@ -124,7 +124,7 @@ public class UserServiceTest {
     Thread thread2 = new Thread(() -> {
       try {
 
-        User lockUser = userRepository.findByEmailWithLock(userEmail)
+        User lockUser = userRepository.findByEmail(userEmail)
             .orElseThrow();
         Thread.sleep(2000);
         lockUser.updateMile(500L);
