@@ -9,7 +9,6 @@ import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,7 +58,7 @@ public class AuthService {
       authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
       User user = getUser(email);
-      validateUserStatus(user); // 사용자 상태 확인 (블락/ 탈퇴)
+      validateUserStatus(user);
       String role = user.getRole().toString();
 
       String accessToken = jwtUtil.createAccessToken(email, role);
@@ -141,17 +140,15 @@ public class AuthService {
 
   // 사용자 상태 확인 (블락/ 탈퇴)
   private void validateUserStatus(User user) {
-    String email = user.getEmail();
     if (user.getIsBlocked()) {
-      log.error("블락된 사용자: {}", email);
-      List<String> reasons = user.getBlockedInfo().getBlockedReason();
-      String reason = reasons.get(reasons.size() - 1);
-      String errorMessage = ErrorCode.USER_BLOCKED.getMessage() + " 이유: " + reason;
-      throw new UserException(ErrorCode.USER_BLOCKED, errorMessage);
+      String reason = user.getBlockedInfo().getBlockedReason()
+          .get(user.getBlockedInfo().getBlockedReason().size() - 1);
+      log.error("블락된 사용자: {} (이유: {})", user.getEmail(), reason);
+      throw new UserException(ErrorCode.USER_BLOCKED, "사유: " + reason);
     }
 
     if (user.getIsDeleted()) {
-      log.error("탈퇴된 사용자: {}", email);
+      log.error("탈퇴된 사용자: {}", user.getEmail());
       throw new UserException(ErrorCode.USER_DELETED);
     }
   }
