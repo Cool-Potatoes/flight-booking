@@ -28,7 +28,11 @@ public class AiService {
 
   // 기내 수하물 규정 질문
   private String regulationQuestion(String airline, String seatClass) {
-    return airline + "의 " + seatClass + "좌석의 기내 수하물 규정(크기, 무게, 제한 물품 등)을 간결하고 공손하게 40자 이하로 알려주세요.";
+    return airline + "의 홈페이지를 참고하여 " + seatClass + " 좌석의 기내 수하물 규정을 간결하고 공손하게 50자 이하로 알려줘."
+        + " 아래 예시를 참고해줘."
+        + "항공사, 좌석 등급의 기내 수하물은 휴대용 가방 1개와 개인 소지품 1개이며, 총 무게는 10kg 이하입니다. "
+        + "휴대용 가방의 크기는 합 115cm 이하여야 합니다."
+        + "자세한 내용은 항공사 공식 홈페이지를 확인해 주세요. (단, 규정은 변동될 수 있습니다.)";
   }
 
   // 여행지의 평균 날씨 조회
@@ -38,9 +42,10 @@ public class AiService {
   }
 
   // 여행지의 평균 날씨 질문
-  private String weatherQuestion(String country, String Month) {
-    return "과거 날씨 데이터를 기반으로 " + country + "의 " + Month
-        + " 평균 기후와 여행 시 유의사항을 간결하고 공손하게 40자 이하로 설명해주세요.";
+  private String weatherQuestion(String country, String month) {
+    return "과거 날씨 데이터를 바탕으로 " + country + "의 " + month
+        + " 평균 날씨와 여행하기 좋은 조건, 유의사항을 50자 이하로 간결하게 알려줘. "
+        + "예: 날씨가 여행하기 좋은지, 우기나 폭염 등 특별한 날씨 상황이 있는지 포함해줘.";
   }
 
   // Gemini API 호출 및 응답 처리
