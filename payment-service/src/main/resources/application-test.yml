@@ -40,3 +40,4 @@ logging:
 retry-payment:
   scheduler:
     thread-pool: 5
+

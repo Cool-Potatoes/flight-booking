@@ -54,4 +54,5 @@ ehthumbs.db
 .recommenders/
 
 # 환경 파일
-.env
+.env.prod
+.env.test

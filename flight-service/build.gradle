@@ -46,9 +46,9 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     // Zipkin
-    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-    implementation 'io.github.openfeign:feign-micrometer'
-    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+//    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+//    implementation 'io.github.openfeign:feign-micrometer'
+//    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
     // Resilience4j
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'

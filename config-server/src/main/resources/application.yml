@@ -3,11 +3,24 @@ server:
 
 spring:
   profiles:
-    active: native
+    active: git  # 'git' 프로파일을 활성화 (선택사항)
   application:
     name: config-server
+
   cloud:
     config:
       server:
-        native:
-          search-locations: classpath:/config-repo
+        git:
+          uri: https://github.com/Cool-Potatoes/config-repo.git
+          username: HanBeom98
+          password: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
+          default-label: main
+          search-paths: '{application}'  # 애플리케이션 이름에 맞는 설정 파일을 찾음
+          clone-on-start: true
+          skip-ssl-validation: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:8761/eureka/}
+
