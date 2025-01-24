@@ -31,7 +31,6 @@ public class PaymentServiceTest {
 
   @Test
   public void testPessimisticLocking() throws InterruptedException {
-    // 초기 데이터 설정
     logger.info("초기 아이템 데이터를 설정합니다.");
     UUID bookingId = UUID.randomUUID();
 
@@ -89,6 +88,4 @@ public class PaymentServiceTest {
     thread2.join();
 
   }
-
-
 }
