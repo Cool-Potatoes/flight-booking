@@ -19,9 +19,9 @@ public class UserCacheService {
   private final ObjectMapper objectMapper;
   private final JwtUtil jwtUtil;
 
+  // 주어진 토큰을 통해 사용자 정보를 캐시에서 조회, 없으면 서비스에서 조회하여 캐시에 저장
   public UserInfo getUserInfo(String token) {
 
-    // 토큰에서 이메일, 역할 추출
     String email = jwtUtil.extractEmail(token);
     String role = jwtUtil.extractRole(token);
 
@@ -32,19 +32,17 @@ public class UserCacheService {
 
     String redisKey = REDIS_KEY_PREFIX + token;
 
-    // 캐시에서 정보 조회
     Object cachedValue = redisTemplate.opsForValue().get(redisKey);
     if (cachedValue != null) {
       return objectMapper.convertValue(cachedValue, UserInfo.class);
     }
 
-    // 캐시가 없으면 서비스에서 조회
     UserInfo userInfo = getUserInfoFromService(email, role);
     redisTemplate.opsForValue().set(redisKey, userInfo, Duration.ofMinutes(30));
     return userInfo;
   }
 
-  // 사용자 상태 조회
+  // 사용자 정보를 서비스에서 조회하여 반환
   private UserInfo getUserInfoFromService(String email, String role) {
     UserStatusDto userStatus = userFeignClient.getUserStatus(email);
 

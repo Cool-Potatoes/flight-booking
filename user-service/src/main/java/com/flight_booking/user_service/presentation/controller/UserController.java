@@ -56,7 +56,6 @@ public class UserController {
       @PathVariable Long id,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    // 사용자는 본인 정보만 제공
     Object response = userService.getUserDetails(id, userDetails);
     return ApiResponse.ok(response, "회원 상세 조회 성공");
   }
@@ -85,12 +84,13 @@ public class UserController {
     return ApiResponse.ok("회원 탈퇴 성공");
   }
 
-  // 상태 조회 (WebClient용)
+  // 사용자 상태 조회 (feignClient)
   @GetMapping("/status/{email}")
   public UserStatusDto getUserStatus(@PathVariable("email") String email) {
     return userService.getUserStatus(email);
   }
 
+  // 마일리지 업데이트
   @PostMapping("/mileage")
   public boolean updateMileage(@RequestBody UserRequestDto requestDto) {
     return userService.updateUserMileage(requestDto);

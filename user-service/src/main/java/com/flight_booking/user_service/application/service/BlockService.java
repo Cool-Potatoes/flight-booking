@@ -40,7 +40,9 @@ public class BlockService {
     user.unblockUser();
   }
 
-  //-----------------------------------------------------------------------------------------
+  /**
+   * private methods
+   */
 
   // 존재하는 사용자 확인 및 삭제된 사용자 확인
   private User getUser(Long id) {

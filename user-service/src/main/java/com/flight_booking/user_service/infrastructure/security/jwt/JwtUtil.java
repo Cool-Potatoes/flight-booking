@@ -1,6 +1,7 @@
 package com.flight_booking.user_service.infrastructure.security.jwt;
 
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
+import com.flight_booking.user_service.presentation.global.exception.UserException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -52,9 +53,8 @@ public class JwtUtil {
   public void init() {
     try {
       byte[] decodedKey = Base64.getDecoder().decode(secretKey);
-      key = Keys.hmacShaKeyFor(decodedKey); // HMAC-SHA 키 생성
+      key = Keys.hmacShaKeyFor(decodedKey);
     } catch (IllegalArgumentException e) {
-      log.error("SECRET_KEY 설정이 잘못되었습니다.", e);
       throw new RuntimeException(ErrorCode.INVALID_SECRET_KEY.getMessage(), e);
     }
   }
@@ -165,7 +165,7 @@ public class JwtUtil {
     long remainingTime = calculateRemainingTime(token);
     if (remainingTime <= 0) {
       log.warn("만료된 토큰입니다. 토큰: {}", token);
-      return;
+      throw new UserException(ErrorCode.TOKEN_EXPIRED);
     }
     // 남은 시간이 0보다 클 때만 블랙리스트에 추가
     redisTemplate.opsForValue().set("blacklist:" + token, "true", Duration.ofMillis(remainingTime));
@@ -181,7 +181,7 @@ public class JwtUtil {
     cookie.setPath("/");
     cookie.setMaxAge(86400);
     response.addCookie(cookie);
-    log.info("Refresh token 쿠키가 성공적으로 설정되었습니다.");
+    log.info("Refresh token 쿠키가 성공적으로 설정되었습니다. 토큰: {}", refreshToken);
   }
 
   // RefreshToken 쿠키에서 삭제
@@ -192,6 +192,6 @@ public class JwtUtil {
     cookie.setPath("/");
     cookie.setMaxAge(0);  // 쿠키 만료
     response.addCookie(cookie);
-    log.info("Refresh token 쿠키가 성공적으로 삭제되었습니다.");
+    log.info("Refresh token 쿠키가 성공적으로 삭제되었습니다.토큰: {}", refreshToken);
   }
 }

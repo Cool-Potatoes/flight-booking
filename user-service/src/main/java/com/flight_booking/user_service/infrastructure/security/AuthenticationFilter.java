@@ -33,28 +33,22 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     if (email != null && role != null) {
       try {
-        // 이메일로 사용자 정보 로드
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
-        // 인증 객체 생성 (권한 포함)
         Authentication authentication = new UsernamePasswordAuthenticationToken(
             userDetails, null, userDetails.getAuthorities());
 
         log.info("auth {}", authentication.getAuthorities());
 
-        // 인증 정보를 SecurityContext에 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } catch (Exception e) {
-        // 사용자 정보 로드 실패 시, 에러 처리
         log.error("사용자 인증 실패: {}", e.getMessage());
-
         ErrorCode errorCode = ErrorCode.USER_AUTHENTICATION_FAILED;
         response.setStatus(errorCode.getHttpStatus().value());
         response.getWriter().write(errorCode.getMessage());
         return;
       }
     }
-
     filterChain.doFilter(request, response);
   }
 }

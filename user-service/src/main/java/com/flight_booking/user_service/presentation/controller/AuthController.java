@@ -34,7 +34,6 @@ public class AuthController {
   @PostMapping("/signin")
   public ApiResponse<?> signIn(@Valid @RequestBody SignInRequest request,
       HttpServletResponse response) {
-    log.info("로그인 시도");
     String accessToken = authService.signIn(request.email(), request.password(), response);
     return ApiResponse.ok("로그인 성공", accessToken);
   }

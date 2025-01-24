@@ -21,26 +21,20 @@ public class RedisConfig {
     RedisTemplate<String, Object> template = new RedisTemplate<>();
     template.setConnectionFactory(connectionFactory);
 
-    template.setKeySerializer(RedisSerializer.string());  // 문자열 직렬화
-    template.setValueSerializer(RedisSerializer.json()); // JSON 직렬화
+    template.setKeySerializer(RedisSerializer.string());
+    template.setValueSerializer(RedisSerializer.json());
 
     return template;
   }
 
   @Bean
   public RedisCacheManager cacheManager(
-      RedisConnectionFactory redisConnectionFactory
-  ) {
-    // Redis 관련 설정 구성
+      RedisConnectionFactory redisConnectionFactory) {
     RedisCacheConfiguration configuration = RedisCacheConfiguration
         .defaultCacheConfig()
-        // null 캐싱 X
         .disableCachingNullValues()
-        // 기본 캐시 유지 시간 (Time To Live)
         .entryTtl(Duration.ofSeconds(60))
-        // 캐시 구분 접두사 설정
         .computePrefixWith(CacheKeyPrefix.simple())
-        // 캐시 저장할 값의 직렬화/역직렬화 방법
         .serializeValuesWith(
             RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json())
         );

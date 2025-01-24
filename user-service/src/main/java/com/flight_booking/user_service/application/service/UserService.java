@@ -2,8 +2,6 @@ package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRetryRequestDto;
-import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
-import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.common.presentation.dto.NotificationRequest;
@@ -62,12 +60,10 @@ public class UserService {
     User user = getUser(id);
     boolean isAdmin = isAdmin(userDetails);
 
-    // 관리자의 경우
     if (isAdmin) {
       return AdminUserDetailResponse.fromEntity(user);
     }
 
-    // 사용자의 경우 본인 정보만 조회 가능
     checkUser(userDetails, user);
     return UserDetailResponse.fromEntity(user);
   }
@@ -103,14 +99,12 @@ public class UserService {
     User user = getUser(id);
     checkUser(userDetails, user);
 
-    // 비밀번호 확인
     if (!passwordEncoder.matches(deleteRequest.password(), user.getPassword())) {
       throw new UserException(ErrorCode.INVALID_CURRENT_PASSWORD);
     }
 
-    // 블랙리스트에 토큰 추가
     String accessToken = jwtUtil.extractAccessTokenFromRequest(request);
-    String refreshToken = jwtUtil.extractRefreshTokenFromRequest(request);  // 요청에서 refreshToken 추출
+    String refreshToken = jwtUtil.extractRefreshTokenFromRequest(request);
 
     jwtUtil.addToBlacklist(accessToken);
     jwtUtil.addToBlacklist(refreshToken);
@@ -150,7 +144,6 @@ public class UserService {
           .set("Retry:paymentId:" + userRequestDto.paymentId().toString(), "In Retry Queue", 15,
               TimeUnit.MINUTES);
 
-      // TODO 알림 발송. 잠시 후 자동으로 결제가 재시도 됩니다. 마일리지를 충전해주세요.
       sendInsufficientMileageMessage(user);
 
       return false;
@@ -220,7 +213,6 @@ public class UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-    // 삭제된 사용자 확인
     if (user.getIsDeleted()) {
       throw new UserException(ErrorCode.USER_DELETED);
     }

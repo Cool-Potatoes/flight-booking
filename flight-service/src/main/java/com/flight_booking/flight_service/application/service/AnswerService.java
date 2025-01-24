@@ -11,19 +11,19 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AnswerService {
 
-  private final AiService aiService;
-  private final StringRedisTemplate redisTemplate;
-
   private static final String REGULATION_CACHE_PREFIX = "ai:regulation:";
   private static final String WEATHER_CACHE_PREFIX = "ai:weather:";
 
-  // 기내 수하물 규정
+  private final AiService aiService;
+  private final StringRedisTemplate redisTemplate;
+
+  // 기내 수하물 규정 응답 Redis에 저장
   public ApiResponse<?> saveRegulationAnswer(String airline, String seatClass) {
     return saveAnswer(REGULATION_CACHE_PREFIX + airline + ":" + seatClass,
         () -> aiService.getRegulation(airline, seatClass));
   }
 
-  // TODO 날씨 정보 -> 현재 날씨 위해선 API 접목 필요
+  // 여행지의 평균 날씨 응답 Redis에 저장
   public ApiResponse<?> saveWeatherAnswer(String country, String month) {
     return saveAnswer(WEATHER_CACHE_PREFIX + country + ":" + month,
         () -> aiService.getWeather(country, month));
@@ -33,18 +33,15 @@ public class AnswerService {
   private ApiResponse<?> saveAnswer(String redisKey, ApiResponseProvider apiResponseProvider) {
     ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
 
-    // 데이터 조회
     String cachedAnswer = valueOps.get(redisKey);
     if (cachedAnswer != null) {
       return ApiResponse.ok(cachedAnswer, "Redis에서 데이터를 반환했습니다.");
     }
 
     try {
-      // 캐시에 데이터가 없을 경우 API 호출
       String apiResponse = apiResponseProvider.getApiResponse();
       String answerText = parseApiResponse(apiResponse);
 
-      // Redis에 데이터 저장 (1일)
       valueOps.set(redisKey, answerText, 1, TimeUnit.DAYS);
 
       return ApiResponse.ok(answerText, "새로운 데이터를 생성하여 저장했습니다.");

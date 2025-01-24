@@ -13,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import java.util.Base64;
 import javax.crypto.SecretKey;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,13 +22,10 @@ import org.springframework.web.server.ServerWebExchange;
 
 @Slf4j(topic = "JWT 검증 및 정보 추출")
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
   private final RedisTemplate<String, Object> redisTemplate;
-
-  public JwtUtil(RedisTemplate<String, Object> redisTemplate) {
-    this.redisTemplate = redisTemplate;
-  }
 
   // Header KEY 값
   public static final String AUTHORIZATION_HEADER = "Authorization";

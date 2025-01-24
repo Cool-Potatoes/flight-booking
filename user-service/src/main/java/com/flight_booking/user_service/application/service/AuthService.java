@@ -42,7 +42,7 @@ public class AuthService {
 
     User user = User.builder()
         .email(request.email())
-        .password(passwordEncoder.encode(request.password())) // 비밀번호 암호화 처리
+        .password(passwordEncoder.encode(request.password()))
         .name(request.name())
         .phone(request.phone())
         .isBlocked(false)
@@ -92,15 +92,14 @@ public class AuthService {
     String accessToken = jwtUtil.extractAccessTokenFromRequest(request);
     String refreshToken = jwtUtil.extractRefreshTokenFromRequest(request);
 
-    // refreshToken 확인 및 검증
     validateRefreshToken(refreshToken);
 
-    // 기존 Access Token 처리
+    // 기존 Access Token - 만료X 시 블랙리스트에 추가
     String accessTokenWithoutBearer = jwtUtil.removeBearer(accessToken);
     if (jwtUtil.isTokenBlacklisted(accessTokenWithoutBearer)) {
       throw new UserException(ErrorCode.BLACKLISTED_TOKEN);
     }
-    jwtUtil.addToBlacklist(accessTokenWithoutBearer); // 만료X 시 블랙리스트에 추가
+    jwtUtil.addToBlacklist(accessTokenWithoutBearer);
 
     // 사용자 정보 추출
     String email = jwtUtil.getEmail(refreshToken);
@@ -108,12 +107,11 @@ public class AuthService {
     validateUserStatus(user);
     String role = user.getRole().toString();
 
-    // 새로운 Access Token, Refresh Token 발급
     String newAccessToken = jwtUtil.createAccessToken(email, role);
     String newRefreshToken = jwtUtil.createRefreshToken(email);
 
-    jwtUtil.addToBlacklist(refreshToken); // 기존 Refresh Token 블랙리스트 추가
-    jwtUtil.addRefreshTokenToCookie(newRefreshToken, response); // HTTP-Only 쿠키 생성
+    jwtUtil.addToBlacklist(refreshToken);
+    jwtUtil.addRefreshTokenToCookie(newRefreshToken, response);
 
     return newAccessToken;
   }
@@ -130,7 +128,9 @@ public class AuthService {
     SecurityContextHolder.clearContext();
   }
 
-  // private method ------------------------------------------------------------------------------------
+  /**
+   * private methods
+   */
 
   // 이메일로 사용자 확인
   private User getUser(String email) {

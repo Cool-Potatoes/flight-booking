@@ -1,6 +1,5 @@
 package com.flight_booking.user_service.infrastructure.configuration.kafka;
 
-import com.flight_booking.common.application.dto.NotificationRequestDto;
 import com.flight_booking.common.presentation.global.ApiResponse;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +19,7 @@ public class ProducerApplicationKafkaConfig {
   @Value("${service.kafka.url}")
   private String url;
 
+  // Kafka 프로듀서 관련 Bean 설정
   @Bean
   public ProducerFactory<String, ApiResponse<?>> apiResponseProducerFactory() {
     Map<String, Object> configProps = new HashMap<>();
@@ -29,6 +29,7 @@ public class ProducerApplicationKafkaConfig {
     return new DefaultKafkaProducerFactory<>(configProps);
   }
 
+  // KafkaTemplate 생성
   @Bean
   public KafkaTemplate<String, ApiResponse<?>> apiResponseKafkaTemplate() {
     return new KafkaTemplate<>(apiResponseProducerFactory());

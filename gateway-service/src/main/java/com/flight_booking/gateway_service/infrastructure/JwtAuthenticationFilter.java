@@ -52,15 +52,12 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     }
 
     try {
-      // JWT 검증
       jwtUtil.validateToken(token);
 
-      // 블랙리스트 체크
       if (jwtUtil.isTokenBlacklisted(token)) {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.BLACKLISTED_TOKEN);
       }
 
-      // 사용자 상태(블락/탈퇴) 확인
       UserInfo userInfo = userCacheService.getUserInfo(token);
 
       if (userInfo.isBlocked()) {
@@ -71,7 +68,6 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_DELETED);
       }
 
-      // 이메일과 역할을 헤더에 추가
       ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
           .header("X-USER-EMAIL", userInfo.email())
           .header("X-USER-ROLE", userInfo.role())

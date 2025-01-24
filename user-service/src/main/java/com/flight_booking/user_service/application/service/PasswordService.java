@@ -56,6 +56,10 @@ public class PasswordService {
     user.setPassword(passwordEncoder.encode(request.newPw()));
   }
 
+  /**
+   * private methods
+   */
+
   // 이메일로 사용자 찾기
   private User getUser(String email) {
     return userRepository.findByEmail(email)

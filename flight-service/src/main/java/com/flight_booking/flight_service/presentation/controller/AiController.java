@@ -17,6 +17,7 @@ public class AiController {
 
   private final AnswerService answerService;
 
+  // 기내 수하물 규정
   @PostMapping("/regulation")
   public ApiResponse<?> getRegulation(@RequestBody RegulationQuestionDto questionDto) {
     String airline = questionDto.airline().replace(" ", "");
@@ -24,7 +25,7 @@ public class AiController {
     return answerService.saveRegulationAnswer(airline, seatClass);
   }
 
-  // TODO 날씨 API 접목 필요
+  // 여행지의 평균 날씨
   @PostMapping("/weather")
   public ApiResponse<?> getWeather(@RequestBody WeatherQuestionDto questionDto) {
     String country = questionDto.country();
