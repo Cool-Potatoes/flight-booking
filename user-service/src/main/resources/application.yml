@@ -1,18 +1,22 @@
 server:
-  port: 0  # Temporary port, will be overwritten by Config server settings later.
+  port: 8100  # User 서비스 고정 포트
 
 spring:
   application:
     name: user-service
   config:
-    import: "optional:configserver:"  # Retrieve configuration from Config Server (application can run even if Config Server is not available)
+    import: optional:configserver:http://config-server:8888
   cloud:
     config:
       discovery:
-        enabled: true  # Discover Config Server through Eureka
+        enabled: true  # Eureka를 통해 Config Server 검색
         service-id: config-server
+
+
 
 eureka:
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/  # Use Eureka server name within Docker network
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL:http://localhost:8761/eureka/}

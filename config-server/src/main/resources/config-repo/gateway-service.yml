@@ -40,17 +40,7 @@ spring:
           enabled: true  # 서비스 디스커버리를 통해 동적으로 라우트를 생성하도록 설정
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://localhost:9411/api/v2/spans"  # Zipkin 서버의 엔드포인트 지정
-  tracing:
-    sampling:
-      probability: 1.0  # Zipkin 트레이싱 샘플링 비율 (1.0: 100%)
   endpoints:
     web:
       exposure:
-        include: refresh, prometheus  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신) + prometheus
-
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
+        include: prometheus  # Prometheus 메트릭 노출
