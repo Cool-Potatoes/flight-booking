@@ -100,42 +100,6 @@ public class FlightService {
     return FlightResponseDto.from(flight);
   }
 
-  public void checkAndCancelFlight(FlightCancelRequestDto flightCancelRequestDto) {
-
-    SeatResponseDto seatResponseDto = seatService.getSeat(flightCancelRequestDto.seatId());
-
-    Flight flight = flightRepository.findById(seatResponseDto.flightId()).orElse(null);
-
-    // 취소 불가 상태
-    if (flight == null
-        || FlightStatusEnum.DEPARTED.equals(flight.getStatusEnum())
-        || FlightStatusEnum.LANDED.equals(flight.getStatusEnum())) {
-
-      flightKafkaSender.sendMessage(
-          "ticket-cancel-unavailable-topic",
-          seatResponseDto.seatId().toString(),
-          flightCancelRequestDto,
-          StackTraceUtils.getCurrentMethodName(),
-          StackTraceUtils.getCurrentClassName()
-      );
-    }
-
-    // 취소 진행 1.환불결제생성(기존 예약 변경) 2.마일리지반환 3.환불결제완료 4.좌석상태변경 + 예약상태변경,탑승객상태변경
-
-    flightKafkaSender.sendMessage(
-        "payment-refund-ticket-topic",
-        flightCancelRequestDto.ticketId().toString(),
-        new PaymentRefundFromTicketRequestDto(
-            flightCancelRequestDto.email(),
-            flightCancelRequestDto.ticketId(),
-            flightCancelRequestDto.bookingId(),
-            flightCancelRequestDto.passengerId(),
-            flightCancelRequestDto.seatId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-  }
-
   public Boolean checkFlightStatusBySeatId(UUID seatId) {
 
     SeatResponseDto seatResponseDto = seatService.getSeat(seatId);

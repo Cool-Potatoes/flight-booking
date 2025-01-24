@@ -8,11 +8,12 @@ import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.ticket_service.domain.model.Ticket;
 import com.flight_booking.ticket_service.domain.model.TicketStateEnum;
 import com.flight_booking.ticket_service.domain.repository.TicketRepository;
-import com.flight_booking.ticket_service.infrastructure.redis.RedisLock;
 import com.flight_booking.ticket_service.infrastructure.messaging.TicketKafkaSender;
+import com.flight_booking.ticket_service.infrastructure.redis.RedisLock;
 import com.flight_booking.ticket_service.presentation.dto.TicketResponseDto;
 import com.flight_booking.ticket_service.presentation.dto.TicketUpdateRequestDto;
 import com.querydsl.core.types.Predicate;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +33,6 @@ public class TicketService {
   private final TicketRepository ticketRepository;
   private final TicketKafkaSender ticketKafkaSender;
   private final RedisLock redisLock;
-  private final BookingService bookingservice;
   private final FlightService flightService;
   private final PaymentService paymentService;
   private final UserService userService;
@@ -48,13 +48,13 @@ public class TicketService {
     Ticket savedTicket = ticketRepository.save(ticket);
 
     // oldTicket 처리
-    if(ticketRequestDto.ticketId() != null){
+    if (ticketRequestDto.ticketId() != null) {
 
-      Ticket oldTicket = ticketRepository.findByTicketIdAndIsDeletedFalse(ticketRequestDto.ticketId())
+      Ticket oldTicket = ticketRepository.findByTicketIdAndIsDeletedFalse(
+              ticketRequestDto.ticketId())
           .orElseThrow(RuntimeException::new);
 
       oldTicket.updateState(TicketStateEnum.REFUND);
-
     }
 
     return TicketResponseDto.from(savedTicket);
@@ -115,8 +115,6 @@ public class TicketService {
 
     ticket.updateState(TicketStateEnum.CANCEL_PENDING);
 
-    // TODO (kafka 비동기 처리) 삭제 가능한지 확인 Flight 상태 확인 -> 마일리지 반환 -> Ticket state update
-
     Boolean isCancellable = checkFlightCancellable(userDetails.email(), userDetails.role(),
         ticket.getSeatId());
     if (!isCancellable) {
@@ -126,7 +124,6 @@ public class TicketService {
     if (ProcessRefund(ticket, userDetails)) {
 
       ticket.updateState(TicketStateEnum.CANCELLED);
-//      sendKafkaMessagesForUpdateStatusToRefund(ticket);
     }
   }
 
@@ -146,7 +143,7 @@ public class TicketService {
 
     Ticket ticket = getTicketById(ticketId);
 
-    if(ticket.getState() == TicketStateEnum.PROCESS_REFUND){
+    if (ticket.getState() == TicketStateEnum.PROCESS_REFUND) {
       throw new RuntimeException("이미 환불중인 티켓 중입니다.");
     }
 
@@ -162,7 +159,6 @@ public class TicketService {
 
   private Long getPaymentFair(Ticket ticket, CustomUserDetails userDetails) {
 
-    // 환불을 해주기 위해 bookingId로 찾은 결제되어있는 금액 리턴
     return paymentService.getPaymentFairByBookingId(userDetails.email(), userDetails.role(),
         ticket.getBookingId());
   }
@@ -184,16 +180,31 @@ public class TicketService {
     return flightService.checkFlightStatusBySeatId(email, role, seatId);
   }
 
+  @CircuitBreaker(name = "ticketService-ProcessRefund", fallbackMethod = "fallbackProcessRefund")
   private Boolean ProcessRefund(Ticket ticket, CustomUserDetails userDetails) {
 
     Long paymentFair = getPaymentFair(ticket, userDetails);
 
-    return userService.RefundMileage(userDetails.email(), userDetails.role(), userDetails.email(),
+    return userService.refundMileage(userDetails.email(), userDetails.role(), userDetails.email(),
         paymentFair);
   }
 
+  @CircuitBreaker(name = "ticketService-validateSeatAvailable", fallbackMethod = "fallbackValidateSeatAvailable")
   private Boolean validateSeatAvailable(CustomUserDetails userDetails, UUID seatId) {
 
     return flightService.getSeatIsAvailable(userDetails.email(), userDetails.role(), seatId);
+  }
+
+  private Boolean fallbackProcessRefund(Ticket ticket, CustomUserDetails userDetails, Throwable t) {
+    log.warn("Refund failed for ticket {} and user {}. Reason: {}", ticket.getTicketId(),
+        userDetails.getUsername(), t.getMessage());
+    return false;
+  }
+
+  private Boolean fallbackValidateSeatAvailable(CustomUserDetails userDetails, UUID seatId,
+      Throwable t) {
+    log.warn("Seat availability check failed for seat {} and user {}. Reason: {}", seatId,
+        userDetails.getUsername(), t.getMessage());
+    return false;
   }
 }

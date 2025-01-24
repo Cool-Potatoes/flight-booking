@@ -204,30 +204,6 @@ public class UserService {
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
   }
 
-  // 티켓 환불
-  @Transactional
-  public void refundTicketPayment(UserRefundTicketRequestDto userRefundRequestDto) {
-
-    User user = userRepository.findByEmail(userRefundRequestDto.email())
-        .orElseThrow();
-
-    user.refundMile(userRefundRequestDto.refundFair());
-
-    // 결제 상태 업데이트
-    userKafkaSender.sendMessage(
-        "payment-refund-ticket-success-process-topic",
-        user.getId().toString(),
-        new ProcessTicketPaymentRequestDto(
-            userRefundRequestDto.paymentId(),
-            userRefundRequestDto.seatId(),
-            userRefundRequestDto.bookingId(),
-            userRefundRequestDto.passengerId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-
-  }
-
   public void createNotificationByEmail(NotificationRequest request) {
     String email = request.receiverEmail();
     User user = userRepository.findByEmail(email)

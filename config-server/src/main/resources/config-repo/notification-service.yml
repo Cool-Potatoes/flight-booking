@@ -52,13 +52,7 @@ resilience4j:
         waitDurationInOpenState: 20s  # Open 상태에서 Half-open 상태로 전환되기 전에 대기하는 시간을 20초로 설정
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://localhost:9411/api/v2/spans"  # Zipkin 서버의 엔드포인트 지정
-  tracing:
-    sampling:
-      probability: 1.0  # Zipkin 트레이싱 샘플링 비율 (1.0: 100%)
   endpoints:
     web:
       exposure:
-        include: refresh, prometheus  # [Post] /actuator/refresh 엔드포인트 노출 (config server 변경사항 수동 갱신) + prometheus
+        include: prometheus  # Prometheus 메트릭 노출

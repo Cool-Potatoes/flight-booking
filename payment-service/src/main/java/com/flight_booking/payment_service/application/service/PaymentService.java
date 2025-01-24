@@ -187,35 +187,6 @@ public class PaymentService {
 
   }
 
-
-  @Transactional
-  public void refundPaymentFromTicket(
-      PaymentRefundFromTicketRequestDto paymentRefundFromTicketRequestDto) {
-
-    Payment payment = paymentRepository.findPaymentByBookingId(
-            paymentRefundFromTicketRequestDto.bookingId())
-        .orElseThrow();
-
-    Long refundFare = payment.getFare();
-
-    payment.updateStatus(PaymentStatusEnum.REFUND_IN_PROGRESS);
-
-    paymentKafkaSender.sendMessage(
-        "user-refund-ticket-topic",
-        paymentRefundFromTicketRequestDto.bookingId().toString(),
-        new UserRefundTicketRequestDto(
-            paymentRefundFromTicketRequestDto.email(),
-            payment.getPaymentId(),
-            refundFare,
-            paymentRefundFromTicketRequestDto.bookingId(),
-            paymentRefundFromTicketRequestDto.passengerId(),
-            paymentRefundFromTicketRequestDto.seatId()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-  }
-
-
   @Transactional
   public void processPaymentRefundFail(
       PaymentRefundProcessRequestDto paymentRefundProcessRequestDto) {
@@ -230,26 +201,6 @@ public class PaymentService {
         new BookingProcessRequestDto(paymentRefundProcessRequestDto.ticketId(),
             refundPayment.getBookingId(),
             paymentRefundProcessRequestDto.email()),
-        StackTraceUtils.getCurrentMethodName(),
-        StackTraceUtils.getCurrentClassName()
-    );
-  }
-
-  @Transactional
-  public void processTicketPaymentRefundSuccess(
-      ProcessTicketPaymentRequestDto processPaymentRequestDto) {
-
-    Payment payment = getPaymentById(processPaymentRequestDto.paymentId());
-
-    Payment refundPayment = payment.updateStatus(PaymentStatusEnum.REFUND_COMPLETE);
-
-    paymentKafkaSender.sendMessage(
-        "booking-refund-ticket-success-topic",
-        refundPayment.getBookingId().toString(),
-        new BookingRefundRequestDto(
-            payment.getBookingId(),
-            processPaymentRequestDto.seatId(),
-            processPaymentRequestDto.passengerId()),
         StackTraceUtils.getCurrentMethodName(),
         StackTraceUtils.getCurrentClassName()
     );
