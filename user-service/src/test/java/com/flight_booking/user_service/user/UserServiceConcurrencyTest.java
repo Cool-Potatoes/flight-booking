@@ -96,6 +96,6 @@ public class UserServiceConcurrencyTest {
 
     // 최종 마일리지 검증
     User resultUser = userRepository.findByEmail(user.getEmail()).orElseThrow();
-    Assertions.assertEquals(6500, resultUser.getMileage(), "최종 마일리지가 일치합니다");
+    Assertions.assertEquals(6500, resultUser.getMileage(), "최종 마일리지가 일치하지 않습니다.");
   }
 }

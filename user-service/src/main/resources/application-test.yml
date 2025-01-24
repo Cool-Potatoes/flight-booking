@@ -5,7 +5,8 @@ service:
   kafka:
     url: localhost:9092
 
-SECRET_KEY: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+# 테스트용 SECRET_KEY
+SECRET_KEY: 66mL7J+B7J206rCQ7J6Q65Ok7ZWt6rO16raM7Yuw7LyT7YyF7ISc67mE7Iqk7YWM7Iqk7Yq47Jqp7Iuc7YGs66a/7YKk7J6F64uI64uk
 
 
 spring:
