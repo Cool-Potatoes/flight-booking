@@ -4,13 +4,15 @@
 
 <h1><b>✈️ Airportato: 항공기 좌석 티켓팅 서비스</b></h1>
 
-🔗 [배포 링크](https://)
+🔗 배포 링크: [Airportato](http://ec2-3-34-91-73.ap-northeast-2.compute.amazonaws.com)
+<br>
+📄 Notion: [🥔🔥멋쟁이 감자들🔥🥔](https://teamsparta.notion.site/6-1682dc3ef5148054a1b9c2bb61655eb5)
 
 ![542 266](https://github.com/user-attachments/assets/17a4d4d6-63f8-4610-97cd-d7992f3713b9)
 
 </div>
 
-<br>
+---
 
 ## 0. 목차
 1. [프로젝트 소개](#1)
@@ -24,7 +26,9 @@
 9. [트러블 슈팅](#9)
 10. [상세 담당 업무](#10)
 
-<br />
+<br>
+
+---
 
 ## <span id="1">👋 프로젝트 소개</span>
 
@@ -40,12 +44,10 @@
 > 여유롭고 편안한 여행,<br/>
 > **Airportato**에서 경험해보세요! ✈️
 
-
-### Notion: [🥔🔥멋쟁이 감자들🔥🥔](https://teamsparta.notion.site/6-1682dc3ef5148054a1b9c2bb61655eb5)
-
-
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+
+---
 
 ## <span id="2">👨‍👩‍👦‍👦 팀원 소개</span>
 
@@ -58,11 +60,12 @@
 | <img width="160px" alt="김재현" src="https://github.com/k-jaehyun.png"> | <img width="160px" alt="김한준" src="https://github.com/wkdehf217.png"> | <img width="160px" alt="조한범" src="https://github.com/HanBeom98.png"> | <img width="160px" alt="홍유진" src="https://github.com/Hujin0322.png"> |
 | [김재현](https://github.com/k-jaehyun) | [김한준](https://github.com/wkdehf217) |  [조한범](https://github.com/HanBeom98)   | [홍유진](https://github.com/Hujin0322) |
 
-
 </div>
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+
+---
 
 ## <span id="3">‍📅 개발 일정</span>
 
@@ -70,6 +73,8 @@
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+
+---
 
 ## <span id="4">🔧 적용 기술</span>
 
@@ -111,6 +116,8 @@
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 
+---
+
 ## <span id="5">🎯 서비스/프로젝트 목표</span>
 
 ### 1. **안정적인 대규모 트래픽 처리**
@@ -135,12 +142,16 @@
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 
+---
+
 ## <span id="6">📄 인프라 설계도</span>
 
 ![image](https://github.com/user-attachments/assets/1f9637a5-35b8-4e6b-86c5-1a49aa1ecdba)
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+
+---
 
 ## <span id="7">⚙️ 주요 기능</span>
 
@@ -212,6 +223,8 @@
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 
+---
+
 ## <span id="8">💡 기술적 의사결정</span>
 
 ### 1. **안정적인 대규모 트래픽 처리**
@@ -239,6 +252,8 @@
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 
+---
+
 ## <span id="9">💥 트러블슈팅</span>
 
 - [Kafka, Redis: 서비스 성능 향상](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka,-Redis-서비스-성능-향상)
@@ -250,6 +265,8 @@
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+
+---
 
 ## <span id="10">😎 상세 담당 업무</span>
 
