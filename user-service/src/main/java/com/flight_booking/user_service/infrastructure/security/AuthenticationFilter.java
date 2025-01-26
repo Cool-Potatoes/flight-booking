@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,16 +21,24 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class AuthenticationFilter extends OncePerRequestFilter {
 
+  @Value("${service.feign.secret}")
+  private String FEIGN_SECRET;
+
   private final CustomUserDetailsService customUserDetailsService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    log.info("--------user-service------------");
+    // FeignClient 호출을 위한 내부 헤더 체크
+    String internalFeignHeader = request.getHeader("X-Internal-feign");
+    if (FEIGN_SECRET.equals(internalFeignHeader)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     String email = request.getHeader("X-USER-EMAIL");
     String role = request.getHeader("X-USER-ROLE");
-    log.info("header: {}, {}", email, role);
 
     if (email != null && role != null) {
       try {

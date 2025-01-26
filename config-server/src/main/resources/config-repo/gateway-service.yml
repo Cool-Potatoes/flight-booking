@@ -5,6 +5,8 @@ service:
   jwt:
     access-expiration: 86400000  # 24시간
     secret-key: ${SECRET_KEY}
+  feign:
+    secret: ${FEIGN_CODE}
 
 spring:
   main:

@@ -36,7 +36,10 @@ public enum ErrorCode {
   ACCESS_ONLY_SELF(HttpStatus.FORBIDDEN, "본인만 가능합니다."),
   CANNOT_MODIFY_FIELD(HttpStatus.FORBIDDEN, "수정 불가능한 항목입니다."),
   CANNOT_ADMIN_BLOCKED(HttpStatus.FORBIDDEN, "관리자의 계정을 블락할 수 없습니다."),
-  INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다.");
+  INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다."),
+
+  // 정상적이지 않은 접근 관련 오류
+  UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "정상적이지 않은 접근이 감지되었습니다.");
 
   private final HttpStatus httpStatus;
   private final String message;

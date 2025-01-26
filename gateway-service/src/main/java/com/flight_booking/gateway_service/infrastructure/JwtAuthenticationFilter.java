@@ -39,6 +39,12 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         "/v1/auth/token"
     );
 
+    // Feign 요청인지 확인 (X-Internal-feign 헤더가 있는 경우 인증 건너뛰기)
+    String internalFeignHeader = exchange.getRequest().getHeaders().getFirst("X-Internal-feign");
+    if (internalFeignHeader != null) {
+      return chain.filter(exchange);
+    }
+
     // 경로가 제외 리스트에 포함되어 있으면 인증 없이 필터 통과
     String path = exchange.getRequest().getURI().getPath();
     if (excludedPaths.contains(path)) {
