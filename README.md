@@ -2,8 +2,7 @@
 
 <div align="center">
 
-<h1><b>✈️ Airportato</b></h1>
-<h3><b>항공기 좌석 티켓팅 서비스</b></h3>
+<h1><b>✈️ Airportato: 항공기 좌석 티켓팅 서비스</b></h1>
 
 🔗 [배포 링크](https://)
 
@@ -29,8 +28,6 @@
 
 ## <span id="1">👋 프로젝트 소개</span>
 
-Notion: [cool potatoes](https://)
-
 ### <p><span style='background-color: skyblue; color: black; font-size: 20px;'>Airportato</span>    ( Airport + Potato )</p>
 
 똑똑한 사람은 세상에 적응하지만 감자는 세상을 바꿉니다! 🥔<br/>
@@ -42,6 +39,10 @@ Notion: [cool potatoes](https://)
 > 이제 좌석 배정 걱정은 그만!<br/>
 > 여유롭고 편안한 여행,<br/>
 > **Airportato**에서 경험해보세요! ✈️
+
+
+### Notion: [🥔🔥멋쟁이 감자들🔥🥔](https://teamsparta.notion.site/6-1682dc3ef5148054a1b9c2bb61655eb5)
+
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
@@ -215,198 +216,49 @@ Notion: [cool potatoes](https://)
 
 ### 1. **안정적인 대규모 트래픽 처리**
 
-- [대기열](https://github.com/Cool-Potatoes/flight-booking/wiki/대기열)<br>
+- [대기열](https://github.com/Cool-Potatoes/flight-booking/wiki/대기열)
 
 ### 2. **서버 성능 및 처리 효율 최적화**
-- [캐싱](https://)
-- [쿼리 개선](https://)
-- [서버 간 통신 최적화](https://)
-- [시스템 최적화](https://)
+- [캐싱](https://github.com/Cool-Potatoes/flight-booking/wiki/캐싱)
+- [쿼리 개선](https://github.com/Cool-Potatoes/flight-booking/wiki/쿼리-개선)
+- [서버 간 통신 최적화](https://github.com/Cool-Potatoes/flight-booking/wiki/서버-간-통신-최적화)
+- [시스템 최적화](https://github.com/Cool-Potatoes/flight-booking/wiki/시스템-최적화)
 
 ### 3. **동시성 제어**
-- [DB Lock](https://)<br>
+- [DB Lock](https://github.com/Cool-Potatoes/flight-booking/wiki/DB-Lock)
 
 ### 4. **서비스 간 독립성 및 확장성 확보**
-- [MSA](https://)
-- [CI/CD](https://)
-- [인증 처리](https://)<br>
+- [MSA](https://github.com/Cool-Potatoes/flight-booking/wiki/MSA)
+- [CI/CD](https://github.com/Cool-Potatoes/flight-booking/wiki/CI-CD)
+- [인증 처리](https://github.com/Cool-Potatoes/flight-booking/wiki/인증-처리)
 
 ### 5. **사용자 편의성 증대**
-- [비동기 처리](https://)
-- [결제 실패 재처리 시스템](https://)
+- [비동기 처리](https://github.com/Cool-Potatoes/flight-booking/wiki/비동기-처리)
+- [결제 실패 재처리 시스템](https://github.com/Cool-Potatoes/flight-booking/wiki/결제-실패-재처리-시스템)
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 
 ## <span id="9">💥 트러블슈팅</span>
 
-<details>
-	<summary><b>Kafka, Redis 서비스 성능 향상</b></summary>
-	<div>
-		<br>
-  	 	 <ul>
-			<span style="font-size: 17px; font-weight: bold;">문제: 서비스 성능 저하</span>
-			<ul>
-				<li>기존 시스템은 <strong>동기식 처리</strong>가 주로 이루어져 대량의 데이터를 처리할 때 서버 부하가 증가하고, 성능이 저하되었습니다.</li>
-				<li>예를 들어, 결제나 좌석 조회 등의 작업이 서버에서 순차적으로 처리되면서 성능에 영향을 미쳤기 때문에 <strong>대기열</strong> 처리가 필요하다고 판단하였습니다.</li>
-			</ul>
-		</ul>
-			<span style="font-size: 17px; font-weight: bold;">해결 방법: Kafka를 활용한 비동기 처리</span>
-			<ul>
-				<li><strong>Kafka</strong>를 도입하여 <strong>비동기 처리</strong>로 전환, 동기식 처리에서 발생하는 성능 문제를 해결했습니다. Kafka는 메시지 큐 시스템으로, 각 서비스 간 데이터를 비동기적으로 처리할 수 있게 해 서버의 부하를 줄이고 응답 시간을 단축시켰습니다.</li>
-				<li><strong>Kafka 프로듀서</strong>로 메시지를 전송하여 처리 속도를 높였으며, <strong>스레드 관리</strong>를 통해 성능을 최적화했습니다. Kafka는 다수의 스레드를 활용하여 동시성을 높이고 각 작업을 독립적으로 처리할 수 있게 하였습니다.</li>
-			</ul>
-		<br>
-			<span style="font-size: 17px; font-weight: bold;">성능 향상 결과</span>
-			<ul>
-				<li>Kafka 도입 후, 시스템의 응답 속도가 개선되었으며, 대규모 트래픽을 처리할 때도 안정적인 성능을 유지할 수 있게 되었습니다.</li>
-				<li>시스템 확장성도 확보되었으며, 처리 대기 시간이 최소화되고 <strong>서버 과부하</strong>가 방지되었습니다.</li>
-			</ul>
-	</div>
-</details>
-<br>
-<details>
-	<summary><b>Kafka 메타데이터 전송 문제</b></summary>
-	<div>
-		<br>
-		<ul>
-  			<span style="font-size: 17px; font-weight: bold;">문제 상황</span>
-			<ul>
-				<li>Kakfa의 비동기 메시지를 처리할 때 Producer와 Consumer를 구분하여 사용.</li>
-				<li>이전 서비스에서 받은 데이터가 다음 서비스에 필요한 데이터면<br>DTO를 통해 메타데이터를 넘겨줘야 함.</li>
-				<li>하지만 서비스 로직이 여러 차례를 거쳐 실행될 때,<br>서비스 1에서 유저로부터 데이터 a, b를 받았지만<br>서비스 2에서는 데이터 a만 필요하고,<br>연계되는 서비스 3에서는 데이터 a, b가 필요하다면<br>중간 전송 시에 데이터 a, b를 계속 전송해야 할까?</li>
-				<li>만약 그렇다면 메타데이터로 인해서 서비스의 부하가 걸릴 것으로 예상.</li>
-			</ul>
-		</ul>
-			<span style="font-size: 17px; font-weight: bold;">해결 방법</span>
-			<ul>
-				<li><strong>메타데이터 크기가 작고 간단하다면</strong>: 필요한 데이터만 전송.</li>
-				<li><strong>데이터 추적성이 중요한 경우</strong>: 전체 데이터를 전송하되 필요한 부분만 사용.</li>
-				<li><strong>대규모 시스템에서 메시지 크기 최적화가 필요하다면</strong>: 외부 저장소와 참조 방식 활용.</li>
-				<li><strong>Kafka의 기능을 최대한 활용하고 싶다면</strong>: 헤더 활용.</li>
-			</ul>
-		<br>
-			<span style="font-size: 17px; font-weight: bold;">결과</span>
-			<ul>
-				<li>데이터 추적성이 중요한 경우이기 때문에 전체를 전송하고 필요한 부분만 사용하기로 결정.</li>
-				<li>만약 메타데이터가 크기가 크다면, 중간 부분을 동기화로 바꿈으로써 해결 가능.</li>
-			</ul>
-	</div>
-</details>
-<br>
-<details>
-	<summary><b>Redis 분산 락을 사용하여 동시성 문제 해결</b></summary>
-	<div>
-		<br>
-		<ul>
-  			<span style="font-size: 17px; font-weight: bold;">문제 상황</span>
-			<ul>
-				<li>Redis 분산 락 적용</li>
-                  1. 좌석 변경 시도 시 seatId를 사용하여 Lock Key를 설정함.<br>
-                  2. Lock Key를 통해 좌석의 예약가능 여부를 리턴, 분산 락을 적용하여 자원 변경이 이루어지지 않도록 제한하여 동시성 문제 차단.<br>
-                  3. Lock 만료 시간을 3분으로 설정하여 좌석 변경이 완료된 후에도 3분동안은 접근을 제한하도록 설정함
-				<li>분산 락 구현 방법: SETNX 락</li>
-                  <li>Redis에서 키가 존재하지 않으면 값을 설정하는 방식.</li>
-                  <li>opsForValue().setIfAbsent() 메서드를 사용하여 락을 얻고, **락을 설정하는 키가 없다면 락을 획득**하고, 이미 락이 걸려 있는 경우에는 획득하지 못하는 구조.</li>
-                  <li>키 만료 시간을 3분으로 설정.</li>
-                  <li>간단한 명령어로 비교적 사용하기 쉬운 방식.</li>
-		</ul><br>
-			<span style="font-size: 17px; font-weight: bold;">결과</span>
-			<ul>
-				<li>현재 구현되어 있는 Ticket Update의 전체 로직입니다.</li>
-                <ul>
-                  <li>텍스트</li>
-                  <li>구조도</li>
-                </ul>
-				<li>만약 메타데이터가 크기가 크다면, 중간 부분을 동기화로 바꿈으로써 해결 가능.</li>
-			</ul>
-        </ul>
-	</div>
-</details>
-<br>
-<details>
-	<summary><b>( Kafka Retry Que ) 실패 트랜잭션 처리</b></summary>
-	<div>
-		<br>
-		<ul>
-          <li>실패 트랜잭션 처리</li>
-            <ul>
-				<li>트랜잭션 실패 시, Retry Queue를 활용해 재시도 로직 구현.</li>
-                <li>실패한 작업을 대기열에 넣고, 일정 시간 후 재시도하여 안정적인 처리가 가능.</li>
-			</ul>
-        </ul>
-	</div>
-</details>
+- [Kafka, Redis: 서비스 성능 향상](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka,-Redis-서비스-성능-향상)
+- [Kafka: 메타데이터 전송 문제](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka:-메타데이터-전송-문제)
+- [Redis: 분산 락을 사용하여 동시성 문제 해결](https://github.com/Cool-Potatoes/flight-booking/wiki/Redis:-분산-락을-사용하여-동시성-문제-해결)
+- [Kafka Retry Que: 실패 트랜잭션 처리](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka-Retry-Que:-실패-트랜잭션-처리)
+- [배포: EC2 서버 다운 이슈](https://github.com/Cool-Potatoes/flight-booking/wiki/배포:-EC2-서버-다운-이슈)
+- [부하 테스트: 서버 부하, 병목 처리](https://github.com/Cool-Potatoes/flight-booking/wiki/부하-테스트:-서버-부하,-병목-처리)
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 
 ## <span id="10">😎 상세 담당 업무</span>
 
-### 김재현
--  코드 리뷰, 의사 결정 참여
--  대기열
--  쿼리 개선
--  결제 실패 재처리 시스템
-
-### 김한준
--  서버 간 통신 최적화
--  동시성 제어
-- <details>
-    <summary> 예약 서비스</summary>
-    <ul>
-        <li>MSA 기반의 예약, 결제, 티켓 로직 구현</li>
-        <li>Kafka를 통한 비동기 처리</li>
-        <li>분산락을 통한 동시성 문제 해결</li>
-        <li>실패 시 재시도 처리, DLT 구현</li>
-        <li>Seat : 캐싱 적용, 조회 성능 개선</li>
-    </ul>
-</details>
-
-### 조한범
-- <details>
-    <summary> 알림 서비스</summary>
-    <ul>
-        <li>알림 생성, 조회, 읽음 처리, 삭제</li>
-        <li>이메일 비동기 전송 (SMTP 사용)</li>
-    </ul>
-</details>
-
-- <details>
-    <summary> 배포</summary>
-    <ul>
-        <li>EC2에서 Docker Compose를 통해 서비스 배포</li>
-        <li>RDS(PostgreSQL) 데이터베이스와 연동하여 저장</li>
-        <li>Git Actions를 사용한 자동 CI/CD 파이프라인 구축</li>
-        <li>Docker Hub를 사용한 이미지 관리</li>
-    </ul>
-</details>
-
-### 홍유진
-- <details>
-    <summary> 인증/인가</summary>
-    <ul>
-        <li>JWT 토큰: 액세스 및 리프레시 토큰 생성/관리</li>
-        <li>Redis를 이용한 토큰 상태 확인 및 블랙리스트 처리</li>
-        <li>Gateway: 토큰 검증 후 사용자 정보와 함께 요청 라우팅</li>
-    </ul>
-</details>
-
-- <details>
-    <summary> 유저 서비스</summary>
-    <ul>
-        <li>회원가입, 로그인, 조회, 수정, 탈퇴, 관리자의 회원 block</li>
-        <li>아이디 찾기, 비밀번호 찾기 및 재설정</li>
-        <li>인증 코드 캐싱 및 Kafka를 통한 알림 서비스 연동</li>
-    </ul>
-</details>
-
-- <details>
-    <summary> AI 서비스</summary>
-    <ul>
-        <li>Gemini API를 활용한 단순 정보 제공</li>
-    </ul>
-</details>
+|  이름   | 포지션          | 담당(개인별 기여점)                                                                                                                                                                                                                                            |
+|:-----:|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  김재현  | `Leader`     | ✅ 코드 리뷰, 의사 결정 참여<br>✅ 대기열<br>✅ 쿼리 개선<br>✅ 결제 실패 재처리 시스템                                                                                                                                                                                               |
+|  김한준  | `Sub-Leader` | ✅ 서버 간 통신 최적화<br>✅ 동시성 제어<br>✅ 예약 서비스<br>- MSA 기반의 예약 - 결제 - 티켓 로직 구현<br>- Kafka 를 통한 비동기 처리<br>- 분산락을 통한 동시성 문제 해결<br>- 실패 시 재시도 처리, DLT 구현<br>- Seat: 캐싱 적용, 조회 성능 개선                                                                                |
+|  조한범  | `Member`     | ✅ 알림 서비스<br>- 알림 생성, 조회, 읽음 처리, 삭제<br>- 이메일 비동기 전송 (SMTP 사용)<br>✅ 배포<br>- EC2에서 Docker Compose를 통해 서비스 배포<br>- RDS(PostgreSQL) 데이터베이스와 연동하여 저장<br>- Git Actions를 사용한 자동 CI/CD 파이프라인 구축<br>- Docker Hub를 사용한 이미지 관리                                     |
+|  홍유진  | `Member`     | ✅ 인증/인가<br>- JWT 토큰: 액세스 및 리프레시 토큰 생성/관리<br>- Redis를 이용한 토큰 상태 확인 및 블랙리스트 처리<br>- Gateway: 토큰 검증 후 사용자 정보와 함께 요청 라우팅<br>✅ 유저 서비스<br>- 회원가입, 로그인, 조회, 수정, 탈퇴, 관리자의 회원 block<br>- 인증 코드 캐싱 및 Kafka를 통한 알림 서비스 연동<br>✅ AI 서비스<br>- Gemini API를 활용한 단순 정보 제공 |
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
