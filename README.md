@@ -79,39 +79,39 @@
 ## <span id="4">🔧 적용 기술</span>
 
 ### ➢ Backend
-<img src="https://img.shields.io/badge/Java 17-007396?style=flat&logo=Java&logoColor=white">  
-<img src="https://img.shields.io/badge/Spring Boot 3.4.1-6DB33F?style=flat&logo=Spring Boot&logoColor=white">  
-<img src="https://img.shields.io/badge/Spring Cloud 2024.0.0-6DB33F?style=flat&logo=Spring&logoColor=white">  
-<img src="https://img.shields.io/badge/Spring Security 6.4.2-6DB33F?style=flat&logo=Spring Security&logoColor=white">  
-<img src="https://img.shields.io/badge/JWT-000000?style=flat&logo=JSON Web Tokens&logoColor=white">  
-<img src="https://img.shields.io/badge/QueryDSL 5.0.0-FF6F00?style=flat&logo=Apache Maven&logoColor=white">  
+<img src="https://img.shields.io/badge/Java 17-007396?style=flat&logo=Java&logoColor=white"> 
+<img src="https://img.shields.io/badge/Spring Boot 3.4.1-6DB33F?style=flat&logo=Spring Boot&logoColor=white"> 
+<img src="https://img.shields.io/badge/Spring Cloud 2024.0.0-6DB33F?style=flat&logo=Spring&logoColor=white"> 
+<img src="https://img.shields.io/badge/Spring Security 6.4.2-6DB33F?style=flat&logo=Spring Security&logoColor=white"> 
+<img src="https://img.shields.io/badge/JWT-000000?style=flat&logo=JSON Web Tokens&logoColor=white"> 
+<img src="https://img.shields.io/badge/QueryDSL 5.0.0-FF6F00?style=flat&logo=Apache Maven&logoColor=white"> 
 
 ### ➢ Database
-<img src="https://img.shields.io/badge/PostgreSQL 16.4-4169E1?style=flat&logo=PostgreSQL&logoColor=white">
+<img src="https://img.shields.io/badge/PostgreSQL 16.4-4169E1?style=flat&logo=PostgreSQL&logoColor=white"> 
 <img src="https://img.shields.io/badge/Redis 3.4.1-DC382D?style=flat&logo=Redis&logoColor=white"> 
 
 ### ➢ Messaging
 <img src="https://img.shields.io/badge/Apache Kafka 3.9.0-231F20?style=flat&logo=Apache Kafka&logoColor=white">
 
 ### ➢ External Library
-<img src="https://img.shields.io/badge/Gemini API-FF4500?style=flat&logo=Google Earth&logoColor=white">  
+<img src="https://img.shields.io/badge/Gemini API-FF4500?style=flat&logo=Google Earth&logoColor=white"> 
 <img src="https://img.shields.io/badge/SMTP-FF0000?style=flat&logo=Mail.Ru&logoColor=white">  
 
 ### ➢ Monitoring
-<img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=Prometheus&logoColor=white">  
+<img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=Prometheus&logoColor=white"> 
 <img src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=Grafana&logoColor=white">  
 
 ### ➢ Test
-<img src="https://img.shields.io/badge/JMeter-D22128?style=flat&logo=Apache JMeter&logoColor=white">  
+<img src="https://img.shields.io/badge/JMeter-D22128?style=flat&logo=Apache JMeter&logoColor=white">
 
 ### ➢ CI/CD
-<img src="https://img.shields.io/badge/Github-181717?style=flat&logo=GitHub&logoColor=white">  
-<img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=Docker&logoColor=white">  
-<img src="https://img.shields.io/badge/Docker Compose-2496ED?style=flat&logo=Docker&logoColor=white">  
+<img src="https://img.shields.io/badge/Github-181717?style=flat&logo=GitHub&logoColor=white"> 
+<img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=Docker&logoColor=white"> 
+<img src="https://img.shields.io/badge/Docker Compose-2496ED?style=flat&logo=Docker&logoColor=white"> 
 
 ### ➢ Infra
-<img src="https://img.shields.io/badge/Github Actions-2088FF?style=flat&logo=GitHub Actions&logoColor=white">  
-<img src="https://img.shields.io/badge/AWS (ECS, RDS)-FF9900?style=flat&logo=Amazon AWS&logoColor=white">  
+<img src="https://img.shields.io/badge/Github Actions-2088FF?style=flat&logo=GitHub Actions&logoColor=white"> 
+<img src="https://img.shields.io/badge/AWS (ECS, RDS)-FF9900?style=flat&logo=Amazon AWS&logoColor=white">
 
 <!-- Top Button -->
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
