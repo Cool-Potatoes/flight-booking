@@ -1,9 +1,9 @@
-package com.flight_booking.gateway_service.application;
+package com.flight_booking.gateway_service.application.dto;
 
 import lombok.Builder;
 
 @Builder
-public record UserInfo(
+public record UserInfoDto(
     String email,
     String role,
     Boolean isBlocked,

@@ -1,7 +1,7 @@
 package com.flight_booking.gateway_service.infrastructure;
 
-import com.flight_booking.gateway_service.application.UserCacheService;
-import com.flight_booking.gateway_service.application.UserInfo;
+import com.flight_booking.gateway_service.application.dto.UserInfoDto;
+import com.flight_booking.gateway_service.application.service.UserInfoService;
 import com.flight_booking.gateway_service.presentation.exception.CustomJwtException;
 import com.flight_booking.gateway_service.presentation.exception.ErrorResponseUtil;
 import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
@@ -19,11 +19,11 @@ import reactor.core.publisher.Mono;
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter {
 
-  private final UserCacheService userCacheService;
+  private final UserInfoService userInfoService;
   private final JwtUtil jwtUtil;
 
-  public JwtAuthenticationFilter(@Lazy UserCacheService userCacheService, JwtUtil jwtUtil) {
-    this.userCacheService = userCacheService;
+  public JwtAuthenticationFilter(@Lazy UserInfoService userInfoService, JwtUtil jwtUtil) {
+    this.userInfoService = userInfoService;
     this.jwtUtil = jwtUtil;
   }
 
@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
     // 경로가 제외 리스트에 포함되어 있으면 인증 없이 필터 통과
     String path = exchange.getRequest().getURI().getPath();
-    if (excludedPaths.contains(path) || path.startsWith("/v1/users/status/")) {
+    if (excludedPaths.contains(path)) {
       return chain.filter(exchange);
     }
 
@@ -58,19 +58,19 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.BLACKLISTED_TOKEN);
       }
 
-      UserInfo userInfo = userCacheService.getUserInfo(token);
+      UserInfoDto userInfoDto = userInfoService.getUserInfo(token);
 
-      if (userInfo.isBlocked()) {
+      if (userInfoDto.isBlocked()) {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_BLOCKED);
       }
 
-      if (userInfo.isDeleted()) {
+      if (userInfoDto.isDeleted()) {
         return ErrorResponseUtil.createErrorResponse(exchange, JwtErrorCode.USER_DELETED);
       }
 
       ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-          .header("X-USER-EMAIL", userInfo.email())
-          .header("X-USER-ROLE", userInfo.role())
+          .header("X-USER-EMAIL", userInfoDto.email())
+          .header("X-USER-ROLE", userInfoDto.role())
           .build();
 
       exchange = exchange.mutate().request(modifiedRequest).build();

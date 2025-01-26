@@ -1,6 +1,6 @@
 package com.flight_booking.gateway_service.infrastructure.feign;
 
-import com.flight_booking.gateway_service.application.UserStatusDto;
+import com.flight_booking.gateway_service.application.dto.UserStatusDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
