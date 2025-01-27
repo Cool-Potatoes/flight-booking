@@ -6,13 +6,14 @@
 
 🔗 배포 링크: [Airportato](http://ec2-3-34-91-73.ap-northeast-2.compute.amazonaws.com)
 <br>
+
+
 📄 Notion: [🥔🔥멋쟁이 감자들🔥🥔](https://teamsparta.notion.site/6-1682dc3ef5148054a1b9c2bb61655eb5)
 
 ![542 266](https://github.com/user-attachments/assets/17a4d4d6-63f8-4610-97cd-d7992f3713b9)
 
 </div>
-
----
+<br>
 
 ## 0. 목차
 1. [프로젝트 소개](#1)
@@ -28,11 +29,9 @@
 
 <br>
 
----
-
 ## <span id="1">👋 프로젝트 소개</span>
-
-### <p><span style='background-color: skyblue; color: black; font-size: 20px;'>Airportato</span>    ( Airport + Potato )</p>
+   
+### <p><span>$\bf{\huge{\color{#A9D0F5}Airportato}}$</span>( Airport + Potato )</p>
 
 똑똑한 사람은 세상에 적응하지만 감자는 세상을 바꿉니다! 🥔<br/>
 감자들이 모여 새로운 서비스를 만들었습니다.<br/>
@@ -45,7 +44,9 @@
 > **Airportato**에서 경험해보세요! ✈️
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="2">👨‍👩‍👦‍👦 팀원 소개</span>
 
@@ -61,14 +62,18 @@
 </div>
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="3">‍📅 개발 일정</span>
 
 ### 2024.12.26 ~ 2025.01.27
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="4">🔧 적용 기술</span>
 
@@ -97,9 +102,9 @@
 <img src="https://img.shields.io/badge/Github Actions-2088FF?style=flat&logo=GitHub Actions&logoColor=white"> <img src="https://img.shields.io/badge/AWS (ECS, RDS)-FF9900?style=flat&logo=Amazon AWS&logoColor=white">
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
-
----
+</div>
 
 ## <span id="5">🎯 서비스/프로젝트 목표</span>
 
@@ -123,14 +128,18 @@
 - 알림 및 상태 조회를 통해 사용자에게 명확한 정보를 제공하여 편의성 강화
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="6">📄 인프라 설계도</span>
 
 ![image](https://github.com/user-attachments/assets/1f9637a5-35b8-4e6b-86c5-1a49aa1ecdba)
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="7">⚙️ 주요 기능</span>
 
@@ -200,7 +209,9 @@
 - 여행 국가와 월에 대한 평균 날씨 정보 제공
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="8">💡 기술적 의사결정</span>
 
@@ -227,7 +238,9 @@
 - [결제 실패 재처리 시스템](https://github.com/Cool-Potatoes/flight-booking/wiki/결제-실패-재처리-시스템)
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="9">💥 트러블슈팅</span>
 
@@ -239,16 +252,20 @@
 - [부하 테스트: 서버 부하, 병목 처리](https://github.com/Cool-Potatoes/flight-booking/wiki/부하-테스트:-서버-부하,-병목-처리)
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
 
 ## <span id="10">😎 상세 담당 업무</span>
 
 |  이름   | 포지션          | 담당(개인별 기여점)                                                                                                                                                                                                                                            |
-|:-----:|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|  김재현  | `Leader`     | ✅ 코드 리뷰, 의사 결정 참여<br>✅ 대기열<br>✅ 쿼리 개선<br>✅ 결제 실패 재처리 시스템                                                                                                                                                                                               |
-|  김한준  | `Sub-Leader` | ✅ 서버 간 통신 최적화<br>✅ 동시성 제어<br>✅ 예약 서비스<br>- MSA 기반의 예약 - 결제 - 티켓 로직 구현<br>- Kafka 를 통한 비동기 처리<br>- 분산락을 통한 동시성 문제 해결<br>- 실패 시 재시도 처리, DLT 구현<br>- Seat: 캐싱 적용, 조회 성능 개선                                                                                |
-|  조한범  | `Member`     | ✅ 알림 서비스<br>- 알림 생성, 조회, 읽음 처리, 삭제<br>- 이메일 비동기 전송 (SMTP 사용)<br>✅ 배포<br>- EC2에서 Docker Compose를 통해 서비스 배포<br>- RDS(PostgreSQL) 데이터베이스와 연동하여 저장<br>- Git Actions를 사용한 자동 CI/CD 파이프라인 구축<br>- Docker Hub를 사용한 이미지 관리                                     |
-|  홍유진  | `Member`     | ✅ 인증/인가<br>- JWT 토큰: 액세스 및 리프레시 토큰 생성/관리<br>- Redis를 이용한 토큰 상태 확인 및 블랙리스트 처리<br>- Gateway: 토큰 검증 후 사용자 정보와 함께 요청 라우팅<br>✅ 유저 서비스<br>- 회원가입, 로그인, 조회, 수정, 탈퇴, 관리자의 회원 block<br>- 인증 코드 캐싱 및 Kafka를 통한 알림 서비스 연동<br>✅ AI 서비스<br>- Gemini API를 활용한 단순 정보 제공 |
+|:-------------:|:--------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  김재현  | `Leader`    | ✅ 코드 리뷰, 의사 결정 참여<br>✅ 대기열<br>✅ 쿼리 개선<br>✅ 결제 실패 재처리 시스템                                                                                                                                                                                               |
+|  김한준  | `Sub-Leader` | ✅ 서버 간 통신 최적화<br>✅ 동시성 제어<br>✅ 예약 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- MSA 기반의 예약 - 결제 - 티켓 로직 구현<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Kafka 를 통한 비동기 처리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 분산락을 통한 동시성 문제 해결<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 실패 시 재시도 처리, DLT 구현<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Seat: 캐싱 적용, 조회 성능 개선                                                                                |
+|  조한범  | `Member`     | ✅ 알림 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 알림 생성, 조회, 읽음 처리, 삭제<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 이메일 비동기 전송 (SMTP 사용)<br>✅ 배포<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- EC2에서 Docker Compose를 통해 서비스 배포<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- RDS(PostgreSQL) 데이터베이스와 연동하여 저장<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Git Actions를 사용한 자동 CI/CD 파이프라인 구축<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Docker Hub를 사용한 이미지 관리                                     |
+|  홍유진  | `Member`     | ✅ 인증/인가<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JWT 토큰: 액세스 및 리프레시 토큰 생성/관리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Redis를 이용한 토큰 상태 확인 및 블랙리스트 처리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Gateway: 토큰 검증 후 사용자 정보와 함께 요청 라우팅<br>✅ 유저 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 회원가입, 로그인, 조회, 수정, 탈퇴, 관리자의 회원 block<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 인증 코드 캐싱 및 Kafka를 통한 알림 서비스 연동<br>✅ AI 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Gemini API를 활용한 단순 정보 제공 |
 
 <!-- Top Button -->
+<div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
