@@ -1,0 +1,46 @@
+service:
+  jwt:
+    access-token-expiration: 1800000  # 30분
+    refresh-token-expiration: 86400000  # 1일
+  kafka:
+    url: localhost:9092
+
+# 테스트용 SECRET_KEY
+SECRET_KEY: 66mL7J+B7J206rCQ7J6Q65Ok7ZWt6rO16raM7Yuw7LyT7YyF7ISc67mE7Iqk7YWM7Iqk7Yq47Jqp7Iuc7YGs66a/7YKk7J6F64uI64uk
+
+
+spring:
+  application:
+    name: user-service
+  config:
+    import: "optional:configserver:"  # Config Server가 없으면 무시됨
+  cloud:
+    discovery:
+      enabled: false  # 서비스 디스커버리 비활성화
+    config:
+      enabled: false  # Config Server 관련 비활성화
+  datasource:
+    url: jdbc:h2:mem:test;  # H2: test용 인메모리 DB
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        orm:
+          jdbc:
+            bind: TRACE
+
