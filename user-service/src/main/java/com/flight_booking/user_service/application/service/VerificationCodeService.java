@@ -30,7 +30,6 @@ public class VerificationCodeService {
   // 비밀번호 찾기: 인증번호 발급 (비밀번호 찾기)
   @Transactional
   public void sendVerificationCode(SendCodeRequest request) {
-    // 이메일 확인
     User user = getUser(request.email());
 
     // 임시 재발급 코드 생성
@@ -38,23 +37,19 @@ public class VerificationCodeService {
     String code = createCode();
     Long userId = user.getId();
 
-    String cacheName = "verification_code_cache";
+    String cacheName = "verification_code";
 
-    // 캐시에서 인증 코드 조회
     String storedCode = redisCacheManager.getCache(cacheName).get(email, String.class);
 
-    // 인증 코드가 이미 존재하면 예외 처리
     if (storedCode != null) {
       throw new UserException(ErrorCode.CODE_ALREADY_SENT);
     }
 
-    // 캐시에 인증 코드 저장
     var cache = redisCacheManager.getCache(cacheName);
     if (cache == null) {
       throw new IllegalArgumentException("캐시 초기화 오류" + cacheName);
     }
 
-    // 캐시가 정상적으로 존재하면, 인증 코드 저장
     cache.put(email, code);
 
     // 이메일 전송 위한 카프카 이벤트 발행
@@ -70,10 +65,9 @@ public class VerificationCodeService {
   // 비밀번호 찾기: 인증번호 검증
   public String verifyCode(VerificationCodeRequest request) {
 
-    // 이메일로 캐시에서 인증 코드 가져오기
     String email = request.email();
-    String storedCode = redisCacheManager.getCache("verification_code_cache")
-        .get(email, String.class);  // 캐시에서 이메일로 저장된 인증 코드 가져오기
+    String storedCode = redisCacheManager.getCache("verification_code")
+        .get(email, String.class);
 
     // 코드 존재 여부 확인
     if (storedCode == null) {
@@ -91,6 +85,10 @@ public class VerificationCodeService {
 
     return jwtUtil.createAccessToken(email, role);
   }
+
+  /**
+   * private methods
+   */
 
   // 인증 코드 생성
   private String createCode() {

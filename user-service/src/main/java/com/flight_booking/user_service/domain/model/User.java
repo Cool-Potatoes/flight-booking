@@ -9,9 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,10 +82,10 @@ public class User extends BaseEntity {
     this.mileage = this.mileage + refundFair;
   }
 
-  @PreRemove
-  public void preRemove() {
+  public void softDelete(String deletedBy) {
     this.isDeleted = true;
     this.deletedAt = LocalDateTime.now();
+    this.deletedBy = deletedBy;
   }
 
   public void blockUser(String reason, String blockedBy) {

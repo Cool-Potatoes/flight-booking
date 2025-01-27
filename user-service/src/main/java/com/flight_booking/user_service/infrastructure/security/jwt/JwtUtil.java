@@ -1,6 +1,7 @@
 package com.flight_booking.user_service.infrastructure.security.jwt;
 
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
+import com.flight_booking.user_service.presentation.global.exception.UserException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.Jwts.SIG;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.util.Base64;
@@ -51,9 +53,8 @@ public class JwtUtil {
   public void init() {
     try {
       byte[] decodedKey = Base64.getDecoder().decode(secretKey);
-      key = Keys.hmacShaKeyFor(decodedKey); // HMAC-SHA 키 생성
+      key = Keys.hmacShaKeyFor(decodedKey);
     } catch (IllegalArgumentException e) {
-      log.error("SECRET_KEY 설정이 잘못되었습니다.", e);
       throw new RuntimeException(ErrorCode.INVALID_SECRET_KEY.getMessage(), e);
     }
   }
@@ -86,6 +87,28 @@ public class JwtUtil {
         .compact();
   }
 
+  // Authorization 헤더에서 accessToken 추출
+  public String extractAccessTokenFromRequest(HttpServletRequest request) {
+    String authorizationHeader = request.getHeader("Authorization");
+    if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+      return authorizationHeader.substring(7);
+    }
+    return null;
+  }
+
+  // 쿠키에서 refreshToken 추출
+  public String extractRefreshTokenFromRequest(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if (REFRESH_TOKEN_COOKIE.equals(cookie.getName())) {
+          return cookie.getValue();
+        }
+      }
+    }
+    return null;
+  }
+
   // Claims 추출
   private Claims getClaims(String token) {
     Jws<Claims> jws = Jwts.parser()
@@ -112,7 +135,7 @@ public class JwtUtil {
     if (token != null && token.startsWith("Bearer ")) {
       token = token.substring(7);
     }
-    return token.trim();
+    return token;
   }
 
   // 이메일 추출
@@ -142,33 +165,33 @@ public class JwtUtil {
     long remainingTime = calculateRemainingTime(token);
     if (remainingTime <= 0) {
       log.warn("만료된 토큰입니다. 토큰: {}", token);
-      return;
+      throw new UserException(ErrorCode.TOKEN_EXPIRED);
     }
     // 남은 시간이 0보다 클 때만 블랙리스트에 추가
     redisTemplate.opsForValue().set("blacklist:" + token, "true", Duration.ofMillis(remainingTime));
     log.info("블랙리스트에 토큰이 추가되었습니다. 토큰: {}", token);
   }
 
-  // RefreshToken을 쿠키에 저장
+  // RefreshToken 쿠키에 저장
   public void addRefreshTokenToCookie(String refreshToken, HttpServletResponse response) {
     log.info("쿠키 설정 값: {}", refreshToken);
     Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
-    cookie.setHttpOnly(true);   // 클라이언트에서 접근 불가
-//      cookie.setSecure(true);     // HTTPS에서만 전송 (현재 HTTP)
-    cookie.setPath("/");        // 쿠키 경로
-    cookie.setMaxAge(86400);    // 만료 시간 (1일)
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(86400);
     response.addCookie(cookie);
-    log.info("Refresh token 쿠키가 성공적으로 설정되었습니다.");
+    log.info("Refresh token 쿠키가 성공적으로 설정되었습니다. 토큰: {}", refreshToken);
   }
 
-  // RefreshToken을 쿠키에서 삭제
+  // RefreshToken 쿠키에서 삭제
   public void deleteRefreshTokenFromCookie(String refreshToken, HttpServletResponse response) {
     Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
     cookie.setHttpOnly(true);
-//    cookie.setSecure(true);
+    cookie.setSecure(true);
     cookie.setPath("/");
     cookie.setMaxAge(0);  // 쿠키 만료
     response.addCookie(cookie);
-    log.info("Refresh token 쿠키가 성공적으로 삭제되었습니다.");
+    log.info("Refresh token 쿠키가 성공적으로 삭제되었습니다.토큰: {}", refreshToken);
   }
 }

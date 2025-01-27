@@ -1,4 +1,4 @@
-package com.flight_booking.gateway_service.application;
+package com.flight_booking.gateway_service.application.dto;
 
 public record UserStatusDto(
 

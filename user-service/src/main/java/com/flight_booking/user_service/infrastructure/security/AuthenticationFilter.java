@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,41 +21,43 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class AuthenticationFilter extends OncePerRequestFilter {
 
+  @Value("${service.feign.secret}")
+  private String FEIGN_SECRET;
+
   private final CustomUserDetailsService customUserDetailsService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    log.info("--------user-service------------");
+    // FeignClient 호출을 위한 내부 헤더 체크
+    String internalFeignHeader = request.getHeader("X-Internal-feign");
+    if (FEIGN_SECRET.equals(internalFeignHeader)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     String email = request.getHeader("X-USER-EMAIL");
     String role = request.getHeader("X-USER-ROLE");
-    log.info("header: {}, {}", email, role);
 
     if (email != null && role != null) {
       try {
-        // 이메일로 사용자 정보 로드
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
-        // 인증 객체 생성 (권한 포함)
         Authentication authentication = new UsernamePasswordAuthenticationToken(
             userDetails, null, userDetails.getAuthorities());
 
         log.info("auth {}", authentication.getAuthorities());
 
-        // 인증 정보를 SecurityContext에 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } catch (Exception e) {
-        // 사용자 정보 로드 실패 시, 에러 처리
         log.error("사용자 인증 실패: {}", e.getMessage());
-
         ErrorCode errorCode = ErrorCode.USER_AUTHENTICATION_FAILED;
         response.setStatus(errorCode.getHttpStatus().value());
         response.getWriter().write(errorCode.getMessage());
         return;
       }
     }
-
     filterChain.doFilter(request, response);
   }
 }

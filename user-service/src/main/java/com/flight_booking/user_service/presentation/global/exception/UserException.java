@@ -14,9 +14,10 @@ public class UserException extends RuntimeException {
     this.errorMessage = errorCode.getMessage();
   }
 
-  // 수정된 생성자 (메시지 추가)
-  public UserException(ErrorCode errorCode, String errorMessage) {
+  // 블락 사유 응답용
+  public UserException(ErrorCode errorCode, String additionalMessage) {
+    super(errorCode.getMessage() + ": " + additionalMessage);
     this.httpStatus = errorCode.getHttpStatus();
-    this.errorMessage = errorMessage;
+    this.errorMessage = errorCode.getMessage() + " - " + additionalMessage;
   }
 }

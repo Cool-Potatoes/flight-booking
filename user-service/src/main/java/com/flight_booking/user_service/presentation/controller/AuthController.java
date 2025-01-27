@@ -5,14 +5,13 @@ import com.flight_booking.user_service.application.service.AuthService;
 import com.flight_booking.user_service.presentation.request.FindIdRequest;
 import com.flight_booking.user_service.presentation.request.SignInRequest;
 import com.flight_booking.user_service.presentation.request.SignUpRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,7 +34,6 @@ public class AuthController {
   @PostMapping("/signin")
   public ApiResponse<?> signIn(@Valid @RequestBody SignInRequest request,
       HttpServletResponse response) {
-    log.info("로그인 시도");
     String accessToken = authService.signIn(request.email(), request.password(), response);
     return ApiResponse.ok("로그인 성공", accessToken);
   }
@@ -50,20 +48,18 @@ public class AuthController {
   // 토큰 재발급
   @PostMapping("/token")
   public ApiResponse<?> refreshToken(
-      @CookieValue(value = "RefreshToken") String refreshToken,
-      @RequestHeader(value = "Authorization") String accessToken,
+      HttpServletRequest request,
       HttpServletResponse response) {
-    String newAccessToken = authService.renewTokens(refreshToken, accessToken, response);
+    String newAccessToken = authService.renewTokens(request, response);
     return ApiResponse.ok(newAccessToken, "AccessToken 발급 성공");
   }
 
   // 로그아웃
   @PostMapping("/logout")
   public ApiResponse<?> logout(
-      @CookieValue(value = "RefreshToken") String refreshToken,
-      @RequestHeader(value = "Authorization") String accessToken,
+      HttpServletRequest request,
       HttpServletResponse response) {
-    authService.logout(refreshToken, accessToken, response);
+    authService.logout(request, response);
     return ApiResponse.ok("로그아웃 성공");
   }
 }

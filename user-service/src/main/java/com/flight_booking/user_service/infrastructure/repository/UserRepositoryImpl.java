@@ -73,7 +73,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
             user.isBlocked,
             user.createdAt))
         .from(user)
-        .where(builder) // 동적으로 생성된 조건 사용
+        .where(builder)
         .orderBy(getDynamicSort(sort, user.getType(), user.getMetadata()))
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
@@ -83,7 +83,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     Long total = queryFactory
         .select(user.count())
         .from(user)
-        .where(builder) // 동적으로 생성된 조건 사용
+        .where(builder)
         .fetchOne();
 
     if (total == null) {
@@ -99,17 +99,15 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
       PathMetadata pathMetadata) {
     List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
 
-    // 도메인 클래스에 맞는 PathBuilder를 생성
     PathBuilder<Object> pathBuilder = new PathBuilder<>(entityClass, pathMetadata);
 
     sort.stream().forEach(orderSpecifier -> {
       Order direction = orderSpecifier.isAscending() ? Order.ASC : Order.DESC;
       String prop = orderSpecifier.getProperty();
 
-      // 동적으로 해당 필드에 접근
       orderSpecifiers.add(new OrderSpecifier(direction, pathBuilder.get(prop)));
     });
 
-    return orderSpecifiers.toArray(new OrderSpecifier[0]); // list 크기에 맞춰 배열 생성
+    return orderSpecifiers.toArray(new OrderSpecifier[0]);
   }
 }

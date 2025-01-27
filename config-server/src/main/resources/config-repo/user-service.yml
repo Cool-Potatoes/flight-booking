@@ -8,6 +8,8 @@ service:
     secret-key: ${SECRET_KEY}
   kafka:
     url: localhost:9092
+  feign:
+    secret: ${FEIGN_CODE}
 
 
 spring:

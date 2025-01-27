@@ -6,20 +6,20 @@ import org.springframework.data.domain.Page;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record PageResponse<T>(
-    long totalElements, // 총 데이터 수
-    int totalPages, // 총 페이지 수
-    int nowPage, // 현재 페이지
-    int size,   // 페이지 크기
-    List<T> content       // 실제 데이터
+    long totalElements,
+    int totalPages,
+    int nowPage,
+    int size,
+    List<T> content
 ) {
 
   public static <T> PageResponse<T> from(Page<T> page) {
     return new PageResponse<>(
-        page.getTotalElements(), // 총 데이터 수
-        page.getTotalPages(),    // 총 페이지 수
-        page.getNumber(),        // 현재 페이지
-        page.getSize(),          // 페이지 크기
-        page.getContent()        // 실제 데이터
+        page.getTotalElements(),
+        page.getTotalPages(),
+        page.getNumber(),
+        page.getSize(),
+        page.getContent()
     );
   }
 }

@@ -2,8 +2,6 @@ package com.flight_booking.user_service.application.service;
 
 import com.flight_booking.common.application.dto.PaymentRefundProcessRequestDto;
 import com.flight_booking.common.application.dto.PaymentRetryRequestDto;
-import com.flight_booking.common.application.dto.ProcessTicketPaymentRequestDto;
-import com.flight_booking.common.application.dto.UserRefundTicketRequestDto;
 import com.flight_booking.common.application.dto.UserRequestDto;
 import com.flight_booking.common.infrastructure.util.StackTraceUtils;
 import com.flight_booking.common.presentation.dto.NotificationRequest;
@@ -13,14 +11,17 @@ import com.flight_booking.user_service.domain.model.User;
 import com.flight_booking.user_service.domain.repository.UserRepository;
 import com.flight_booking.user_service.infrastructure.messaging.UserKafkaSender;
 import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
+import com.flight_booking.user_service.infrastructure.security.jwt.JwtUtil;
 import com.flight_booking.user_service.presentation.global.exception.ErrorCode;
 import com.flight_booking.user_service.presentation.global.exception.UserException;
+import com.flight_booking.user_service.presentation.request.DeleteRequest;
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
 import com.flight_booking.user_service.presentation.response.AdminUserDetailResponse;
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserDetailResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
-import java.time.LocalDateTime;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,8 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserKafkaSender userKafkaSender;
   private final RedisTemplate<String, String> redisTemplate;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtUtil jwtUtil;
 
   // 전체 회원 목록 조회
   @Transactional(readOnly = true)
@@ -55,12 +60,10 @@ public class UserService {
     User user = getUser(id);
     boolean isAdmin = isAdmin(userDetails);
 
-    // 관리자의 경우
     if (isAdmin) {
       return AdminUserDetailResponse.fromEntity(user);
     }
 
-    // 사용자의 경우 본인 정보만 조회 가능
     checkUser(userDetails, user);
     return UserDetailResponse.fromEntity(user);
   }
@@ -91,15 +94,27 @@ public class UserService {
 
   // 사용자 - 회원 탈퇴
   @Transactional
-  public void deleteUser(Long id, CustomUserDetails userDetails) {
+  public void deleteUser(Long id, CustomUserDetails userDetails,
+      DeleteRequest deleteRequest, HttpServletRequest request, HttpServletResponse response) {
     User user = getUser(id);
     checkUser(userDetails, user);
-    user.setDeletedBy(userDetails.getUsername());
-    user.setIsDeleted(true);
-    user.setDeletedAt(LocalDateTime.now());
+
+    if (!passwordEncoder.matches(deleteRequest.password(), user.getPassword())) {
+      throw new UserException(ErrorCode.INVALID_CURRENT_PASSWORD);
+    }
+
+    String accessToken = jwtUtil.extractAccessTokenFromRequest(request);
+    String refreshToken = jwtUtil.extractRefreshTokenFromRequest(request);
+
+    jwtUtil.addToBlacklist(accessToken);
+    jwtUtil.addToBlacklist(refreshToken);
+    jwtUtil.deleteRefreshTokenFromCookie(refreshToken, response);
+
+    user.softDelete(userDetails.getUsername());
+    SecurityContextHolder.clearContext();
   }
 
-  // 상태 조회 (WebClient용)
+  // 상태 조회 (FeignClient)
   public UserStatusDto getUserStatus(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
@@ -129,7 +144,6 @@ public class UserService {
           .set("Retry:paymentId:" + userRequestDto.paymentId().toString(), "In Retry Queue", 15,
               TimeUnit.MINUTES);
 
-      // TODO 알림 발송. 잠시 후 자동으로 결제가 재시도 됩니다. 마일리지를 충전해주세요.
       sendInsufficientMileageMessage(user);
 
       return false;
@@ -199,7 +213,6 @@ public class UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 
-    // 삭제된 사용자 확인
     if (user.getIsDeleted()) {
       throw new UserException(ErrorCode.USER_DELETED);
     }

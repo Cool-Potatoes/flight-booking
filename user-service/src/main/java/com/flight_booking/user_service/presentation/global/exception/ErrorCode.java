@@ -8,28 +8,38 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
+  // 인증 및 사용자 상태 관련 오류
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 사용자가 존재하지 않습니다."),
-  DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다."),
-  DUPLICATE_PHONE(HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호입니다."),
-  LOGIN_FAIL(HttpStatus.BAD_REQUEST, "로그인에 실패했습니다."),
   USER_AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "사용자 인증에 실패했습니다."),
-  INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다."),
-  ACCESS_ONLY_SELF(HttpStatus.FORBIDDEN, "본인만 가능합니다."),
-  CANNOT_MODIFY_FIELD(HttpStatus.FORBIDDEN, "수정 불가능한 항목입니다."),
-  USER_DELETED(HttpStatus.NOT_FOUND, "탈퇴한 사용자입니다."),
-  USER_BLOCKED(HttpStatus.BAD_REQUEST, "블락 상태의 회원입니다."),
-  USER_NOT_BLOCKED(HttpStatus.BAD_REQUEST, "블락 해제 상태의 회원입니다."),
-  CANNOT_ADMIN_BLOCKED(HttpStatus.BAD_REQUEST, "관리자는 블락 설정 할 수 없습니다."),
-  INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호와 일치하지 않습니다."),
+  USER_DELETED(HttpStatus.FORBIDDEN, "탈퇴한 사용자입니다."),
+  USER_BLOCKED(HttpStatus.FORBIDDEN, "블락 상태의 회원입니다."),
+  USER_NOT_BLOCKED(HttpStatus.FORBIDDEN, "블락 해제된 상태의 회원입니다."),
+  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+  TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+  BLACKLISTED_TOKEN(HttpStatus.FORBIDDEN, "블랙리스트에 존재하는 토큰입니다."),
+  LOGIN_FAIL(HttpStatus.BAD_REQUEST, "로그인에 실패했습니다."),
+
+  // 비밀번호 관련 오류
+  INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
   PASSWORDS_DO_NOT_MATCH(HttpStatus.BAD_REQUEST, "새로운 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
   PASSWORDS_SAME(HttpStatus.BAD_REQUEST, "기존 비밀번호와 동일합니다."),
+
+  // 입력값 검증 및 중복 오류
+  DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다."),
+  DUPLICATE_PHONE(HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호입니다."),
   INVALID_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 인증 코드입니다."),
   CODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 이메일에 대한 인증 코드가 존재하지 않습니다."),
   CODE_ALREADY_SENT(HttpStatus.BAD_REQUEST, "이미 인증 코드가 발급되었습니다. 1분 뒤에 다시 발급 가능합니다."),
   REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "리프레시 토큰이 존재하지 않습니다."),
-  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
-  BLACKLISTED_TOKEN(HttpStatus.FORBIDDEN, "블랙리스트에 존재하는 토큰입니다."),
-  TOKEN_EXPIRED(HttpStatus.FORBIDDEN, "만료된 토큰입니다.");
+
+  // 권한 및 접근 제어 관련 오류
+  ACCESS_ONLY_SELF(HttpStatus.FORBIDDEN, "본인만 가능합니다."),
+  CANNOT_MODIFY_FIELD(HttpStatus.FORBIDDEN, "수정 불가능한 항목입니다."),
+  CANNOT_ADMIN_BLOCKED(HttpStatus.FORBIDDEN, "관리자의 계정을 블락할 수 없습니다."),
+  INVALID_SECRET_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "SECRET_KEY 초기화에 실패했습니다."),
+
+  // 정상적이지 않은 접근 관련 오류
+  UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "정상적이지 않은 접근이 감지되었습니다.");
 
   private final HttpStatus httpStatus;
   private final String message;

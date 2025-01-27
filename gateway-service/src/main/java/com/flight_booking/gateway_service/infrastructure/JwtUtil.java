@@ -1,5 +1,6 @@
 package com.flight_booking.gateway_service.infrastructure;
 
+import com.flight_booking.gateway_service.presentation.exception.CustomJwtException;
 import com.flight_booking.gateway_service.presentation.exception.JwtErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -12,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import java.util.Base64;
 import javax.crypto.SecretKey;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,13 +22,10 @@ import org.springframework.web.server.ServerWebExchange;
 
 @Slf4j(topic = "JWT 검증 및 정보 추출")
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
   private final RedisTemplate<String, Object> redisTemplate;
-
-  public JwtUtil(RedisTemplate<String, Object> redisTemplate) {
-    this.redisTemplate = redisTemplate;
-  }
 
   // Header KEY 값
   public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -51,7 +50,7 @@ public class JwtUtil {
   }
 
   // 토큰 검증
-  public void validateToken(String token) {
+  public void validateToken(String token) throws CustomJwtException {
     try {
       Jws<Claims> claimsJws = Jwts.parser()
           .verifyWith(key)
@@ -59,19 +58,19 @@ public class JwtUtil {
       log.info("payload: {}", claimsJws.getPayload().toString());
     } catch (ExpiredJwtException e) {
       log.error("만료된 JWT token 입니다. Token: {}", token);
-      throw new JwtException(JwtErrorCode.EXPIRED_TOKEN.getMessage());
+      throw new CustomJwtException(JwtErrorCode.EXPIRED_TOKEN);
     } catch (UnsupportedJwtException e) {
       log.error("지원되지 않는 JWT 토큰 입니다. Token: {}", token);
-      throw new JwtException(JwtErrorCode.UNSUPPORTED_TOKEN.getMessage());
+      throw new CustomJwtException(JwtErrorCode.UNSUPPORTED_TOKEN);
     } catch (MalformedJwtException | IllegalArgumentException e) {
       log.error("잘못된 JWT 토큰 입니다. Token: {}", token);
-      throw new JwtException(JwtErrorCode.MALFORMED_TOKEN.getMessage());
+      throw new CustomJwtException(JwtErrorCode.MALFORMED_TOKEN);
     } catch (SecurityException | JwtException e) {
       log.error("JWT 검증에 실패했습니다. Token: {}", token);
-      throw new JwtException(JwtErrorCode.INVALID_SIGNATURE.getMessage());
+      throw new CustomJwtException(JwtErrorCode.INVALID_SIGNATURE);
     } catch (NullPointerException e) {
       log.error("토큰에 필요한 클레임 정보가 비어있습니다. Token: {}", token);
-      throw new JwtException(JwtErrorCode.EMPTY_CLAIMS.getMessage());
+      throw new CustomJwtException(JwtErrorCode.EMPTY_CLAIMS);
     }
   }
 
@@ -116,10 +115,6 @@ public class JwtUtil {
 
   // 블랙리스트에 존재하는지 확인
   public boolean isTokenBlacklisted(String token) {
-    if (redisTemplate.hasKey("blacklist:" + token)) {
-      log.warn("블랙리스트에 포함된 토큰입니다. Token: {}", token);
-      throw new JwtException(JwtErrorCode.BLACKLISTED_TOKEN.getMessage());
-    }
-    return false;
+    return redisTemplate.hasKey("blacklist:" + token);
   }
 }

@@ -5,9 +5,12 @@ import com.flight_booking.common.presentation.global.ApiResponse;
 import com.flight_booking.user_service.application.dto.UserStatusDto;
 import com.flight_booking.user_service.application.service.UserService;
 import com.flight_booking.user_service.infrastructure.security.CustomUserDetails;
+import com.flight_booking.user_service.presentation.request.DeleteRequest;
 import com.flight_booking.user_service.presentation.request.UpdateRequest;
 import com.flight_booking.user_service.presentation.response.PageResponse;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +56,6 @@ public class UserController {
       @PathVariable Long id,
       @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    // 사용자는 본인 정보만 제공
     Object response = userService.getUserDetails(id, userDetails);
     return ApiResponse.ok(response, "회원 상세 조회 성공");
   }
@@ -74,17 +76,21 @@ public class UserController {
   @DeleteMapping("/{id}")
   public ApiResponse<?> deleteUser(
       @PathVariable Long id,
-      @AuthenticationPrincipal CustomUserDetails userDetails) {
-    userService.deleteUser(id, userDetails);
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      @Valid @RequestBody DeleteRequest deleteRequest,
+      HttpServletResponse response,
+      HttpServletRequest request) {
+    userService.deleteUser(id, userDetails, deleteRequest, request, response);
     return ApiResponse.ok("회원 탈퇴 성공");
   }
 
-  // 상태 조회 (WebClient용)
+  // 사용자 상태 조회 (feignClient)
   @GetMapping("/status/{email}")
   public UserStatusDto getUserStatus(@PathVariable("email") String email) {
     return userService.getUserStatus(email);
   }
 
+  // 마일리지 업데이트
   @PostMapping("/mileage")
   public boolean updateMileage(@RequestBody UserRequestDto requestDto) {
     return userService.updateUserMileage(requestDto);

@@ -13,9 +13,9 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class AiService {
 
-  @Value("${gemini.api.url}")
+  @Value("${spring.gemini.api.url}")
   private String GEMINI_API_URL;
-  @Value("${gemini.api.key}")
+  @Value("${spring.gemini.api.key}")
   private String GEMINI_API_KEY;
 
   private final RestClient restClient;

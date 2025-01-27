@@ -32,7 +32,8 @@ public class SecurityConfig {
       "/v1/auth/send-code",
       "/v1/auth/verify-code",
       "/v1/auth/token",
-      "/v1/users/status/*"
+      "/v1/users/status/*",
+      "/actuator/prometheus"
   };
 
   @Bean
@@ -55,14 +56,13 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-        .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
-        .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
-        .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 비활성화
-        .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))// 세션을 Stateless로 설정
+        .csrf(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
         .authorizeHttpRequests(auth -> {
-          auth.requestMatchers("/actuator/prometheus").permitAll();
           auth.requestMatchers(permitPaths).permitAll(); // 허용
-          auth.anyRequest().authenticated(); // 모든 요청은 인증 필요
+          auth.anyRequest().authenticated();
         })
         .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
