@@ -59,41 +59,41 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew test --info --stacktrace
 
-      # 7️⃣ DockerHub 로그인
-      - name: DockerHub Login
-        if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd/docker2')
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      # # 7️⃣ DockerHub 로그인
+      # - name: DockerHub Login
+      #   if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd/docker2')
+      #   run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 8️⃣ Docker 이미지 빌드 및 푸시
-      - name: Build and Push Docker Images
-        if: success() && github.ref == 'refs/heads/main'
-        run: |
-          IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)
-          docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG  # 전체 서비스 빌드
-          docker-compose -f docker-compose.yml push  # 전체 서비스 푸시
+      # # 8️⃣ Docker 이미지 빌드 및 푸시
+      # - name: Build and Push Docker Images
+      #   if: success() && github.ref == 'refs/heads/main'
+      #   run: |
+      #     IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)
+      #     docker-compose -f docker-compose.yml build --build-arg VERSION=$IMAGE_TAG  # 전체 서비스 빌드
+      #     docker-compose -f docker-compose.yml push  # 전체 서비스 푸시
 
-      # 🔟 서버에 배포
-      - name: Deploy to server
-        if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd/docker2')
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script: |
-            cd /home/ec2-user/flight-booking  # EC2 서버의 프로젝트 경로로 이동
-            cp .env.prod .env  # 운영 환경용 .env 파일 복사
+      # # 🔟 서버에 배포
+      # - name: Deploy to server
+      #   if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd/docker2')
+      #   uses: appleboy/ssh-action@v1.1.0
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ec2-user
+      #     key: ${{ secrets.SSH_KEY }}
+      #     port: 22
+      #     script: |
+      #       cd /home/ec2-user/flight-booking  # EC2 서버의 프로젝트 경로로 이동
+      #       cp .env.prod .env  # 운영 환경용 .env 파일 복사
 
-            # 서비스 순차 실행
-            SERVICES=("eureka-server" "config-server" "gateway-service" "notification-service" "user-service" "booking-service" "payment-service" "flight-service" "ticket-service")
+      #       # 서비스 순차 실행
+      #       SERVICES=("eureka-server" "config-server" "gateway-service" "notification-service" "user-service" "booking-service" "payment-service" "flight-service" "ticket-service")
 
-            for SERVICE in "${SERVICES[@]}"; do
-              echo "Starting $SERVICE..."
-              docker-compose pull $SERVICE
-              docker-compose up -d --build $SERVICE
-              sleep 30  # 각 서비스 실행 후 대기 시간 (필요시 조정 가능)
-            done
+      #       for SERVICE in "${SERVICES[@]}"; do
+      #         echo "Starting $SERVICE..."
+      #         docker-compose pull $SERVICE
+      #         docker-compose up -d --build $SERVICE
+      #         sleep 30  # 각 서비스 실행 후 대기 시간 (필요시 조정 가능)
+      #       done
 
-            docker image prune -af  # 불필요한 이미지 정리
-            docker ps  # 실행 중인 컨테이너 확인
+      #       docker image prune -af  # 불필요한 이미지 정리
+      #       docker ps  # 실행 중인 컨테이너 확인
