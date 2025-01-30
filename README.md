@@ -4,9 +4,6 @@
 
 <h1><b>✈️ Airportato: 항공기 좌석 티켓팅 서비스</b></h1>
 
-🔗 배포 링크: [Airportato](http://ec2-3-34-91-73.ap-northeast-2.compute.amazonaws.com)
-<br>
-
 
 📄 Notion: [🥔🔥멋쟁이 감자들🔥🥔](https://teamsparta.notion.site/6-1682dc3ef5148054a1b9c2bb61655eb5)
 
