@@ -33,7 +33,6 @@ public class FlightService {
   @Transactional(readOnly = true)
   public FlightResponseDto getFlightById(UUID flightId) {
     Flight flight = flightRepository.findByFlightIdAndIsDeletedFalse(flightId).orElseThrow(
-        //TODO: Error 타입 정해지면 수정
         () -> new RuntimeException("해당하는 항공편이 존재하지 않습니다.")
     );
 
