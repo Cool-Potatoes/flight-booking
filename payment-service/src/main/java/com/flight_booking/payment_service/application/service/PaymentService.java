@@ -50,7 +50,6 @@ public class PaymentService {
       throw new ApiException("중복된 결제 시도");
     }
 
-    // TODO createdBy 넣어주기 or Auditing
     Payment payment = Payment.builder()
         .bookingId(paymentRequestDto.bookingId())
         .fare(paymentRequestDto.fare())
@@ -59,7 +58,6 @@ public class PaymentService {
 
     Payment savedPayment = paymentRepository.save(payment);
 
-    // TODO 마일리지 확인 및 차감 -> 성공적으로 이루어지면 status 변경 -> 탑승객 생성
     paymentKafkaSender.sendMessage(
         "user-update-mileage-topic",
         savedPayment.getPaymentId().toString(),
@@ -115,7 +113,7 @@ public class PaymentService {
     // TODO 사용자 권한검증
     // TODO 마일리지 확인 및 증감
 
-    Payment updatedPayment = payment.updateFare(updateFareRequestDto.newFare()); // TODO updatedBy
+    Payment updatedPayment = payment.updateFare(updateFareRequestDto.newFare());
 
     return PaymentResponseDto.from(updatedPayment);
   }
@@ -125,7 +123,7 @@ public class PaymentService {
 
     Payment payment = getPaymentById(paymentId);
 
-    payment.delete(); // TODO deletedBy
+    payment.delete();
   }
 
 
