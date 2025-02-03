@@ -112,7 +112,6 @@ public class SeatService {
   public void consumeSeatAvailabilityCheckAndUpdate(
       SeatAvailabilityCheckRequestDto seatAvailabilityCheckRequestDto) {
 
-    // TODO 조회 할 때 lock?
     List<UUID> seatIdList = seatAvailabilityCheckRequestDto.seatIdList();
 
     List<Seat> seatList = seatRepository.findAllById(seatIdList).stream()
@@ -184,8 +183,6 @@ public class SeatService {
     Seat seat = getSeatIsDeletedFalse(seatId);
 
     if (!seat.getIsAvailable()) {
-      // TODO
-      // 실패 로직.. 동기화? 비동기화?
       throw new RuntimeException("새로운 좌석이 이미 예약되었습니다: " + seat.getSeatId());
     } else {
       return seat.getPrice();
