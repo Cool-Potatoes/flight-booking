@@ -1,17 +1,13 @@
 package com.flight_booking.user_service.infrastructure.repository;
 
+import com.flight_booking.common.infrastructure.util.DynamicSortUtil;
 import com.flight_booking.user_service.domain.model.QUser;
 import com.flight_booking.user_service.domain.model.Role;
 import com.flight_booking.user_service.presentation.response.UserListResponse;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.PathMetadata;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -74,7 +70,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
             user.createdAt))
         .from(user)
         .where(builder)
-        .orderBy(getDynamicSort(sort, user.getType(), user.getMetadata()))
+        .orderBy(DynamicSortUtil.getDynamicSort(sort, user.getType(), user.getMetadata()))
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
         .fetch();
@@ -94,20 +90,4 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
     return new PageImpl<>(users, pageable, total);
   }
 
-
-  private <T> OrderSpecifier[] getDynamicSort(Sort sort, Class<? extends T> entityClass,
-      PathMetadata pathMetadata) {
-    List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
-
-    PathBuilder<Object> pathBuilder = new PathBuilder<>(entityClass, pathMetadata);
-
-    sort.stream().forEach(orderSpecifier -> {
-      Order direction = orderSpecifier.isAscending() ? Order.ASC : Order.DESC;
-      String prop = orderSpecifier.getProperty();
-
-      orderSpecifiers.add(new OrderSpecifier(direction, pathBuilder.get(prop)));
-    });
-
-    return orderSpecifiers.toArray(new OrderSpecifier[0]);
-  }
 }
