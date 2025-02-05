@@ -4,25 +4,20 @@
 
 <h1><b>✈️ Airportato: 항공기 좌석 티켓팅 서비스</b></h1>
 
-
-📄 Notion: [🥔🔥멋쟁이 감자들🔥🥔](https://teamsparta.notion.site/6-1682dc3ef5148054a1b9c2bb61655eb5)
-
-![542 266](https://github.com/user-attachments/assets/17a4d4d6-63f8-4610-97cd-d7992f3713b9)
+<img src="https://github.com/user-attachments/assets/17a4d4d6-63f8-4610-97cd-d7992f3713b9" width="600"/>
 
 </div>
 <br>
 
 ## 0. 목차
 1. [프로젝트 소개](#1)
-2. [팀원 소개](#2)
-3. [개발 일정](#3)
-4. [적용 기술](#4)
-5. [서비스/프로젝트 목표](#5)
-6. [인프라 설계도](#6)
-7. [주요 기능](#7)
-8. [기술적 의사 결정](#8)
-9. [트러블 슈팅](#9)
-10. [상세 담당 업무](#10)
+2. [서비스/프로젝트 목표](#2)
+3. [적용 기술](#3)
+4. [인프라 설계도](#4)
+5. [주요 기능](#5)
+6. [기술적 의사 결정](#6)
+7. [트러블 슈팅](#7)
+8. [상세 담당 업무](#8)
 
 <br>
 
@@ -47,81 +42,8 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="2">👨‍👩‍👦‍👦 팀원 소개</span>
-
-<div align="center">
-
-## 😎 COOL POTATOES 🥔
-
-| <img src="https://img.shields.io/badge/유래카 감자 🥔-FF5733" /> | <img src="https://img.shields.io/badge/오른팔 감자 🥔-%2300264B" /> | <img src="https://img.shields.io/badge/운송 감자 🥔-%2310069F%20" /> | <img src="https://img.shields.io/badge/문지기 감자 🥔-blue" /> |
-| :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------------------: | :-----------------------------------------------------------: |
-| <img width="160px" alt="김재현" src="https://github.com/k-jaehyun.png"> | <img width="160px" alt="김한준" src="https://github.com/wkdehf217.png"> | <img width="160px" alt="조한범" src="https://github.com/HanBeom98.png"> | <img width="160px" alt="홍유진" src="https://github.com/Hujin0322.png"> |
-| [김재현](https://github.com/k-jaehyun) | [김한준](https://github.com/wkdehf217) |  [조한범](https://github.com/HanBeom98)   | [홍유진](https://github.com/Hujin0322) |
-
-</div>
-
-<!-- Top Button -->
-<div align="right">
-<p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
-</div>
-
-## <span id="3">‍📅 개발 일정</span>
-
-### 2024.12.26 ~ 2025.01.27
-
-<!-- Top Button -->
-<div align="right">
-<p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
-</div>
-
-## 🔧 적용 기술
-
-###  Backend
-| Java | Spring Boot | Spring Cloud | Spring Security | JWT | QueryDSL |
-|------|------------|--------------|----------------|-----|----------|
-| ![Java](https://img.shields.io/badge/Java%2017-007396?style=flat&logo=Java&logoColor=white) | ![Spring Boot](https://img.shields.io/badge/Spring%20Boot%203.4.1-6DB33F?style=flat&logo=Spring%20Boot&logoColor=white) | ![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud%202024.0.0-6DB33F?style=flat&logo=Spring&logoColor=white) | ![Spring Security](https://img.shields.io/badge/Spring%20Security%206.4.2-6DB33F?style=flat&logo=Spring%20Security&logoColor=white) | ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=JSON%20Web%20Tokens&logoColor=white) | ![QueryDSL](https://img.shields.io/badge/QueryDSL%205.0.0-FF6F00?style=flat&logo=Apache%20Maven&logoColor=white) |
-
-###  Database
-| PostgreSQL | Redis |
-|-----------|------|
-| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL%2016.4-4169E1?style=flat&logo=PostgreSQL&logoColor=white) | ![Redis](https://img.shields.io/badge/Redis%203.4.1-DC382D?style=flat&logo=Redis&logoColor=white) |
-
-### Messaging
-| Apache Kafka |
-|-------------|
-| ![Kafka](https://img.shields.io/badge/Apache%20Kafka%203.9.0-231F20?style=flat&logo=Apache%20Kafka&logoColor=white) |
-
-### External Library
-| Gemini API | SMTP |
-|------------|------|
-| ![Gemini API](https://img.shields.io/badge/Gemini%20API-FF4500?style=flat&logo=Google%20Earth&logoColor=white) | ![SMTP](https://img.shields.io/badge/SMTP-FF0000?style=flat&logo=Mail.Ru&logoColor=white) |
-
-### Monitoring
-| Prometheus | Grafana |
-|-----------|---------|
-| ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=Prometheus&logoColor=white) | ![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat&logo=Grafana&logoColor=white) |
-
-### Test
-| JMeter |
-|------|
-| ![JMeter](https://img.shields.io/badge/JMeter-D22128?style=flat&logo=Apache%20JMeter&logoColor=white) |
-
-###  CI/CD
-| GitHub | Docker | Docker Compose |
-|--------|--------|---------------|
-| ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=GitHub&logoColor=white) | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=Docker&logoColor=white) | ![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2496ED?style=flat&logo=Docker&logoColor=white) |
-
-###  Infra
-| GitHub Actions | AWS (ECS, RDS) |
-|---------------|--------------|
-| ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=GitHub%20Actions&logoColor=white) | ![AWS](https://img.shields.io/badge/AWS%20(ECS,%20RDS)-FF9900?style=flat&logo=Amazon%20AWS&logoColor=white) |
-
-<!-- Top Button -->
-<div align="right">
-<p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
-</div>
-
-## 🎯 **서비스/프로젝트 목표**
+## <span id="2">🎯 **서비스/프로젝트 목표**
+> 개발 기간 : 2024.12.26 ~ 2025.01.27
 
 ### 1️⃣ **대규모 트래픽 안정적 처리**
 - 트래픽 제어 및 메시지 분산으로 **서버 과부하 방지**
@@ -147,7 +69,70 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="6">📄 인프라 설계도</span>
+## <span id="3">🔧 적용 기술
+
+**Development**
+
+<p>
+<img src="https://img.shields.io/badge/Java 17-007396?style=flat-square&logo=Java&logoColor=white">
+<img src="https://img.shields.io/badge/SpringBoot 3.4.1-6DB33F?style=flat-square&logo=SpringBoot&logoColor=white"/>
+<img src="https://img.shields.io/badge/SpringCloud 2024.0.0-6DB33F?style=flat-square&logo=Spring&logoColor=white"/>
+   <br />
+<img src="https://img.shields.io/badge/SpringSecurity 6.4.2-6DB33F?style=flat-square&logo=SpringSecurity&logoColor=white"/>
+<img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=JSON Web Tokens&logoColor=white"/>
+<img src="https://img.shields.io/badge/QueryDSL 5.0.0-FF6F00?style=flat-square&logo=ApacheMaven&logoColor=white"/>
+</p>
+
+**Database**
+
+<p>
+<img src="https://img.shields.io/badge/PostgreSQL 16.4-4169E1?style=flat-square&logo=PostgreSQL&logoColor=white">
+<img src="https://img.shields.io/badge/Redis 3.4.1-DC382D?style=flat-square&logo=Redis&logoColor=white">
+</p>
+
+**Messaging**
+
+<p>
+<img src="https://img.shields.io/badge/Apache Kafka 3.9.0-231F20?style=flat-square&logo=ApacheKafka&logoColor=white">
+</p>
+
+**External Library**
+
+<p>
+<img src="https://img.shields.io/badge/Gemini API-FF4500?style=flat-square&logo=GoogleEarth&logoColor=white">
+<img src="https://img.shields.io/badge/SMTP-FF0000?style=flat-square&logo=Mail.Ru&logoColor=white">
+</p>
+
+**Monitoring**
+
+<p>
+<img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat-square&logo=Prometheus&logoColor=white">
+<img src="https://img.shields.io/badge/Grafana-F46800?style=flat-square&logo=Grafana&logoColor=white">
+</p>
+
+**Test**
+
+<p>
+<img src="https://img.shields.io/badge/JMeter-D22128?style=flat-square&logo=ApacheJMeter&logoColor=white">
+</p>
+
+**CI/CD**
+
+<p>
+<img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=GitHub&logoColor=white">
+<img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white">
+<img src="https://img.shields.io/badge/Docker Compose-2496ED?style=flat-square&logo=Docker&logoColor=white">
+<br />
+<img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat-square&logo=GitHubActions&logoColor=white">
+<img src="https://img.shields.io/badge/AWS (ECS, RDS)-FF9900?style=flat-square&logo=AmazonAWS&logoColor=white">
+</p>
+
+<!-- Top Button -->
+<div align="right">
+<p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
+</div>
+
+## <span id="4">📄 인프라 설계도</span>
 
 ![image](https://github.com/user-attachments/assets/1f9637a5-35b8-4e6b-86c5-1a49aa1ecdba)
 
@@ -156,7 +141,7 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="7">⚙️ 주요 기능</span>
+## <span id="5">⚙️ 주요 기능</span>
 
 ### 회원 서비스
 - 회원가입, 로그인, 로그아웃
@@ -228,7 +213,7 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="8">💡 기술적 의사결정</span>
+## <span id="6">💡 기술적 의사결정</span>
 
 ### 1. **안정적인 대규모 트래픽 처리**
 
@@ -257,7 +242,7 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="9">💥 트러블슈팅</span>
+## <span id="7">💥 트러블슈팅</span>
 
 - [Kafka, Redis: 서비스 성능 향상](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka,-Redis-서비스-성능-향상)
 - [Kafka: 메타데이터 전송 문제](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka:-메타데이터-전송-문제)
@@ -271,15 +256,16 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="10">😎 상세 담당 업무</span>
+## <span id="8">😎 팀원 소개 및 담당 업무</span>
 
 |  이름   | 포지션          | 담당(개인별 기여점)                                                                                                                                                                                                                                            |
 |:-------------:|:--------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|  김재현  | `Leader`    | ✅ 코드 리뷰, 의사 결정 참여<br>✅ 대기열<br>✅ 쿼리 개선<br>✅ 결제 실패 재처리 시스템                                                                                                                                                                                               |
-|  김한준  | `Sub-Leader` | ✅ 서버 간 통신 최적화<br>✅ 동시성 제어<br>✅ 예약 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- MSA 기반의 예약 - 결제 - 티켓 로직 구현<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Kafka 를 통한 비동기 처리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 분산락을 통한 동시성 문제 해결<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 실패 시 재시도 처리, DLT 구현<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Seat: 캐싱 적용, 조회 성능 개선                                                                                |
-|  조한범  | `Member`     | ✅ 알림 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 알림 생성, 조회, 읽음 처리, 삭제<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 이메일 비동기 전송 (SMTP 사용)<br>✅ 배포<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- EC2에서 Docker Compose를 통해 서비스 배포<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- RDS(PostgreSQL) 데이터베이스와 연동하여 저장<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Git Actions를 사용한 자동 CI/CD 파이프라인 구축<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Docker Hub를 사용한 이미지 관리                                     |
-|  홍유진  | `Member`     | ✅ 인증/인가<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JWT 토큰: 액세스 및 리프레시 토큰 생성/관리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Redis를 이용한 토큰 상태 확인 및 블랙리스트 처리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Gateway: 토큰 검증 후 사용자 정보와 함께 요청 라우팅<br>✅ 유저 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 회원가입, 로그인, 조회, 수정, 탈퇴, 관리자의 회원 block<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 인증 코드 캐싱 및 Kafka를 통한 알림 서비스 연동<br>✅ AI 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Gemini API를 활용한 단순 정보 제공 |
+| <a href="https://github.com/k-jaehyun"><img width="100px" alt="김재현" src="https://github.com/k-jaehyun.png"></a><br>[김재현](https://github.com/k-jaehyun) | `Leader`    | ✅ 코드 리뷰, 의사 결정 참여<br>✅ 대기열<br>✅ 쿼리 개선<br>✅ 결제 실패 재처리 시스템 |
+| <a href="https://github.com/wkdehf217"><img width="100px" alt="김한준" src="https://github.com/wkdehf217.png"></a><br>[김한준](https://github.com/wkdehf217) | `Sub-Leader` | ✅ 서버 간 통신 최적화<br>✅ 동시성 제어<br>✅ 예약 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- MSA 기반의 예약 - 결제 - 티켓 로직 구현<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Kafka 를 통한 비동기 처리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 분산락을 통한 동시성 문제 해결<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 실패 시 재시도 처리, DLT 구현<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Seat: 캐싱 적용, 조회 성능 개선 |
+| <a href="https://github.com/HanBeom98"><img width="100px" alt="조한범" src="https://github.com/HanBeom98.png"></a><br>[조한범](https://github.com/HanBeom98) | `Member`     | ✅ 알림 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 알림 생성, 조회, 읽음 처리, 삭제<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 이메일 비동기 전송 (SMTP 사용)<br>✅ 배포<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- EC2에서 Docker Compose를 통해 서비스 배포<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- RDS(PostgreSQL) 데이터베이스와 연동하여 저장<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Git Actions를 사용한 자동 CI/CD 파이프라인 구축<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Docker Hub를 사용한 이미지 관리 |
+| <a href="https://github.com/Hujin0322"><img width="100px" alt="홍유진" src="https://github.com/Hujin0322.png"></a><br>[홍유진](https://github.com/Hujin0322) | `Member`     | ✅ 인증/인가<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JWT 토큰: 액세스 및 리프레시 토큰 생성/관리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Redis를 이용한 토큰 상태 확인 및 블랙리스트 처리<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Gateway: 토큰 검증 후 사용자 정보와 함께 요청 라우팅<br>✅ 유저 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 회원가입, 로그인, 조회, 수정, 탈퇴, 관리자의 회원 block<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 인증 코드 캐싱 및 Kafka를 통한 알림 서비스 연동<br>✅ AI 서비스<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Gemini API를 활용한 단순 정보 제공 |
 
+### 📄 Notion: [🥔🔥멋쟁이 감자들🔥🥔](https://teamsparta.notion.site/6-1682dc3ef5148054a1b9c2bb61655eb5)
 <!-- Top Button -->
 <div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
