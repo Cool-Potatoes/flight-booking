@@ -247,9 +247,7 @@
 - [Kafka, Redis: 서비스 성능 향상](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka,-Redis-서비스-성능-향상)
 - [Kafka: 메타데이터 전송 문제](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka:-메타데이터-전송-문제)
 - [Redis: 분산 락을 사용하여 동시성 문제 해결](https://github.com/Cool-Potatoes/flight-booking/wiki/Redis:-분산-락을-사용하여-동시성-문제-해결)
-- [Kafka Retry Que: 실패 트랜잭션 처리](https://github.com/Cool-Potatoes/flight-booking/wiki/Kafka-Retry-Que:-실패-트랜잭션-처리)
 - [배포: EC2 서버 다운 이슈](https://github.com/Cool-Potatoes/flight-booking/wiki/배포:-EC2-서버-다운-이슈)
-- [부하 테스트: 서버 부하, 병목 처리](https://github.com/Cool-Potatoes/flight-booking/wiki/부하-테스트:-서버-부하,-병목-처리)
 
 <!-- Top Button -->
 <div align="right">
