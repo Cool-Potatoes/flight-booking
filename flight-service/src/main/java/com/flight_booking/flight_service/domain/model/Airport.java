@@ -1,5 +1,6 @@
 package com.flight_booking.flight_service.domain.model;
 
+import com.flight_booking.common.domain.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
