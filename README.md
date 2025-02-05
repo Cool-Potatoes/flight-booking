@@ -28,15 +28,17 @@
 
 ## <span id="1">👋 프로젝트 소개</span>
    
-### <p><span>$\bf{\huge{\color{#A9D0F5}Airportato}}$</span>( Airport + Potato )</p>
+### <p><span>$\bf{\huge{\color{#FF8000}Airportato}}$</span>( Airport + Potato )</p>
 
 똑똑한 사람은 세상에 적응하지만 감자는 세상을 바꿉니다! 🥔<br/>
 감자들이 모여 새로운 서비스를 만들었습니다.<br/>
+
 기존 항공권 예매 시스템과 달리 원하는 좌석을 티켓팅 하는 서비스입니다.
 
 > 창 밖을 보고 싶은데, 멀리 떨어져서 아쉬우셨나요?<br/>
 > 빨리 내리고 싶은데, 맨 뒷자리라 답답하셨나요?<br/>
-> 이제 좌석 배정 걱정은 그만!<br/>
+> 
+> **이제 좌석 배정 걱정은 그만!<br/>**
 > 여유롭고 편안한 여행,<br/>
 > **Airportato**에서 경험해보세요! ✈️
 
@@ -72,57 +74,73 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="4">🔧 적용 기술</span>
+## 🔧 적용 기술
 
-### ➢ Backend
-<img src="https://img.shields.io/badge/Java 17-007396?style=flat&logo=Java&logoColor=white"> <img src="https://img.shields.io/badge/Spring Boot 3.4.1-6DB33F?style=flat&logo=Spring Boot&logoColor=white"> <img src="https://img.shields.io/badge/Spring Cloud 2024.0.0-6DB33F?style=flat&logo=Spring&logoColor=white"> <img src="https://img.shields.io/badge/Spring Security 6.4.2-6DB33F?style=flat&logo=Spring Security&logoColor=white"> <img src="https://img.shields.io/badge/JWT-000000?style=flat&logo=JSON Web Tokens&logoColor=white"> <img src="https://img.shields.io/badge/QueryDSL 5.0.0-FF6F00?style=flat&logo=Apache Maven&logoColor=white"> 
+###  Backend
+| Java | Spring Boot | Spring Cloud | Spring Security | JWT | QueryDSL |
+|------|------------|--------------|----------------|-----|----------|
+| ![Java](https://img.shields.io/badge/Java%2017-007396?style=flat&logo=Java&logoColor=white) | ![Spring Boot](https://img.shields.io/badge/Spring%20Boot%203.4.1-6DB33F?style=flat&logo=Spring%20Boot&logoColor=white) | ![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud%202024.0.0-6DB33F?style=flat&logo=Spring&logoColor=white) | ![Spring Security](https://img.shields.io/badge/Spring%20Security%206.4.2-6DB33F?style=flat&logo=Spring%20Security&logoColor=white) | ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=JSON%20Web%20Tokens&logoColor=white) | ![QueryDSL](https://img.shields.io/badge/QueryDSL%205.0.0-FF6F00?style=flat&logo=Apache%20Maven&logoColor=white) |
 
-### ➢ Database
-<img src="https://img.shields.io/badge/PostgreSQL 16.4-4169E1?style=flat&logo=PostgreSQL&logoColor=white"> <img src="https://img.shields.io/badge/Redis 3.4.1-DC382D?style=flat&logo=Redis&logoColor=white"> 
+###  Database
+| PostgreSQL | Redis |
+|-----------|------|
+| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL%2016.4-4169E1?style=flat&logo=PostgreSQL&logoColor=white) | ![Redis](https://img.shields.io/badge/Redis%203.4.1-DC382D?style=flat&logo=Redis&logoColor=white) |
 
-### ➢ Messaging
-<img src="https://img.shields.io/badge/Apache Kafka 3.9.0-231F20?style=flat&logo=Apache Kafka&logoColor=white">
+### Messaging
+| Apache Kafka |
+|-------------|
+| ![Kafka](https://img.shields.io/badge/Apache%20Kafka%203.9.0-231F20?style=flat&logo=Apache%20Kafka&logoColor=white) |
 
-### ➢ External Library
-<img src="https://img.shields.io/badge/Gemini API-FF4500?style=flat&logo=Google Earth&logoColor=white"> <img src="https://img.shields.io/badge/SMTP-FF0000?style=flat&logo=Mail.Ru&logoColor=white">  
+### External Library
+| Gemini API | SMTP |
+|------------|------|
+| ![Gemini API](https://img.shields.io/badge/Gemini%20API-FF4500?style=flat&logo=Google%20Earth&logoColor=white) | ![SMTP](https://img.shields.io/badge/SMTP-FF0000?style=flat&logo=Mail.Ru&logoColor=white) |
 
-### ➢ Monitoring
-<img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=Prometheus&logoColor=white"> <img src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=Grafana&logoColor=white">  
+### Monitoring
+| Prometheus | Grafana |
+|-----------|---------|
+| ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=Prometheus&logoColor=white) | ![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat&logo=Grafana&logoColor=white) |
 
-### ➢ Test
-<img src="https://img.shields.io/badge/JMeter-D22128?style=flat&logo=Apache JMeter&logoColor=white">
+### Test
+| JMeter |
+|------|
+| ![JMeter](https://img.shields.io/badge/JMeter-D22128?style=flat&logo=Apache%20JMeter&logoColor=white) |
 
-### ➢ CI/CD
-<img src="https://img.shields.io/badge/Github-181717?style=flat&logo=GitHub&logoColor=white"> <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/Docker Compose-2496ED?style=flat&logo=Docker&logoColor=white"> 
+###  CI/CD
+| GitHub | Docker | Docker Compose |
+|--------|--------|---------------|
+| ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=GitHub&logoColor=white) | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=Docker&logoColor=white) | ![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2496ED?style=flat&logo=Docker&logoColor=white) |
 
-### ➢ Infra
-<img src="https://img.shields.io/badge/Github Actions-2088FF?style=flat&logo=GitHub Actions&logoColor=white"> <img src="https://img.shields.io/badge/AWS (ECS, RDS)-FF9900?style=flat&logo=Amazon AWS&logoColor=white">
+###  Infra
+| GitHub Actions | AWS (ECS, RDS) |
+|---------------|--------------|
+| ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=GitHub%20Actions&logoColor=white) | ![AWS](https://img.shields.io/badge/AWS%20(ECS,%20RDS)-FF9900?style=flat&logo=Amazon%20AWS&logoColor=white) |
 
 <!-- Top Button -->
 <div align="right">
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="5">🎯 서비스/프로젝트 목표</span>
+## 🎯 **서비스/프로젝트 목표**
 
-### 1. **안정적인 대규모 트래픽 처리**
-- 트래픽 제어 및 메시지 분산 처리를 통해 서버 과부하 방지
-- 수만 건 이상의 동시 요청을 안정적으로 처리하며, CPU 사용률 80% 이하로 유지
+### 1️⃣ **대규모 트래픽 안정적 처리**
+- 트래픽 제어 및 메시지 분산으로 **서버 과부하 방지**
+- **수만 건 동시 요청** 처리, CPU 사용률 **80% 이하 유지**
 
-### 2. **서버 성능 및 처리 효율 최적화**
-- 캐싱, 쿼리 최적화, 서버 간 통신 최적화 등을 통해 요청 처리 속도 개선, 리소스 사용 최소화
-- 부하 테스트로 병목 구간을 파악하고, 서버 성능과 처리 효율을 지속적으로 개선
+### 2️⃣ **서버 성능 및 처리 최적화**
+- **캐싱, 쿼리 최적화, 통신 최적화**로 응답 속도 개선
+- **부하 테스트**로 병목 구간 분석 및 지속 개선
 
-### 3. **동시성 제어로 안정성 확보**
-- 데이터 무결성 100% 유지
-- 중복 예매와 결제 오류를 방지하여 안정적인 서비스를 제공
+### 3️⃣ **데이터 무결성 및 동시성 제어**
+- **중복 예매·결제 오류 방지**, 무결성 **100% 유지**
 
-### 4. **서비스 간 독립성 및 확장성 확보**
-- 독립적인 배포 및 관리, 트래픽 급증 시 유연하게 확장 가능한 MSA 구조 도입
+### 4️⃣ **확장성과 서비스 독립성 강화**
+- **MSA 도입**으로 독립적 배포 및 관리
+- 트래픽 급증 시 **유연한 확장 가능**
 
-### 5. **사용자 편의성 증대**
-- 사용자 응답 속도를 200ms 이하로 유지하여 원활한 서비스 제공
-- 알림 및 상태 조회를 통해 사용자에게 명확한 정보를 제공하여 편의성 강화
+### 5️⃣ **사용자 경험 최적화**
+- 응답 속도 **200ms 이하 유지**
+- **알림·상태 조회**로 사용자 정보 제공
 
 <!-- Top Button -->
 <div align="right">
@@ -140,7 +158,7 @@
 
 ## <span id="7">⚙️ 주요 기능</span>
 
-### 🎫 회원 서비스
+### 회원 서비스
 - 회원가입, 로그인, 로그아웃
 - 아이디 찾기, 비밀번호 변경
 - <details>
@@ -154,7 +172,7 @@
   </div>
 </details>
 
-### 📕 예매 ( 티켓팅 ) 서비스
+### 예매 ( 티켓팅 ) 서비스
 - 좌석 예매
 - 예매 정보 조회
 - <details>
@@ -176,7 +194,7 @@
 - 예매 취소
 </details>
 
-### 💵 결제 서비스
+### 결제 서비스
 - <details>
   <summary> 마일리지 기반 결제 </summary>
   <div>
@@ -197,11 +215,11 @@
   </div>
 </details>
 
-### ❗알림 서비스
+### 알림 서비스
 - 결제 결과 전송
 - 비밀번호 변경시 인증번호 전송
 
-### 🤖 AI 서비스
+### AI 서비스
 - 항공사, 좌석 등급별 기내 수하물 정보 제공
 - 여행 국가와 월에 대한 평균 날씨 정보 제공
 
