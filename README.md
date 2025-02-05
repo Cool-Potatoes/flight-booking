@@ -15,7 +15,7 @@
 3. [적용 기술](#3)
 4. [인프라 설계도](#4)
 5. [주요 기능](#5)
-6. [기술적 의사 결정](#6)
+6. [목표 달성을 위한 기술적 의사결정](#6)
 7. [트러블 슈팅](#7)
 8. [상세 담당 업무](#8)
 
@@ -213,7 +213,7 @@
 <p style='background: black; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto;'><a href="#top" style='color: white; '>▲</a></p>
 </div>
 
-## <span id="6">💡 기술적 의사결정</span>
+## <span id="6">💡 목표 달성을 위한 기술적 의사결정</span>
 
 ### 1. **안정적인 대규모 트래픽 처리**
 
