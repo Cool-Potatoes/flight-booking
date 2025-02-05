@@ -1,4 +1,4 @@
-package com.flight_booking.user_service.domain.model;
+package com.flight_booking.common.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -18,11 +18,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public abstract class BaseEntity {
 
   @CreatedDate
-  @Column(name = "created_at", updatable = false, nullable = false)
+  @Column(updatable = false, nullable = false)
   private LocalDateTime createdAt;
 
   @CreatedBy
-  @Column(name = "created_by", updatable = false, nullable = false, length = 100)
+  @Column(updatable = false, nullable = false, length = 100)
   protected String createdBy;
 
   @LastModifiedDate
@@ -44,4 +44,5 @@ public abstract class BaseEntity {
   @Setter
   @Column(name = "is_deleted", nullable = false)
   protected Boolean isDeleted = false;
+
 }
