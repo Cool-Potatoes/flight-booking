@@ -134,7 +134,7 @@
 
 ## <span id="4">📄 인프라 설계도</span>
 
-![image](https://github.com/user-attachments/assets/1f9637a5-35b8-4e6b-86c5-1a49aa1ecdba)
+![인프라 설계도_직각](https://github.com/user-attachments/assets/43acc3e4-5432-4e3b-b742-1fee8da79a9c)
 
 <!-- Top Button -->
 <div align="right">
